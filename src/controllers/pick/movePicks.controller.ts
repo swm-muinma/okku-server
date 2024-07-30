@@ -17,7 +17,7 @@ export const movePicksController = async (
     res
       .status(200)
       .send(
-        cartService.movePicks(
+        await cartService.movePicks(
           pickIds,
           sourceCartId,
           destinationCartId,

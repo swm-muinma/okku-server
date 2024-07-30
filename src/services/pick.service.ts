@@ -18,6 +18,7 @@ export class PickService {
       "https://www.29cm.co.kr/home/"
     );
     const pick: PickDomain = new PickDomain(
+      url,
       "test_user_id",
       "testUser",
       56000,
@@ -34,12 +35,18 @@ export class PickService {
   async deletePicks(
     pickIds: string[],
     cartId: string | null,
-    isDeletePernenant: boolean
+    isDeletePermenant: boolean
   ): Promise<{ cartId: string; pickIds: string[] }> {
-    if (isDeletePernenant == null) {
-      throw new ErrorDomain("'isDeletePernenant' filed is required", 400);
+    if (isDeletePermenant == null) {
+      throw new ErrorDomain("'isDeletePermenant' filed is required", 400);
     }
-    if (cartId == null && isDeletePernenant == true) {
+    if ((cartId == null || cartId == "") && isDeletePermenant == false) {
+      throw new ErrorDomain(
+        "if cartId is null, then isDeletePermenant is must true",
+        500
+      );
+    }
+    if ((cartId == null || cartId == "") && isDeletePermenant == true) {
       const isDeleted: boolean = await pickRepository.delete(pickIds);
       if (isDeleted) {
         return {
@@ -49,7 +56,7 @@ export class PickService {
       }
       throw new ErrorDomain("Can not deleted from all", 500);
     }
-    if (cartId != null && isDeletePernenant == false) {
+    if (cartId != null && isDeletePermenant == false) {
       const isDeleted: string[] | null = await cartRepository.deleteFromCart(
         pickIds,
         cartId
@@ -62,13 +69,17 @@ export class PickService {
         pickIds: pickIds,
       };
     }
-    throw new ErrorDomain("Can not deleted", 500);
+
+    throw new ErrorDomain("Can not deleted from cart", 500);
   }
 
   // =============================================================================
   // TODO : getComparisonView 일단 더미데이터. 나중에 파싱 로직 나오면 수정 필요
   // =============================================================================
-  getComparisonView(): any {
+  getComparisonView(pickIds: string[]): any {
+    if (!pickIds) {
+      throw new ErrorDomain("'pickIds' is required", 400);
+    }
     return {
       user: {
         name: "testUser",
@@ -186,7 +197,6 @@ export class PickService {
     }
     if (cartId != undefined) {
       const cart = await cartRepository.findById(cartId);
-
       const res = await pickRepository.findByPickIds(
         cart.pickItemIds,
         page,

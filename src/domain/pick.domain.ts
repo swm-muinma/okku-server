@@ -4,6 +4,7 @@ export class PickDomain {
   updatedAt: Date | null;
 
   constructor(
+    public url: string,
     public userId: string,
     public name: string,
     public price: number,

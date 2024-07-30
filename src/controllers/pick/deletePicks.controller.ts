@@ -10,11 +10,11 @@ export const deletePicksController = async (
 ) => {
   const pickIds: string[] = req.body.pickIds;
   const cartId: string | null = req.body.cartId;
-  const isDeletePernenant: boolean = req.body.isDeletePernenant;
+  const isDeletePermenant: boolean = req.body.isDeletePermenant;
   try {
     res
       .status(200)
-      .send(pickService.deletePicks(pickIds, cartId, isDeletePernenant));
+      .send(await pickService.deletePicks(pickIds, cartId, isDeletePermenant));
   } catch (error) {
     return next(error);
   }

@@ -7,8 +7,9 @@ export const getComparisonViewController = async (
   res: Response,
   next: NextFunction
 ) => {
+  const pickIds = req.body.pickIds;
   try {
-    res.status(200).send(pickService.getComparisonView());
+    res.status(200).send(await pickService.getComparisonView(pickIds));
   } catch (error) {
     return next(error);
   }

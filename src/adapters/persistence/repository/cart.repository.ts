@@ -113,7 +113,6 @@ class CartRepository {
         { $addToSet: { pick_item_ids: { $each: pickIds } } },
         { session }
       ).exec();
-
       return updatedTargetCart.modifiedCount > 0 ? pickIds : null;
     } catch (error) {
       console.error("Error adding picks to cart with session:", error);
@@ -146,14 +145,12 @@ class CartRepository {
    * @param pickIds - The pick IDs to move.
    * @param sourceCartId - The source cart ID.
    * @param destinationCartId - The target cart ID.
-   * @param isDeleteFromOrigin - Whether to delete the picks from the origin cart.
    * @returns A promise that resolves to an array of moved pick IDs or null.
    */
   public async moveCart(
     pickIds: string[],
     sourceCartId: string,
-    destinationCartId: string,
-    isDeleteFromOrigin: boolean
+    destinationCartId: string
   ): Promise<string[] | null> {
     const session = await CartModel.startSession();
     session.startTransaction();
@@ -165,10 +162,8 @@ class CartRepository {
         session
       );
 
-      if (isDeleteFromOrigin && addedPicks) {
-        // Remove picks from the original carts
-        await this.deleteFromCartWithSession(pickIds, sourceCartId, session);
-      }
+      // Remove picks from the original carts
+      await this.deleteFromCartWithSession(pickIds, sourceCartId, session);
 
       await session.commitTransaction();
       return addedPicks;
@@ -194,7 +189,10 @@ class CartRepository {
     const session = await CartModel.startSession();
     session.startTransaction();
     try {
-      return await this.addToCartWithSession(pickIds, cartId, session);
+      const result = await this.addToCartWithSession(pickIds, cartId, session);
+      await session.commitTransaction();
+      session.endSession();
+      return result;
     } catch (error) {
       console.error("Error adding picks from carts:", error);
       throw new ErrorDomain("Error adding picks from carts", 500);
@@ -214,7 +212,14 @@ class CartRepository {
     const session = await CartModel.startSession();
     session.startTransaction();
     try {
-      return await this.deleteFromCartWithSession(pickIds, cartId, session);
+      const result = await this.deleteFromCartWithSession(
+        pickIds,
+        cartId,
+        session
+      );
+      await session.commitTransaction();
+      session.endSession();
+      return result;
     } catch (error) {
       console.error("Error deleting picks from carts:", error);
       throw new ErrorDomain("Error deleting picks from carts", 500);
@@ -234,7 +239,7 @@ class CartRepository {
       return cartDomain;
     } catch (error) {
       console.error("Error finding cart by cartId:", error);
-      throw new ErrorDomain("Error finding cart by cartId", 500);
+      throw new ErrorDomain("Error finding cart by cartId", 404);
     }
   }
 }

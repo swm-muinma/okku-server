@@ -10,7 +10,7 @@ export const createPickController = async (
 ) => {
   const url = req.body.url;
   try {
-    res.status(200).send(pickService.createPick(url));
+    res.status(200).send(await pickService.createPick(url));
   } catch (error) {
     return next(error);
   }

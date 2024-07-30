@@ -24,7 +24,8 @@ class PickRepository {
       const totalDataCnt = await PickModel.countDocuments({
         _id: { $in: pickIds },
       }).exec();
-
+      console.log(pickIds);
+      console.log(totalDataCnt);
       // Get paginated picks
       const picks = await PickModel.find({
         _id: { $in: pickIds },
@@ -32,7 +33,7 @@ class PickRepository {
         .skip(skip)
         .limit(size)
         .exec();
-
+      console.log(picks);
       if (!picks.length) {
         const emptyPageInfo: PageInfo = {
           totalDataCnt: 0,

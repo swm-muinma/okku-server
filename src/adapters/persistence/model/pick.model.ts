@@ -5,6 +5,7 @@ class PickEntity {
   _id?: string;
 
   constructor(
+    public url: string,
     public user_id: string,
     public name: string,
     public price: number,
@@ -16,6 +17,7 @@ class PickEntity {
 }
 
 const PickSchema: Schema<PickEntity & Document> = new Schema({
+  url: { type: String, required: true },
   user_id: { type: String, required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
@@ -39,6 +41,7 @@ class PickPersistenceMapper {
       entity.platform.url
     );
     let res: PickDomain = new PickDomain(
+      entity.url,
       entity.user_id,
       entity.name,
       entity.price,
@@ -59,6 +62,7 @@ class PickPersistenceMapper {
     };
 
     let res: PickEntity = new PickEntity(
+      domain.url,
       domain.userId,
       domain.name,
       domain.price,

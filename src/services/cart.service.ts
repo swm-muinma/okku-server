@@ -45,5 +45,51 @@ export class CartService {
     throw new ErrorDomain("Cart not created", 404);
   }
 
-  async movePicks() {}
+  async movePicks(
+    pickIds: string[],
+    sourceCartId: string,
+    destinationCartId: string,
+    isDeleteFromOrigin: boolean
+  ): Promise<{
+    source: { cartId: string; pickIds: string[] };
+    destination: { cartId: string; pickIds: string[] };
+  }> {
+    if (isDeleteFromOrigin == null) {
+      throw new ErrorDomain("'isDeleteFromOrigin' filed is required", 400);
+    }
+    if (isDeleteFromOrigin == false) {
+      const movedPickIds: string[] | null = await cartRepository.addToCart(
+        pickIds,
+        destinationCartId
+      );
+      if (!movedPickIds) {
+        throw new ErrorDomain("can not moved picks", 500);
+      }
+      return {
+        source: {
+          cartId: sourceCartId ? sourceCartId : "__all__",
+          pickIds: movedPickIds,
+        },
+        destination: { cartId: destinationCartId, pickIds: movedPickIds },
+      };
+    }
+    if (isDeleteFromOrigin == true) {
+      const movedPickIds: string[] | null = await cartRepository.moveCart(
+        pickIds,
+        sourceCartId,
+        destinationCartId
+      );
+      if (!movedPickIds) {
+        throw new ErrorDomain("can not moved picks", 500);
+      }
+      return {
+        source: {
+          cartId: sourceCartId ? sourceCartId : "__all__",
+          pickIds: [],
+        },
+        destination: { cartId: destinationCartId, pickIds: movedPickIds },
+      };
+    }
+    throw new ErrorDomain("can not moved picks with server error", 500);
+  }
 }

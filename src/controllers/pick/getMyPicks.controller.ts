@@ -12,7 +12,9 @@ export const getMyPicksController = async (
   const size = parseInt(req.query.size as string, 10) || 10;
   const cartId = req.query.cartId?.toString();
   try {
-    res.status(200).send(pickService.getMyPicks(userId, cartId!, page, size));
+    res
+      .status(200)
+      .send(await pickService.getMyPicks(userId, cartId!, page, size));
   } catch (error) {
     return next(error);
   }
