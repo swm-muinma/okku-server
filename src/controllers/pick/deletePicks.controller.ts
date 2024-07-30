@@ -1,0 +1,21 @@
+import { NextFunction, Request, Response } from "express";
+import { PickService } from "src/services/pick.service";
+
+const pickService = new PickService();
+
+export const deletePicksController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const pickIds: string[] = req.body.pickIds;
+  const cartId: string[] | null = req.body.cartId;
+  const isDeletePernenant: boolean = req.body.isDeletePernenant;
+  try {
+    res
+      .status(200)
+      .send(pickService.deletePicks(pickIds, cartId, isDeletePernenant));
+  } catch (error) {
+    return next(error);
+  }
+};
