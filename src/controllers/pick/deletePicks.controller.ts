@@ -9,7 +9,7 @@ export const deletePicksController = async (
   next: NextFunction
 ) => {
   const pickIds: string[] = req.body.pickIds;
-  const cartId: string[] | null = req.body.cartId;
+  const cartId: string | null = req.body.cartId;
   const isDeletePernenant: boolean = req.body.isDeletePernenant;
   try {
     res

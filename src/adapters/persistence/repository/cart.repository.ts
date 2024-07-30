@@ -5,6 +5,7 @@ import {
 } from "src/adapters/persistence/model/cart.model";
 import { ErrorDomain } from "src/domain/error.domain";
 import { PageInfo } from "src/dto/pageInfo.dto";
+import { ClientSession } from "mongoose";
 
 class CartRepository {
   /**
@@ -100,46 +101,123 @@ class CartRepository {
       throw new ErrorDomain("Error deleting carts by cartId", 500);
     }
   }
-  /**
-   * Move picks to a different cart.
-   * @param pickIds - The pick IDs to move.
-   * @param cartId - The target cart ID.
-   * @param isDeleteFromOrigin - Whether to delete the picks from the origin cart.
-   * @returns A promise that resolves to an array of moved pick IDs or null.
-   */
-  public async moveCart(
+
+  private async addToCartWithSession(
     pickIds: string[],
     cartId: string,
-    isDeleteFromOrigin: boolean
+    session: ClientSession
   ): Promise<string[] | null> {
-    const session = await CartModel.startSession();
-    session.startTransaction();
     try {
-      // Add picks to the target cart
       const updatedTargetCart = await CartModel.updateOne(
         { _id: cartId },
         { $addToSet: { pick_item_ids: { $each: pickIds } } },
         { session }
       ).exec();
 
-      if (isDeleteFromOrigin) {
+      return updatedTargetCart.modifiedCount > 0 ? pickIds : null;
+    } catch (error) {
+      console.error("Error adding picks to cart with session:", error);
+      throw new ErrorDomain("Error adding picks to cart with session", 500);
+    }
+  }
+
+  private async deleteFromCartWithSession(
+    pickIds: string[],
+    cartId: string,
+    session: ClientSession
+  ): Promise<string[] | null> {
+    try {
+      // Update the cart by pulling the pick IDs from the specified cart
+      const updatedCart = await CartModel.updateOne(
+        { _id: cartId, pick_item_ids: { $in: pickIds } },
+        { $pull: { pick_item_ids: { $in: pickIds } } },
+        { session }
+      ).exec();
+
+      // Return the pick IDs if any were deleted, otherwise return null
+      return updatedCart.modifiedCount > 0 ? pickIds : null;
+    } catch (error) {
+      console.error("Error deleting picks from cart with session:", error);
+      throw new ErrorDomain("Error deleting picks from cart with session", 500);
+    }
+  }
+  /**
+   * Move picks to a different cart.
+   * @param pickIds - The pick IDs to move.
+   * @param sourceCartId - The source cart ID.
+   * @param destinationCartId - The target cart ID.
+   * @param isDeleteFromOrigin - Whether to delete the picks from the origin cart.
+   * @returns A promise that resolves to an array of moved pick IDs or null.
+   */
+  public async moveCart(
+    pickIds: string[],
+    sourceCartId: string,
+    destinationCartId: string,
+    isDeleteFromOrigin: boolean
+  ): Promise<string[] | null> {
+    const session = await CartModel.startSession();
+    session.startTransaction();
+    try {
+      // Add picks to the target cart
+      const addedPicks = await this.addToCartWithSession(
+        pickIds,
+        destinationCartId,
+        session
+      );
+
+      if (isDeleteFromOrigin && addedPicks) {
         // Remove picks from the original carts
-        await CartModel.updateMany(
-          { pick_item_ids: { $in: pickIds } },
-          { $pull: { pick_item_ids: { $in: pickIds } } },
-          { session }
-        ).exec();
+        await this.deleteFromCartWithSession(pickIds, sourceCartId, session);
       }
 
       await session.commitTransaction();
-      session.endSession();
-
-      return updatedTargetCart.modifiedCount > 0 ? pickIds : null;
+      return addedPicks;
     } catch (error) {
       await session.abortTransaction();
-      session.endSession();
       console.error("Error moving picks to different cart:", error);
       throw new ErrorDomain("Error moving picks to different cart", 500);
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * Add picks to a cart.
+   * @param pickIds - The pick IDs to add.
+   * @param cartId - The target cart ID.
+   * @returns A promise that resolves to an array of added pick IDs or null.
+   */
+  public async addToCart(
+    pickIds: string[],
+    cartId: string
+  ): Promise<string[] | null> {
+    const session = await CartModel.startSession();
+    session.startTransaction();
+    try {
+      return await this.addToCartWithSession(pickIds, cartId, session);
+    } catch (error) {
+      console.error("Error adding picks from carts:", error);
+      throw new ErrorDomain("Error adding picks from carts", 500);
+    }
+  }
+
+  /**
+   * Remove picks from their original carts.
+   * @param pickIds - The pick IDs to remove.
+   * @param cartId - The cart ID from remove.
+   * @returns A promise that resolves to an array of removed pick IDs or null.
+   */
+  public async deleteFromCart(
+    pickIds: string[],
+    cartId: string
+  ): Promise<string[] | null> {
+    const session = await CartModel.startSession();
+    session.startTransaction();
+    try {
+      return await this.deleteFromCartWithSession(pickIds, cartId, session);
+    } catch (error) {
+      console.error("Error deleting picks from carts:", error);
+      throw new ErrorDomain("Error deleting picks from carts", 500);
     }
   }
 

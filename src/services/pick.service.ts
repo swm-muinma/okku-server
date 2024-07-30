@@ -14,11 +14,36 @@ export class PickService {
 
   async deletePicks(
     pickIds: string[],
-    cartId: string[] | null,
+    cartId: string | null,
     isDeletePernenant: boolean
   ): Promise<{ cartId: string; pickIds: string[] }> {
-    pickRepository.delete(pickIds);
-    return "ㄹ";
+    if (isDeletePernenant == null) {
+      throw new ErrorDomain("'isDeletePernenant' filed is required", 400);
+    }
+    if (cartId == null && isDeletePernenant == true) {
+      const isDeleted: boolean = await pickRepository.delete(pickIds);
+      if (isDeleted) {
+        return {
+          cartId: "__all__",
+          pickIds: pickIds,
+        };
+      }
+      throw new ErrorDomain("Can not deleted from all", 500);
+    }
+    if (cartId != null && isDeletePernenant == false) {
+      const isDeleted: string[] | null = await cartRepository.deleteFromCart(
+        pickIds,
+        cartId
+      );
+      if (!isDeleted) {
+        throw new ErrorDomain("Can not deleted from cart", 500);
+      }
+      return {
+        cartId: cartId,
+        pickIds: pickIds,
+      };
+    }
+    throw new ErrorDomain("Can not deleted", 500);
   }
 
   getComparisonView(): any {

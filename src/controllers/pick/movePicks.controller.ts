@@ -10,12 +10,20 @@ export const movePicksController = async (
   next: NextFunction
 ) => {
   const pickIds = req.body.pickIds;
-  const cartId = req.body.cartId;
+  const sourceCartId = req.body.sourceCartId;
+  const destinationCartId = req.body.destinationCartId;
   const isDeleteFromOrigin = req.body.isDeleteFromOrigin;
   try {
     res
       .status(200)
-      .send(cartService.movePicks(pickIds, cartId, isDeleteFromOrigin));
+      .send(
+        cartService.movePicks(
+          pickIds,
+          sourceCartId,
+          destinationCartId,
+          isDeleteFromOrigin
+        )
+      );
   } catch (error) {
     return next(error);
   }
