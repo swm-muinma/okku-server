@@ -1,15 +1,34 @@
 import { CartRepository } from "src/adapters/persistence/repository/cart.repository";
 import { PickRepository } from "src/adapters/persistence/repository/pick.repository";
 import { ErrorDomain } from "src/domain/error.domain";
-import { PickDomain } from "src/domain/pick.domain";
+import { PickDomain, PlatformDomain } from "src/domain/pick.domain";
 import { PageInfo } from "src/dto/pageInfo.dto";
 import { FormEnum } from "src/enum/form.enum";
 
 const pickRepository = new PickRepository();
 const cartRepository = new CartRepository();
 export class PickService {
-  async createPick(): Promise<PickDomain> {
-    return "ㅎㅇ";
+  async createPick(url: string): Promise<PickDomain> {
+    // =================================================
+    // TODO : 밑에 더미데이터임. 나중에 파싱 로직 나오면 수정 필요
+    // =================================================
+    const platform: PlatformDomain = new PlatformDomain(
+      "29cm",
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUAAACtrarj5eb19vempqY2MzC7uLXk4+Hx8fGmqamusK/P0dD////FxsZHR0X8+/nGx8LFysyRk5B5fX5+fnphY2ago550dXlaWligoKCztLY4OTciIiCsq610cm6Li40tLSsbGxm9wrlMS0u3ubHs8fT0+/+EgoLY1dcDqKGoAAAAlElEQVR4AeSPgwEEQQxFs8b8tW30X+Gt1cINk7yQ/mxxvCBugiQrqvZmvKAzGItgWopuw3kyFx6Rj4BI5YkoRPSAcbK+SCnDKuUo6LNKVFRDXnND/LAaa0Z1zW0jfrNcQLM1BNaC/zCgO5rrhzF7Q/XOpCP6znk5S3DeLIVqyLIxLWLDD/kbGgoPAPpacv5NgmGkAQAbCgckaxy7FQAAAABJRU5ErkJggg==",
+      "https://www.29cm.co.kr/home/"
+    );
+    const pick: PickDomain = new PickDomain(
+      "test_user_id",
+      "testUser",
+      56000,
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbdg4cbR-mZsRLhUw7U8LPx5DW99HGLhKlMQ&s",
+      platform
+    );
+
+    // 이 위로 다 더미 데이터 ================================
+
+    const savedPick = await pickRepository.create(pick);
+    return savedPick;
   }
 
   async deletePicks(
@@ -46,6 +65,9 @@ export class PickService {
     throw new ErrorDomain("Can not deleted", 500);
   }
 
+  // =============================================================================
+  // TODO : getComparisonView 일단 더미데이터. 나중에 파싱 로직 나오면 수정 필요
+  // =============================================================================
   getComparisonView(): any {
     return {
       user: {

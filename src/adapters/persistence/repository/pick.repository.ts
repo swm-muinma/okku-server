@@ -145,12 +145,12 @@ class PickRepository {
     }
   }
 
-  public async create(pick: PickDomain): Promise<boolean> {
+  public async create(pick: PickDomain): Promise<PickDomain> {
     try {
       const pickEntity = PickPersistenceMapper.toEntity(pick);
       const newPick = new PickModel(pickEntity);
-      await newPick.save();
-      return true;
+      const savedPick = await newPick.save();
+      return PickPersistenceMapper.toDomain(savedPick);
     } catch (error) {
       console.error("Error creating pick:", error);
       throw new ErrorDomain("Error creating pick", 500);
