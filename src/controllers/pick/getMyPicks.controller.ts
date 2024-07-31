@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { PickService } from "src/services/pick.service";
 
 const pickService = new PickService();
-const userId = "test_user_id";
+const userId = "66a99612385174b0b9a399a6";
 export const getMyPicksController = async (
   req: Request,
   res: Response,

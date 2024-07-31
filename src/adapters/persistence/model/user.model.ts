@@ -51,7 +51,7 @@ class UserPersistenceMapper {
       domain.image,
       domain.height,
       domain.weight,
-      domain.form, // Enum 문자열 그대로 사용
+      domain.form,
       domain.createdAt,
       domain.updatedAt
     );
