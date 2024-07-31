@@ -10,6 +10,7 @@ export const getMyCartsController = async (
 ) => {
   const page = parseInt(req.query.page as string, 10) || 1;
   const size = parseInt(req.query.size as string, 10) || 10;
+  console.log("call getMyCarts");
   try {
     const carts = await cartsService.getMyCarts(userId, page, size);
     res.status(200).send(carts);

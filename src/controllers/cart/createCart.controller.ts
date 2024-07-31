@@ -11,6 +11,7 @@ export const createCartController = async (
 ) => {
   const name = req.body.name;
   const pickIds = req.body.pickIds;
+  console.log("call createCart");
   try {
     const savedCart: CartDomain | null = await cartsService.createCart(
       userId,

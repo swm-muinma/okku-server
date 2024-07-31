@@ -13,6 +13,7 @@ export const movePicksController = async (
   const sourceCartId = req.body.sourceCartId;
   const destinationCartId = req.body.destinationCartId;
   const isDeleteFromOrigin = req.body.isDeleteFromOrigin;
+  console.log("call movePicks");
   try {
     res
       .status(200)

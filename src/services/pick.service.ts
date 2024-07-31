@@ -48,7 +48,10 @@ export class PickService {
     }
     if ((cartId == null || cartId == "") && isDeletePermenant == true) {
       const isDeleted: boolean = await pickRepository.delete(pickIds);
-      if (isDeleted) {
+      const isDeletedFromCart = await cartRepository.deletePickFromAllCart(
+        pickIds
+      );
+      if (isDeleted && isDeletedFromCart) {
         return {
           cartId: "__all__",
           pickIds: pickIds,

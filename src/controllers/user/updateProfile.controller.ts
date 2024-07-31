@@ -13,7 +13,7 @@ export const updateProfileController = async (
   const height = parseInt(req.body.height as string, 10) || undefined;
   const weight = parseInt(req.body.weight as string, 10) || undefined;
   const form = req.body.form as FormEnum;
-
+  console.log("call updateProfile");
   try {
     res
       .status(200)

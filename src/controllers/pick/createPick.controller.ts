@@ -9,6 +9,7 @@ export const createPickController = async (
   next: NextFunction
 ) => {
   const url = req.body.url;
+  console.log("call createPick");
   try {
     res.status(200).send(await pickService.createPick(userId, url));
   } catch (error) {

@@ -10,7 +10,6 @@ class CartEntity {
     public name: string,
     public pick_num: number,
     public pick_item_ids: string[],
-    public pick_images: string[],
     public created_at: Date | null,
     public updated_at: Date | null
   ) {
@@ -24,7 +23,6 @@ const CartSchema: Schema<CartEntity & Document> = new Schema({
   name: { type: String, required: true },
   pick_num: { type: Number, required: false },
   pick_item_ids: { type: [String], required: false },
-  pick_images: { type: [String], required: false },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
@@ -37,8 +35,7 @@ class CartPersistenceMapper {
       entity.user_id,
       entity.name,
       entity.pick_num,
-      entity.pick_item_ids,
-      entity.pick_images
+      entity.pick_item_ids
     );
     res.id = entity._id!;
     res.createdAt = entity.created_at;
@@ -52,7 +49,6 @@ class CartPersistenceMapper {
       domain.name,
       domain.pickNum,
       domain.pickItemIds,
-      domain.pickImages,
       domain.createdAt,
       domain.updatedAt
     );
@@ -78,9 +74,6 @@ class CartPersistenceMapper {
     }
     if (update.pickItemIds !== undefined) {
       partialEntity.pick_item_ids = update.pickItemIds;
-    }
-    if (update.pickImages !== undefined) {
-      partialEntity.pick_images = update.pickImages;
     }
     partialEntity.updated_at = new Date();
     return partialEntity;
