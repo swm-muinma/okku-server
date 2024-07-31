@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CartService } from "src/services/cart.service";
 
 const cartsService = new CartService();
-const userId = "test_user_id";
+const userId = "66a99612385174b0b9a399a6";
 export const getMyCartsController = async (
   req: Request,
   res: Response,

@@ -9,4 +9,4 @@ router.get("/", getMyCartsController);
 router.post("/", createCartController);
 router.delete("/:id", deleteCartController);
 
-export { router };
+export { router as CartRouter };
