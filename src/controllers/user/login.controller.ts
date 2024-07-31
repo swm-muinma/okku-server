@@ -7,6 +7,7 @@ export const loginController = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log("call login");
   try {
     res.status(200).send(await userService.login());
     return;

@@ -11,6 +11,7 @@ export const getMyPicksController = async (
   const page = parseInt(req.query.page as string, 10) || 1;
   const size = parseInt(req.query.size as string, 10) || 10;
   const cartId = req.query.cartId?.toString();
+  console.log("call getMyPicks");
   try {
     res
       .status(200)

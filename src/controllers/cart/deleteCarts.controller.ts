@@ -9,6 +9,7 @@ export const deleteCartController = async (
   next: NextFunction
 ) => {
   const cartId = req.params.id;
+  console.log("call deleteCart");
   try {
     const deletedCartId = await cartsService.deleteCart(cartId);
     res.status(200).send({ cartId: deletedCartId });

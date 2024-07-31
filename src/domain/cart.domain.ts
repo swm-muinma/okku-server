@@ -7,8 +7,7 @@ export class CartDomain {
     public userId: string,
     public name: string,
     public pickNum: number,
-    public pickItemIds: string[],
-    public pickImages: string[]
+    public pickItemIds: string[]
   ) {
     this.id = null;
     this.createdAt = null;

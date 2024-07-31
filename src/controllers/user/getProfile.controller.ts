@@ -8,6 +8,7 @@ export const getProfileController = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log("call getProfile");
   try {
     res.status(200).send(await userService.getProfile(userId));
     return;
