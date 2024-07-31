@@ -2,7 +2,6 @@ import { CartRepository } from "src/adapters/persistence/repository/cart.reposit
 import { CartDomain } from "src/domain/cart.domain";
 import { ErrorDomain } from "src/domain/error.domain";
 import { PageInfo } from "src/dto/pageInfo.dto";
-const userId = "test_user_id";
 
 const cartRepository = new CartRepository();
 export class CartService {
@@ -34,7 +33,11 @@ export class CartService {
     return deletedCartId;
   }
 
-  async createCart(name: string, pickIds: string[]): Promise<CartDomain> {
+  async createCart(
+    userId: string,
+    name: string,
+    pickIds: string[]
+  ): Promise<CartDomain> {
     if (!name) {
       throw new ErrorDomain("'name' is required", 400);
     }

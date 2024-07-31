@@ -120,6 +120,32 @@ class CartRepository {
     }
   }
 
+  public async deletePickFromAllCart(
+    pickIds: string[]
+  ): Promise<string[] | null> {
+    const session = await CartModel.startSession();
+    session.startTransaction();
+
+    try {
+      const updatedCarts = await CartModel.updateMany(
+        { pick_item_ids: { $in: pickIds } },
+        { $pull: { pick_item_ids: { $in: pickIds } } },
+        { session }
+      ).exec();
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return updatedCarts.modifiedCount > 0 ? pickIds : null;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+
+      console.error("Error deleting picks from all carts:", error);
+      throw new ErrorDomain("Error deleting picks from all carts", 500);
+    }
+  }
+
   private async deleteFromCartWithSession(
     pickIds: string[],
     cartId: string,

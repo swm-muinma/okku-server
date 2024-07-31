@@ -8,7 +8,7 @@ import { FormEnum } from "src/enum/form.enum";
 const pickRepository = new PickRepository();
 const cartRepository = new CartRepository();
 export class PickService {
-  async createPick(url: string): Promise<PickDomain> {
+  async createPick(userId: string, url: string): Promise<PickDomain> {
     // =================================================
     // TODO : 밑에 더미데이터임. 나중에 파싱 로직 나오면 수정 필요
     // =================================================
@@ -19,7 +19,7 @@ export class PickService {
     );
     const pick: PickDomain = new PickDomain(
       url,
-      "test_user_id",
+      userId,
       "testUser",
       56000,
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbdg4cbR-mZsRLhUw7U8LPx5DW99HGLhKlMQ&s",
