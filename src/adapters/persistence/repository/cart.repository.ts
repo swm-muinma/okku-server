@@ -67,7 +67,7 @@ class CartRepository {
     name: string,
     pickIds: string[]
   ): Promise<CartDomain | null> {
-    this.checkPickIdExist(pickIds);
+    await this.checkPickIdExist(pickIds);
     try {
       const newCart = new CartModel({
         user_id: userId,
@@ -82,7 +82,7 @@ class CartRepository {
       return CartPersistenceMapper.toDomain(savedCart);
     } catch (error) {
       console.error("Error creating cart:", error);
-      throw new ErrorDomain("Error creating cart:", 500);
+      throw new ErrorDomain("Error creating cart", 500);
     }
   }
 
@@ -109,7 +109,7 @@ class CartRepository {
     cartId: string,
     session: ClientSession
   ): Promise<string[] | null> {
-    this.checkPickIdExist(pickIds);
+    await this.checkPickIdExist(pickIds);
     try {
       const updatedTargetCart = await CartModel.updateOne(
         { _id: cartId },
@@ -274,7 +274,7 @@ class CartRepository {
   isValidObjectId = (id: string): boolean => mongoose.isValidObjectId(id);
 
   private async checkPickIdExist(pickIds: string[]): Promise<boolean> {
-    if (!pickIds || pickIds.length < 0) {
+    if (!pickIds || pickIds.length < 1) {
       return true;
     }
     const validPickIds = pickIds.filter((id) => this.isValidObjectId(id));
