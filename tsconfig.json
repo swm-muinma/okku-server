@@ -4,6 +4,11 @@
     "module": "commonjs",
     "strict": true,
     "baseUrl": ".",
-    "esModuleInterop": true
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "paths": {
+      "@src/*": ["src/*"]
+    }
   }
 }

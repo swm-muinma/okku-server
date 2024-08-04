@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { PickService } from "src/services/pick.service";
+import { PickService } from "@src/services/pick.service";
 
 const pickService = new PickService();
 export const getComparisonViewController = async (

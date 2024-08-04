@@ -1,8 +1,12 @@
-import { UserDomain } from "src/domain/user.domain";
+import { UserDomain } from "@src/domain/user.domain";
 
-import { ErrorDomain } from "src/domain/error.domain";
-import { UserModel, UserPersistenceMapper } from "../model/user.model";
-import { FormEnum } from "src/enum/form.enum";
+import { ErrorDomain } from "@src/domain/error.domain";
+import {
+  UserEntity,
+  UserModel,
+  UserPersistenceMapper,
+} from "../model/user.model";
+import { FormEnum } from "@src/enum/form.enum";
 
 class UserRepository {
   /**
@@ -34,6 +38,41 @@ class UserRepository {
     } catch (error) {
       console.error("Error getting user by ID:", error);
       throw new ErrorDomain("Error getting user by ID", 500);
+    }
+  }
+
+  /**
+   * Get a user by Apple ID.
+   * @param appleId - The Apple ID of the user to retrieve.
+   * @returns A promise that resolves to the user domain object or null.
+   */
+  public async getByAppleId(appleId: string): Promise<UserDomain | null> {
+    try {
+      const userEntity: UserEntity | null = await UserModel.findOne({
+        apple_id: appleId,
+      }).exec();
+      if (!userEntity) return null;
+      return UserPersistenceMapper.toDomain(userEntity);
+    } catch (error) {
+      console.error("Error getting user by apple Id:", error);
+      throw new ErrorDomain("Error getting user by apple Id", 500);
+    }
+  }
+  /**
+   * Get a user by Kakao ID.
+   * @param kakaoId - The Kakao ID of the user to retrieve.
+   * @returns A promise that resolves to the user domain object or null.
+   */
+  public async getByKakaoId(kakaoId: string): Promise<UserDomain | null> {
+    try {
+      const userEntity: UserEntity | null = await UserModel.findOne({
+        kakao_id: kakaoId,
+      }).exec();
+      if (!userEntity) return null;
+      return UserPersistenceMapper.toDomain(userEntity);
+    } catch (error) {
+      console.error("Error getting user by kakao Id:", error);
+      throw new ErrorDomain("Error getting user by kakao Id", 500);
     }
   }
 

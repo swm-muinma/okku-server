@@ -1,9 +1,11 @@
-import { FormEnum } from "src/enum/form.enum";
+import { FormEnum } from "@src/enum/form.enum";
 
 export class UserDomain {
   id: string | null;
   createdAt: Date | null;
   updatedAt: Date | null;
+  kakaoId: string;
+  appleId: string;
 
   constructor(
     public name: string,
@@ -15,5 +17,7 @@ export class UserDomain {
     this.id = null;
     this.createdAt = null;
     this.updatedAt = null;
+    this.kakaoId = "";
+    this.appleId = "";
   }
 }

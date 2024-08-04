@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { CartDomain } from "src/domain/cart.domain";
-import { CartService } from "src/services/cart.service";
+import { CartDomain } from "@src/domain/cart.domain";
+import { CartService } from "@src/services/cart.service";
 
 const cartsService = new CartService();
 const userId = "66a99612385174b0b9a399a6";
@@ -13,7 +13,7 @@ export const createCartController = async (
   const pickIds = req.body.pickIds;
   console.log("call createCart");
   try {
-    const savedCart: CartDomain | null = await cartsService.createCart(
+    const savedCart: CartDomain = await cartsService.createCart(
       userId,
       name,
       pickIds

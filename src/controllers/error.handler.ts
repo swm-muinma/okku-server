@@ -1,7 +1,7 @@
-// src/middlewares/errorHandler.ts
+// @src/middlewares/errorHandler.ts
 
 import { Request, Response, NextFunction } from "express";
-import { ErrorDomain } from "src/domain/error.domain";
+import { ErrorDomain } from "@src/domain/error.domain";
 
 const errorHandler = (
   err: Error | ErrorDomain,

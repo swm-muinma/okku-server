@@ -1,6 +1,6 @@
 import { Document, Schema, model } from "mongoose";
-import { FormEnum } from "src/enum/form.enum";
-import { UserDomain } from "src/domain/user.domain";
+import { FormEnum } from "@src/enum/form.enum";
+import { UserDomain } from "@src/domain/user.domain";
 
 // UserEntity 클래스
 class UserEntity {
@@ -12,6 +12,8 @@ class UserEntity {
     public height: number,
     public weight: number,
     public form: FormEnum,
+    public kakao_id: string,
+    public apple_id: string,
     public created_at: Date | null = new Date(),
     public updated_at: Date | null = new Date()
   ) {}
@@ -23,6 +25,8 @@ const UserSchema: Schema<UserEntity & Document> = new Schema({
   image: { type: String, required: true },
   height: { type: Number, required: true },
   weight: { type: Number, required: true },
+  kakao_id: { type: String, unique: true },
+  apple_id: { type: String, unique: true },
   form: { type: String, enum: Object.values(FormEnum), required: true },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
@@ -42,6 +46,8 @@ class UserPersistenceMapper {
     res.id = entity._id!;
     res.createdAt = entity.created_at;
     res.updatedAt = entity.updated_at;
+    res.appleId = entity.apple_id;
+    res.kakaoId = entity.kakao_id;
     return res;
   }
 
@@ -52,6 +58,8 @@ class UserPersistenceMapper {
       domain.height,
       domain.weight,
       domain.form,
+      domain.kakaoId,
+      domain.appleId,
       domain.createdAt,
       domain.updatedAt
     );
