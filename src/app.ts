@@ -10,7 +10,7 @@ import { UserRouter } from "./controllers/user";
 import { LoginRouter } from "./controllers/auth";
 import cors from "cors";
 const app = express();
-const port = 3000;
+const port = 80;
 
 app.use(cors());
 app.use(bodyParser.json());
