@@ -1,30 +1,26 @@
 import { NextFunction, Request, Response } from "express";
 import { CartService } from "@src/services/cart.service";
-import { PickService } from "@src/services/pick.service";
 
-const cartService = new CartService();
+const cartsService = new CartService();
 
 export const movePicksController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const pickIds = req.body.pickIds;
-  const sourceCartId = req.body.sourceCartId;
-  const destinationCartId = req.body.destinationCartId;
-  const isDeleteFromOrigin = req.body.isDeleteFromOrigin;
+  const pickIds: string[] = req.body.pickIds;
+  const sourceCartId: string = req.body.sourceCartId;
+  const destinationCartId: string = req.body.destinationCartId;
+  const isDeleteFromOrigin: boolean = req.body.isDeleteFromOrigin;
   console.log("call movePicks");
   try {
-    res
-      .status(200)
-      .send(
-        await cartService.movePicks(
-          pickIds,
-          sourceCartId,
-          destinationCartId,
-          isDeleteFromOrigin
-        )
-      );
+    const result = await cartsService.movePicks(
+      pickIds,
+      sourceCartId,
+      destinationCartId,
+      isDeleteFromOrigin
+    );
+    res.status(200).send(result);
   } catch (error) {
     return next(error);
   }

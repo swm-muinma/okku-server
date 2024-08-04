@@ -3,9 +3,12 @@ import { PickRepository } from "@src/adapters/persistence/repository/pick.reposi
 import { CartDomain } from "@src/domain/cart.domain";
 import { ErrorDomain } from "@src/domain/error.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
+import mongoose from "mongoose";
 
 const cartRepository = new CartRepository();
 const pickRepository = new PickRepository();
+const isValidObjectId = (id: string): boolean => mongoose.isValidObjectId(id);
+
 export class CartService {
   async getMyCarts(
     userId: string,
