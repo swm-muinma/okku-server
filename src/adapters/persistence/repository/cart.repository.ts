@@ -5,7 +5,7 @@ import {
 } from "@src/adapters/persistence/model/cart.model";
 import { ErrorDomain } from "@src/domain/error.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
-import { ClientSession } from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { PickModel } from "../model/pick.model";
 
 class CartRepository {
@@ -271,11 +271,20 @@ class CartRepository {
       throw new ErrorDomain("Error finding cart by cartId", 404);
     }
   }
+  isValidObjectId = (id: string): boolean => mongoose.isValidObjectId(id);
 
   private async checkPickIdExist(pickIds: string[]): Promise<boolean> {
+    if (!pickIds || pickIds.length < 0) {
+      return true;
+    }
+    const validPickIds = pickIds.filter((id) => this.isValidObjectId(id));
+
+    if (validPickIds.length != pickIds.length) {
+      throw new ErrorDomain("pickId is invalid", 400);
+    }
     // 데이터베이스에서 존재하는 pickIds를 조회
     const existingPicks = await PickModel.find({
-      _id: { $in: pickIds },
+      _id: { $in: validPickIds },
     }).select("_id"); // _id 필드만 선택
 
     // 존재하는 pickIds를 배열로 변환
