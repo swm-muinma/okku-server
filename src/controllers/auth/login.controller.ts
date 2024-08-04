@@ -24,7 +24,7 @@ export const loginController = async (
       console.log(username);
       //   const appleLoginUserInfo = await appleSign(id, username, email);
     }
-    return res.status(200).json({ result });
+    return res.redirect(result);
   } catch (err) {
     console.log("Err", err);
     return next(err);
