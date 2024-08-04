@@ -1,11 +1,12 @@
-import { CartDomain } from "src/domain/cart.domain";
+import { CartDomain } from "@src/domain/cart.domain";
 import {
   CartModel,
   CartPersistenceMapper,
-} from "src/adapters/persistence/model/cart.model";
-import { ErrorDomain } from "src/domain/error.domain";
-import { PageInfo } from "src/dto/pageInfo.dto";
+} from "@src/adapters/persistence/model/cart.model";
+import { ErrorDomain } from "@src/domain/error.domain";
+import { PageInfo } from "@src/dto/pageInfo.dto";
 import { ClientSession } from "mongoose";
+import { PickModel } from "../model/pick.model";
 
 class CartRepository {
   /**
@@ -66,6 +67,7 @@ class CartRepository {
     name: string,
     pickIds: string[]
   ): Promise<CartDomain | null> {
+    this.checkPickIdExist(pickIds);
     try {
       const newCart = new CartModel({
         user_id: userId,
@@ -107,6 +109,7 @@ class CartRepository {
     cartId: string,
     session: ClientSession
   ): Promise<string[] | null> {
+    this.checkPickIdExist(pickIds);
     try {
       const updatedTargetCart = await CartModel.updateOne(
         { _id: cartId },
@@ -267,6 +270,28 @@ class CartRepository {
       console.error("Error finding cart by cartId:", error);
       throw new ErrorDomain("Error finding cart by cartId", 404);
     }
+  }
+
+  private async checkPickIdExist(pickIds: string[]): Promise<boolean> {
+    // 데이터베이스에서 존재하는 pickIds를 조회
+    const existingPicks = await PickModel.find({
+      _id: { $in: pickIds },
+    }).select("_id"); // _id 필드만 선택
+
+    // 존재하는 pickIds를 배열로 변환
+    const existingPickIds = existingPicks.map((pick) => pick._id.toString());
+
+    // 존재하지 않는 pickIds 추출
+    const invalidPickIds = pickIds.filter(
+      (pickId) => !existingPickIds.includes(pickId)
+    );
+
+    if (invalidPickIds.length > 0) {
+      const errmsg = "Invalid PickIds: " + invalidPickIds;
+      throw new ErrorDomain(errmsg, 400);
+    }
+
+    return true;
   }
 }
 

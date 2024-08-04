@@ -1,7 +1,7 @@
-import { PickDomain } from "src/domain/pick.domain";
+import { PickDomain } from "@src/domain/pick.domain";
 import { PickModel, PickPersistenceMapper } from "../model/pick.model";
-import { ErrorDomain } from "src/domain/error.domain";
-import { PageInfo } from "src/dto/pageInfo.dto";
+import { ErrorDomain } from "@src/domain/error.domain";
+import { PageInfo } from "@src/dto/pageInfo.dto";
 
 class PickRepository {
   /**

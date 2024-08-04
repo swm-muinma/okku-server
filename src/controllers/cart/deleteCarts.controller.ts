@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { CartService } from "src/services/cart.service";
+import { CartService } from "@src/services/cart.service";
 
 const cartsService = new CartService();
 

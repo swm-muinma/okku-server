@@ -1,9 +1,9 @@
-import { CartRepository } from "src/adapters/persistence/repository/cart.repository";
-import { PickRepository } from "src/adapters/persistence/repository/pick.repository";
-import { ErrorDomain } from "src/domain/error.domain";
-import { PickDomain, PlatformDomain } from "src/domain/pick.domain";
-import { PageInfo } from "src/dto/pageInfo.dto";
-import { FormEnum } from "src/enum/form.enum";
+import { CartRepository } from "@src/adapters/persistence/repository/cart.repository";
+import { PickRepository } from "@src/adapters/persistence/repository/pick.repository";
+import { ErrorDomain } from "@src/domain/error.domain";
+import { PickDomain, PlatformDomain } from "@src/domain/pick.domain";
+import { PageInfo } from "@src/dto/pageInfo.dto";
+import { FormEnum } from "@src/enum/form.enum";
 
 const pickRepository = new PickRepository();
 const cartRepository = new CartRepository();

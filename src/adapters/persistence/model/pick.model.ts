@@ -1,5 +1,5 @@
 import { Document, Schema, model } from "mongoose";
-import { PickDomain, PlatformDomain } from "src/domain/pick.domain";
+import { PickDomain, PlatformDomain } from "@src/domain/pick.domain";
 
 class PickEntity {
   _id?: string;

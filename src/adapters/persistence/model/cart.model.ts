@@ -1,5 +1,5 @@
-import { CartDomain } from "src/domain/cart.domain";
-import { createModel } from "src/infra/mongo.config";
+import { CartDomain } from "@src/domain/cart.domain";
+import { createModel } from "@src/infra/mongo.config";
 import { Document, Schema } from "mongoose";
 
 class CartEntity {

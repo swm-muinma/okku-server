@@ -1,5 +1,3 @@
-// src/errors/AppError.ts
-
 export class ErrorDomain extends Error {
   public statusCode: number;
 
