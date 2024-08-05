@@ -2,6 +2,7 @@ import { PickDomain } from "@src/domain/pick.domain";
 import { PickModel, PickPersistenceMapper } from "../model/pick.model";
 import { ErrorDomain } from "@src/domain/error.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
+import mongoose from "mongoose";
 
 class PickRepository {
   /**
@@ -132,6 +133,7 @@ class PickRepository {
   }
 
   public async delete(pickIds: string[]): Promise<boolean> {
+    await this.checkPickIdExist(pickIds);
     try {
       const result = await PickModel.deleteMany({
         _id: { $in: pickIds },
@@ -153,6 +155,38 @@ class PickRepository {
       console.error("Error creating pick:", error);
       throw new ErrorDomain("Error creating pick", 500);
     }
+  }
+
+  isValidObjectId = (id: string): boolean => mongoose.isValidObjectId(id);
+
+  private async checkPickIdExist(pickIds: string[]): Promise<boolean> {
+    if (!pickIds || pickIds.length < 1) {
+      return true;
+    }
+    const validPickIds = pickIds.filter((id) => this.isValidObjectId(id));
+
+    if (validPickIds.length != pickIds.length) {
+      throw new ErrorDomain("pickId is invalid", 400);
+    }
+    // 데이터베이스에서 존재하는 pickIds를 조회
+    const existingPicks = await PickModel.find({
+      _id: { $in: validPickIds },
+    }).select("_id"); // _id 필드만 선택
+
+    // 존재하는 pickIds를 배열로 변환
+    const existingPickIds = existingPicks.map((pick) => pick._id.toString());
+
+    // 존재하지 않는 pickIds 추출
+    const invalidPickIds = pickIds.filter(
+      (pickId) => !existingPickIds.includes(pickId)
+    );
+
+    if (invalidPickIds.length > 0) {
+      const errmsg = "Invalid PickIds: " + invalidPickIds;
+      throw new ErrorDomain(errmsg, 400);
+    }
+
+    return true;
   }
 }
 

@@ -14,7 +14,9 @@ export const movePicksController = async (
   const isDeleteFromOrigin: boolean = req.body.isDeleteFromOrigin;
   console.log("call movePicks");
   try {
+    const userId: string = req.user?.id!.toString()!;
     const result = await cartsService.movePicks(
+      userId,
       pickIds,
       sourceCartId,
       destinationCartId,

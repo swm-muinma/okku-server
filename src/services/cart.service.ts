@@ -23,6 +23,7 @@ export class CartService {
     }[];
     page: PageInfo;
   }> {
+    console.log(userId);
     if (page < 1) {
       throw new ErrorDomain("page must be larger than 0", 400);
     }
@@ -60,7 +61,11 @@ export class CartService {
     return { carts: resCart, page: cartDomains.page };
   }
 
-  async deleteCart(cartId: string): Promise<string> {
+  async deleteCart(userId: string, cartId: string): Promise<string> {
+    const cartInfo = await cartRepository.findById(cartId);
+    if (cartInfo.userId != userId) {
+      throw new ErrorDomain("not cart owner", 400);
+    }
     const deletedCartId = await cartRepository.delete(cartId);
     if (!deletedCartId) {
       throw new ErrorDomain("Cart not found", 404);
@@ -84,6 +89,7 @@ export class CartService {
   }
 
   async movePicks(
+    userId: string,
     pickIds: string[],
     sourceCartId: string,
     destinationCartId: string,
@@ -103,6 +109,19 @@ export class CartService {
       if (!movedPickIds) {
         throw new ErrorDomain("already exist in cart", 400);
       }
+      if (pickIds.length == 0) {
+        throw new ErrorDomain("pickIds is required", 400);
+      }
+      const picksInfo = await pickRepository.findByPickIds(
+        pickIds,
+        1,
+        pickIds.length
+      );
+      picksInfo.picks.forEach((el) => {
+        if (el.userId != userId) {
+          throw new ErrorDomain("not pick owner", 400);
+        }
+      });
       return {
         source: {
           cartId: sourceCartId ? sourceCartId : "__all__",

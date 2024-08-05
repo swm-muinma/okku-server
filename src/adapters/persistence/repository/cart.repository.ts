@@ -135,11 +135,10 @@ class CartRepository {
         { $pull: { pick_item_ids: { $in: pickIds } } },
         { session }
       ).exec();
-
       await session.commitTransaction();
       session.endSession();
 
-      return updatedCarts.modifiedCount > 0 ? pickIds : null;
+      return updatedCarts.acknowledged ? pickIds : null;
     } catch (error) {
       await session.abortTransaction();
       session.endSession();

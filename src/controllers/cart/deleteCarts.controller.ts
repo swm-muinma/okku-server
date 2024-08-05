@@ -11,7 +11,8 @@ export const deleteCartController = async (
   const cartId = req.params.id;
   console.log("call deleteCart");
   try {
-    const deletedCartId = await cartsService.deleteCart(cartId);
+    const userId: string = req.user?.id!.toString()!;
+    const deletedCartId = await cartsService.deleteCart(userId, cartId);
     res.status(200).send({ cartId: deletedCartId });
   } catch (error) {
     return next(error);

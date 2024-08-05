@@ -22,12 +22,12 @@ class UserEntity {
 // Mongoose 스키마
 const UserSchema: Schema<UserEntity & Document> = new Schema({
   name: { type: String, required: true },
-  image: { type: String, required: true },
-  height: { type: Number, required: true },
-  weight: { type: Number, required: true },
-  kakao_id: { type: String, unique: true },
-  apple_id: { type: String, unique: true },
-  form: { type: String, enum: Object.values(FormEnum), required: true },
+  image: { type: String, required: false },
+  height: { type: Number, required: false },
+  weight: { type: Number, required: false },
+  kakao_id: { type: String, unique: false },
+  apple_id: { type: String, unique: false },
+  form: { type: String, enum: Object.values(FormEnum), required: false },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });

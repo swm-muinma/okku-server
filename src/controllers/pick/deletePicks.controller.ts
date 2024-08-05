@@ -13,9 +13,17 @@ export const deletePicksController = async (
   const isDeletePermenant: boolean = req.body.isDeletePermenant;
   console.log("call deletePicks");
   try {
+    const userId: string = req.user?.id!.toString()!;
     res
       .status(200)
-      .send(await pickService.deletePicks(pickIds, cartId, isDeletePermenant));
+      .send(
+        await pickService.deletePicks(
+          userId,
+          pickIds,
+          cartId,
+          isDeletePermenant
+        )
+      );
   } catch (error) {
     return next(error);
   }

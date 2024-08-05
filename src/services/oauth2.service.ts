@@ -16,6 +16,8 @@ import {
   kakaoRedirectUri,
 } from "@src/infra/kakao.config";
 import { expirationTime, secretKey } from "@src/infra/jwt.config";
+import { UserDomain } from "@src/domain/user.domain";
+import { FormEnum } from "@src/enum/form.enum";
 
 const userRepository = new UserRepository();
 
@@ -31,7 +33,14 @@ export class Oauth2Service {
     }
   }
 
-  async oauth2login(platform: string, authorizationCode: string) {
+  async oauth2login(
+    platform: string,
+    authorizationCode: string
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    isNewUser: boolean;
+  }> {
     switch (platform) {
       case "apple":
         return await this.handleAppleLogin(authorizationCode);
@@ -42,14 +51,18 @@ export class Oauth2Service {
     }
   }
 
-  private async handleAppleLogin(authorizationCode: string) {
+  private async handleAppleLogin(authorizationCode: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    isNewUser: boolean;
+  }> {
     const keyPath = process.env.AUTH_KEY_PATH;
     if (!keyPath) {
       throw new Error("Environment variable AUTH_KEY_PATH is not set");
     }
     const privateKey = fs.readFileSync(keyPath, "utf8");
     const appleAuth = new AppleAuth(appleConfig, privateKey, "text");
-
+    let isNewUser = false;
     try {
       const response = await appleAuth.accessToken(authorizationCode);
       const idToken = jwt.decode(response.id_token, { complete: true });
@@ -67,22 +80,29 @@ export class Oauth2Service {
 
       if (!user) {
         console.log("New user registration logic here");
-        // Implement user registration logic here
+        isNewUser = true;
+        user = new UserDomain("유저", "", 0, 0, FormEnum.NORMAL);
+        user.appleId = appleId;
+        user = await userRepository.create(user);
       }
 
       const token = jwt.sign({ userId: "user._id" }, secretKey, {
         expiresIn: expirationTime,
       });
 
-      return { token };
+      return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
     } catch (err) {
       console.error("Error during Apple login:", err);
       throw new ErrorDomain("Error during Apple login", 500);
     }
   }
 
-  private async handleKakaoLogin(authorizationCode: string) {
-    console.log(authorizationCode);
+  private async handleKakaoLogin(authorizationCode: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    isNewUser: boolean;
+  }> {
+    let isNewUser = false;
     try {
       const tokenResponse = await axios.post(
         "https://kauth.kakao.com/oauth/token",
@@ -106,6 +126,12 @@ export class Oauth2Service {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
+          params: {
+            property_keys: [
+              "kakao_account.email",
+              "kakao_account.profile.nickname",
+            ],
+          },
         }
       );
 
@@ -115,18 +141,27 @@ export class Oauth2Service {
         throw new ErrorDomain("Kakao ID not found from Kakao", 404);
       }
 
-      let user = await userRepository.getByKakaoId(kakaoId);
+      let user: UserDomain | null = await userRepository.getByKakaoId(kakaoId);
 
       if (!user) {
-        console.log("New user registration logic here");
-        // Implement user registration logic here
+        user = new UserDomain(
+          userResponse.data.kakao_account.profile.nickname,
+          "",
+          0,
+          0,
+          FormEnum.NORMAL
+        );
+        user.kakaoId = kakaoId;
+        user = await userRepository.create(user);
+        console.log(user);
+        isNewUser = true;
       }
 
-      const token = jwt.sign({ userId: "user._id" }, secretKey, {
+      const token = jwt.sign({ userId: user.id }, secretKey, {
         expiresIn: expirationTime,
       });
 
-      return { token };
+      return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
     } catch (err) {
       console.error("Error during Kakao login:", err);
       throw new ErrorDomain("err", 500);

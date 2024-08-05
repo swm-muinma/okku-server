@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { PickService } from "@src/services/pick.service";
 
 const pickService = new PickService();
-const userId = "66a99612385174b0b9a399a6";
 export const getMyPicksController = async (
   req: Request,
   res: Response,
@@ -13,6 +12,7 @@ export const getMyPicksController = async (
   const cartId = req.query.cartId?.toString();
   console.log("call getMyPicks");
   try {
+    const userId: string = req.user?.id!.toString()!;
     res
       .status(200)
       .send(await pickService.getMyPicks(userId, cartId!, page, size));
