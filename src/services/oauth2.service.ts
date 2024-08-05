@@ -102,7 +102,6 @@ export class Oauth2Service {
     refreshToken: string;
     isNewUser: boolean;
   }> {
-    let isNewUser = false;
     try {
       const tokenResponse = await axios.post(
         "https://kauth.kakao.com/oauth/token",
@@ -120,48 +119,7 @@ export class Oauth2Service {
 
       const accessToken = tokenResponse.data.access_token;
 
-      const userResponse = await axios.get(
-        "https://kapi.kakao.com/v2/user/me",
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          params: {
-            property_keys: [
-              "kakao_account.email",
-              "kakao_account.profile.nickname",
-            ],
-          },
-        }
-      );
-
-      const kakaoId: string = userResponse.data.id.toString();
-
-      if (!kakaoId) {
-        throw new ErrorDomain("Kakao ID not found from Kakao", 404);
-      }
-
-      let user: UserDomain | null = await userRepository.getByKakaoId(kakaoId);
-
-      if (!user) {
-        user = new UserDomain(
-          userResponse.data.kakao_account.profile.nickname,
-          "",
-          0,
-          0,
-          FormEnum.NORMAL
-        );
-        user.kakaoId = kakaoId;
-        user = await userRepository.create(user);
-        console.log(user);
-        isNewUser = true;
-      }
-
-      const token = jwt.sign({ userId: user.id }, secretKey, {
-        expiresIn: expirationTime,
-      });
-
-      return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
+      return this.kakaoLoginWithToken(accessToken);
     } catch (err) {
       console.error("Error during Kakao login:", err);
       throw new ErrorDomain("err", 500);
@@ -173,5 +131,47 @@ export class Oauth2Service {
     const keys = response.data.keys;
     const key = keys.find((k: any) => k.kid === kid);
     return jwkToPem(key);
+  }
+
+  public async kakaoLoginWithToken(accessToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    isNewUser: boolean;
+  }> {
+    let isNewUser = false;
+    const userResponse = await axios.get("https://kapi.kakao.com/v2/user/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      params: {
+        property_keys: [
+          "kakao_account.email",
+          "kakao_account.profile.nickname",
+        ],
+      },
+    });
+
+    const kakaoId: string = userResponse.data.id.toString();
+
+    if (!kakaoId) {
+      throw new ErrorDomain("Kakao ID not found from Kakao", 404);
+    }
+    let user: UserDomain | null = await userRepository.getByKakaoId(kakaoId);
+    if (!user) {
+      user = new UserDomain(
+        userResponse.data.kakao_account.profile.nickname,
+        "",
+        0,
+        0,
+        FormEnum.NORMAL
+      );
+      user.kakaoId = kakaoId;
+      user = await userRepository.create(user);
+      isNewUser = true;
+    }
+    const token = jwt.sign({ userId: user.id }, secretKey, {
+      expiresIn: expirationTime,
+    });
+    return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
   }
 }
