@@ -3,7 +3,6 @@ import { CartDomain } from "@src/domain/cart.domain";
 import { CartService } from "@src/services/cart.service";
 
 const cartsService = new CartService();
-const userId = "66a99612385174b0b9a399a6";
 export const createCartController = async (
   req: Request,
   res: Response,
@@ -13,6 +12,7 @@ export const createCartController = async (
   const pickIds = req.body.pickIds;
   console.log("call createCart");
   try {
+    const userId: string = req.user?.id!.toString()!;
     const savedCart: CartDomain = await cartsService.createCart(
       userId,
       name,

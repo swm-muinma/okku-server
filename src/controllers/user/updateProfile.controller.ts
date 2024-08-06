@@ -3,7 +3,7 @@ import { FormEnum } from "@src/enum/form.enum";
 import { UserService } from "@src/services/user.service";
 
 const userService = new UserService();
-const userId = "66a99612385174b0b9a399a6";
+
 export const updateProfileController = async (
   req: Request,
   res: Response,
@@ -15,6 +15,7 @@ export const updateProfileController = async (
   const form = req.body.form as FormEnum;
   console.log("call updateProfile");
   try {
+    const userId: string = req.user?.id!.toString()!;
     res
       .status(200)
       .send(

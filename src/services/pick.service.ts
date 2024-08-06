@@ -33,6 +33,7 @@ export class PickService {
   }
 
   async deletePicks(
+    userId: string,
     pickIds: string[],
     cartId: string | null,
     isDeletePermenant: boolean
@@ -46,11 +47,26 @@ export class PickService {
         500
       );
     }
+    if (pickIds.length == 0) {
+      throw new ErrorDomain("pickIds is required", 400);
+    }
+    const picksInfo = await pickRepository.findByPickIds(
+      pickIds,
+      1,
+      pickIds.length
+    );
+    picksInfo.picks.forEach((el) => {
+      if (el.userId != userId) {
+        throw new ErrorDomain("not pick owner", 400);
+      }
+    });
     if ((cartId == null || cartId == "") && isDeletePermenant == true) {
       const isDeleted: boolean = await pickRepository.delete(pickIds);
       const isDeletedFromCart = await cartRepository.deletePickFromAllCart(
         pickIds
       );
+      console.log(isDeleted);
+      console.log(isDeletePermenant);
       if (isDeleted && isDeletedFromCart) {
         return {
           cartId: "__all__",
@@ -87,8 +103,8 @@ export class PickService {
       user: {
         name: "testUser",
         image: "https://cdn-icons-png.flaticon.com/512/4140/4140051.png",
-        height: "165",
-        weight: "49",
+        height: 165,
+        weight: 49,
         form: FormEnum.SLIM,
       },
       picks: [
