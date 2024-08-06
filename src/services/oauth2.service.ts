@@ -15,11 +15,17 @@ import {
   kakaoLoginUrl,
   kakaoRedirectUri,
 } from "@src/infra/kakao.config";
-import { expirationTime, secretKey } from "@src/infra/jwt.config";
+import {
+  expirationTime,
+  refreshTokenExpirationTime,
+  secretKey,
+} from "@src/infra/jwt.config";
 import { UserDomain } from "@src/domain/user.domain";
 import { FormEnum } from "@src/enum/form.enum";
+import { RefreshRepository } from "@src/adapters/persistence/repository/refresh.repository";
 
 const userRepository = new UserRepository();
+const refreshRepository = new RefreshRepository();
 
 export class Oauth2Service {
   getRedirect(platform: string): string {
@@ -86,11 +92,19 @@ export class Oauth2Service {
         user = await userRepository.create(user);
       }
 
-      const token = jwt.sign({ userId: "user._id" }, secretKey, {
+      const newAccessToken = jwt.sign({ userId: user.id }, secretKey, {
         expiresIn: expirationTime,
       });
+      const refreshToken = jwt.sign({ userId: user.id }, secretKey, {
+        expiresIn: refreshTokenExpirationTime,
+      });
+      await refreshRepository.create(refreshToken);
 
-      return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
+      return {
+        accessToken: newAccessToken,
+        refreshToken: refreshToken,
+        isNewUser: isNewUser,
+      };
     } catch (err) {
       console.error("Error during Apple login:", err);
       throw new ErrorDomain("Error during Apple login", 500);
@@ -150,6 +164,8 @@ export class Oauth2Service {
         ],
       },
     });
+    console.log("kakao login");
+    console.log(userResponse.data.kakao_account);
 
     const kakaoId: string = userResponse.data.id.toString();
 
@@ -169,9 +185,17 @@ export class Oauth2Service {
       user = await userRepository.create(user);
       isNewUser = true;
     }
-    const token = jwt.sign({ userId: user.id }, secretKey, {
+    const newAccessToken = jwt.sign({ userId: user.id }, secretKey, {
       expiresIn: expirationTime,
     });
-    return { accessToken: token, refreshToken: token, isNewUser: isNewUser };
+    const refreshToken = jwt.sign({ userId: user.id }, secretKey, {
+      expiresIn: refreshTokenExpirationTime,
+    });
+    await refreshRepository.create(refreshToken);
+    return {
+      accessToken: newAccessToken,
+      refreshToken: refreshToken,
+      isNewUser: isNewUser,
+    };
   }
 }

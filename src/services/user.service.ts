@@ -3,8 +3,6 @@ import { ErrorDomain } from "@src/domain/error.domain";
 import { UserDomain } from "@src/domain/user.domain";
 import { FormEnum } from "@src/enum/form.enum";
 
-const userId = "test_user_id";
-
 const userRepository = new UserRepository();
 export class UserService {
   async getProfile(userId: string) {
