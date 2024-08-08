@@ -9,6 +9,7 @@ export const createPickController = async (
   next: NextFunction
 ) => {
   const url = req.body.url;
+  console.log("add Pick");
   try {
     const userId: string = req.user?.id!.toString()!;
     res.status(200).send(await pickService.createPick(userId, url));

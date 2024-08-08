@@ -12,10 +12,10 @@ export const refreshController = async (
 ) => {
   const refreshToken = req.body.refreshToken;
   console.log("call refresh");
-  if (refreshToken == null) {
-    throw new ErrorDomain("'refreshToken' is required", 400);
-  }
   try {
+    if (refreshToken == null) {
+      throw new ErrorDomain("'refreshToken' is required", 400);
+    }
     const result = await refreshService.updateRefresh(refreshToken);
     return res.status(200).json(result);
   } catch (err) {

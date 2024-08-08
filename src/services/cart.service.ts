@@ -101,6 +101,9 @@ export class CartService {
     if (isDeleteFromOrigin == null) {
       throw new ErrorDomain("'isDeleteFromOrigin' filed is required", 400);
     }
+    if (!destinationCartId) {
+      throw new ErrorDomain("'destinationCartId' filed is required", 400);
+    }
     if (isDeleteFromOrigin == false) {
       const movedPickIds: string[] | null = await cartRepository.addToCart(
         pickIds,
