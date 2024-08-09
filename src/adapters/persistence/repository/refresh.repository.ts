@@ -1,5 +1,4 @@
 import { RefreshModel } from "@src/adapters/persistence/model/refresh.model";
-import { ErrorDomain } from "@src/domain/error.domain";
 
 class RefreshRepository {
   // Refresh 토큰이 존재하는지 확인하는 함수

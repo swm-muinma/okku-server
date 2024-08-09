@@ -6,7 +6,7 @@ import {
 } from "../model/pick.model";
 import { ErrorDomain } from "@src/domain/error.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 class PickRepository {
   /**
@@ -73,16 +73,23 @@ class PickRepository {
   }
 
   public async findById(id: string): Promise<PickDomain> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new ErrorDomain("Invalid ID format", 400);
+    }
+
     try {
       const pick = await PickModel.findById(id).exec();
+      console.log("find pick! ", pick);
       if (!pick) {
-        throw new ErrorDomain("can not find by pickId", 404);
+        throw new ErrorDomain("Cannot find pick with given ID", 404);
       }
       return PickPersistenceMapper.toDomain(pick);
     } catch (err) {
-      throw new ErrorDomain("can not find by pickId", 404);
+      // Re-throw the error with additional context if needed
+      throw new ErrorDomain("Error finding pick by ID", 500);
     }
   }
+
   /**
    * Find picks by user ID and cart ID with pagination.
    * @param userId - The user ID to find picks for.
