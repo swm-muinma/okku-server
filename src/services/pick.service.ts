@@ -18,7 +18,7 @@ export class PickService {
   async createPick(userId: string, url: string): Promise<PickDomain> {
     try {
       const scrapedData = await scraperAdapter.scrape(url);
-      console.log(scrapedData);
+      console.log("scrape: ", scrapedData);
       const platform = new PlatformDomain(
         "29cm",
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUAAACtrarj5eb19vempqY2MzC7uLXk4+Hx8fGmqamusK/P0dD////FxsZHR0X8+/nGx8LFysyRk5B5fX5+fnphY2ago550dXlaWligoKCztLY4OTciIiCsq610cm6Li40tLSsbGxm9wrlMS0u3ubHs8fT0+/+EgoLY1dcDqKGoAAAAlElEQVR4AeSPgwEEQQxFs8b8tW30X+Gt1cINk7yQ/mxxvCBugiQrqvZmvKAzGItgWopuw3kyFx6Rj4BI5YkoRPSAcbK+SCnDKuUo6LNKVFRDXnND/LAaa0Z1zW0jfrNcQLM1BNaC/zCgO5rrhzF7Q/XOpCP6znk5S3DeLIVqyLIxLWLDD/kbGgoPAPpacv5NgmGkAQAbCgckaxy7FQAAAABJRU5ErkJggg==",
@@ -74,8 +74,6 @@ export class PickService {
       const isDeletedFromCart = await cartRepository.deletePickFromAllCart(
         pickIds
       );
-      console.log(isDeleted);
-      console.log(isDeletePermenant);
       if (isDeleted && isDeletedFromCart) {
         return {
           cartId: "__all__",
@@ -136,15 +134,20 @@ export class PickService {
       }[];
     };
   }> {
-    const scrapedData = await scraperAdapter.scrape(url);
-    let res = await summarizeReviewAdapter.getReviews();
-    res.pick = {
-      image: scrapedData.thumbnail_url,
-      name: scrapedData.name,
-      price: scrapedData.price,
-      url: url,
-    };
-    return res;
+    try {
+      const scrapedData = await scraperAdapter.scrape(url);
+      console.log("scrape: ", scrapedData);
+      let res = await summarizeReviewAdapter.getReviews();
+      res.pick = {
+        image: scrapedData.thumbnail_url,
+        name: scrapedData.name,
+        price: scrapedData.price,
+        url: url,
+      };
+      return res;
+    } catch (err) {
+      throw new ErrorDomain("error with scrape", 500);
+    }
   }
 
   async getReviews(pickId: string): Promise<{
@@ -180,10 +183,14 @@ export class PickService {
       }[];
     };
   }> {
-    const pick = await pickRepository.findById(pickId);
-    let res = await summarizeReviewAdapter.getReviews();
-    res.pick = pick;
-    return res;
+    try {
+      const pick = await pickRepository.findById(pickId);
+      let res = await summarizeReviewAdapter.getReviews();
+      res.pick = pick;
+      return res;
+    } catch (err) {
+      throw new ErrorDomain("error with scrape", 500);
+    }
   }
 
   async getMyPicks(

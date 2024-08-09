@@ -8,7 +8,7 @@ export const getReviewsController = async (
   next: NextFunction
 ) => {
   const pickId: string = req.params.pickId;
-  console.log("call getComparisonView");
+  console.log("call getReviews");
   try {
     res.status(200).send(await pickService.getReviews(pickId));
   } catch (error) {

@@ -9,10 +9,9 @@ export const getReviewWithoutLoginViewController = async (
   next: NextFunction
 ) => {
   const url: string = req.body.url;
-  console.log("call getComparisonView");
-  console.log(req);
+  console.log("call getReviews Without login");
   try {
-    res.status(200).send(pickService.getReviewsWithoutLogin(url));
+    res.status(200).send(await pickService.getReviewsWithoutLogin(url));
   } catch (error) {
     return next(error);
   }
