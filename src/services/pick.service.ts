@@ -6,10 +6,12 @@ import { ErrorDomain } from "@src/domain/error.domain";
 import { PickDomain, PlatformDomain } from "@src/domain/pick.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
 import { FormEnum } from "@src/enum/form.enum";
+import { UserRepository } from "@src/adapters/persistence/repository/user.repository";
 
 const pickRepository = new PickRepository();
 const cartRepository = new CartRepository();
 const scraperAdapter = new ScraperAdapter();
+const userRepository = new UserRepository();
 const summarizeReviewAdapter = new SummarizeReviewAdapter();
 
 export class PickService {
@@ -208,13 +210,14 @@ export class PickService {
         page,
         size
       );
+      const user = await userRepository.getById(cart.userId);
       if (!res) {
         throw new ErrorDomain("Cart not found by userId", 404);
       }
       return {
         cart: {
           name: cart.name,
-          host: { id: cart.userId, name: "testUser" },
+          host: { id: cart.userId, name: user?.name! },
         },
         picks: res.picks,
         page: res.page,
