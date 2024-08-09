@@ -2,15 +2,15 @@ import { NextFunction, Request, Response } from "express";
 import { PickService } from "@src/services/pick.service";
 
 const pickService = new PickService();
-export const getComparisonViewController = async (
+export const getReviewsController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const pickIds = req.body.pickIds;
+  const pickId: string = req.params.pickId;
   console.log("call getComparisonView");
   try {
-    res.status(200).send(await pickService.getComparisonView(pickIds));
+    res.status(200).send(await pickService.getReviews(pickId));
   } catch (error) {
     return next(error);
   }
