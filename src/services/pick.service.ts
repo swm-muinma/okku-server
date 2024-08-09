@@ -102,69 +102,86 @@ export class PickService {
   // =============================================================================
   // TODO : getComparisonView 일단 더미데이터. 나중에 파싱 로직 나오면 수정 필요
   // =============================================================================
-  getReviewsWithoutLogin(url: string): {
+  async getReviewsWithoutLogin(url: string): Promise<{
     pick: {
       image: string;
       name: string;
       price: number;
+      url: string;
     };
-    cons: {
-      content: string;
-      count: number;
-      comments: {
-        name?: string;
-        height?: number;
-        weight?: number;
-        comment: string;
-        image?: string;
+    reviews: {
+      cons: {
+        content: string;
+        count: number;
+        comments: {
+          name?: string;
+          height?: number;
+          weight?: number;
+          comment: string;
+          image?: string;
+        }[];
       }[];
-    }[];
-    pros: {
-      content: string;
-      count: number;
-      comments: {
-        name?: string;
-        height?: number;
-        weight?: number;
-        comment: string;
-        image?: string;
+      pros: {
+        content: string;
+        count: number;
+        comments: {
+          name?: string;
+          height?: number;
+          weight?: number;
+          comment: string;
+          image?: string;
+        }[];
       }[];
-    }[];
-  } {
-    return summarizeReviewAdapter.getReviews();
+    };
+  }> {
+    const scrapedData = await scraperAdapter.scrape(url);
+    let res = await summarizeReviewAdapter.getReviews();
+    res.pick = {
+      image: scrapedData.thumbnail_url,
+      name: scrapedData.name,
+      price: scrapedData.price,
+      url: url,
+    };
+    return res;
   }
 
-  getReviews(pickId: string): {
+  async getReviews(pickId: string): Promise<{
     pick: {
       id: string;
       image: string;
       name: string;
       price: number;
+      url: string;
     };
-    cons: {
-      content: string;
-      count: number;
-      comments: {
-        name?: string;
-        height?: number;
-        weight?: number;
-        comment: string;
-        image?: string;
+    reviews: {
+      cons: {
+        content: string;
+        count: number;
+        comments: {
+          name?: string;
+          height?: number;
+          weight?: number;
+          comment: string;
+          image?: string;
+        }[];
       }[];
-    }[];
-    pros: {
-      content: string;
-      count: number;
-      comments: {
-        name?: string;
-        height?: number;
-        weight?: number;
-        comment: string;
-        image?: string;
+      pros: {
+        content: string;
+        count: number;
+        comments: {
+          name?: string;
+          height?: number;
+          weight?: number;
+          comment: string;
+          image?: string;
+        }[];
       }[];
-    }[];
-  } {
-    return summarizeReviewAdapter.getReviews();
+    };
+  }> {
+    const pick = await pickRepository.findById(pickId);
+    let res = await summarizeReviewAdapter.getReviews();
+    res.pick = pick;
+    return res;
   }
 
   async getMyPicks(
