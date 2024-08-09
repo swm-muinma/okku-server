@@ -103,6 +103,11 @@ export class PickService {
   // TODO : getComparisonView 일단 더미데이터. 나중에 파싱 로직 나오면 수정 필요
   // =============================================================================
   getReviewsWithoutLogin(url: string): {
+    pick: {
+      image: string;
+      name: string;
+      price: number;
+    };
     cons: {
       content: string;
       count: number;
@@ -130,6 +135,12 @@ export class PickService {
   }
 
   getReviews(pickId: string): {
+    pick: {
+      id: string;
+      image: string;
+      name: string;
+      price: number;
+    };
     cons: {
       content: string;
       count: number;
