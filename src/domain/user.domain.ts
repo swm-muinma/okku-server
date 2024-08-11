@@ -6,6 +6,7 @@ export class UserDomain {
   updatedAt: Date | null;
   kakaoId: string;
   appleId: string;
+  isPremium: boolean;
 
   constructor(
     public name: string,
@@ -19,5 +20,6 @@ export class UserDomain {
     this.updatedAt = null;
     this.kakaoId = "";
     this.appleId = "";
+    this.isPremium = false;
   }
 }

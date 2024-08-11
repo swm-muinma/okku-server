@@ -1,26 +1,30 @@
 import { ScraperAdapter } from "@src/adapters/crawlling/scraper.adapter";
-import { SummarizeReviewAdapter } from "@src/adapters/crawlling/summarizeReview.adapter";
 import { CartRepository } from "@src/adapters/persistence/repository/cart.repository";
 import { PickRepository } from "@src/adapters/persistence/repository/pick.repository";
 import { ErrorDomain } from "@src/domain/error.domain";
 import { PickDomain, PlatformDomain } from "@src/domain/pick.domain";
 import { PageInfo } from "@src/dto/pageInfo.dto";
-import { FormEnum } from "@src/enum/form.enum";
 import { UserRepository } from "@src/adapters/persistence/repository/user.repository";
 
 const pickRepository = new PickRepository();
 const cartRepository = new CartRepository();
 const scraperAdapter = new ScraperAdapter();
 const userRepository = new UserRepository();
-const summarizeReviewAdapter = new SummarizeReviewAdapter();
 
 export class PickService {
   async createPick(userId: string, url: string): Promise<PickDomain> {
     try {
+      const user = await userRepository.getById(userId);
+      if (!user?.isPremium) {
+        const picks = await pickRepository.findByUserId(userId, 1, 10);
+        if (picks.page.totalDataCnt > 8) {
+          throw new ErrorDomain("must invite", 402);
+        }
+      }
       const scrapedData = await scraperAdapter.scrape(url);
       console.log("scrape: ", scrapedData);
       const platform = new PlatformDomain(
-        "29cm",
+        scrapedData.platform,
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUAAACtrarj5eb19vempqY2MzC7uLXk4+Hx8fGmqamusK/P0dD////FxsZHR0X8+/nGx8LFysyRk5B5fX5+fnphY2ago550dXlaWligoKCztLY4OTciIiCsq610cm6Li40tLSsbGxm9wrlMS0u3ubHs8fT0+/+EgoLY1dcDqKGoAAAAlElEQVR4AeSPgwEEQQxFs8b8tW30X+Gt1cINk7yQ/mxxvCBugiQrqvZmvKAzGItgWopuw3kyFx6Rj4BI5YkoRPSAcbK+SCnDKuUo6LNKVFRDXnND/LAaa0Z1zW0jfrNcQLM1BNaC/zCgO5rrhzF7Q/XOpCP6znk5S3DeLIVqyLIxLWLDD/kbGgoPAPpacv5NgmGkAQAbCgckaxy7FQAAAABJRU5ErkJggg==",
         "https://www.29cm.co.kr/home/"
       );
@@ -31,7 +35,8 @@ export class PickService {
         scrapedData.name,
         scrapedData.price,
         scrapedData.thumbnail_url,
-        platform
+        platform,
+        scrapedData.product_pk
       );
 
       const savedPick = await pickRepository.create(pick);
@@ -97,101 +102,6 @@ export class PickService {
     }
 
     throw new ErrorDomain("Can not deleted from cart", 500);
-  }
-
-  // =============================================================================
-  // TODO : getComparisonView 일단 더미데이터. 나중에 파싱 로직 나오면 수정 필요
-  // =============================================================================
-  async getReviewsWithoutLogin(url: string): Promise<{
-    pick: {
-      image: string;
-      name: string;
-      price: number;
-      url: string;
-    };
-    reviews: {
-      cons: {
-        content: string;
-        count: number;
-        comments: {
-          name?: string;
-          height?: number;
-          weight?: number;
-          comment: string;
-          image?: string;
-        }[];
-      }[];
-      pros: {
-        content: string;
-        count: number;
-        comments: {
-          name?: string;
-          height?: number;
-          weight?: number;
-          comment: string;
-          image?: string;
-        }[];
-      }[];
-    };
-  }> {
-    try {
-      const scrapedData = await scraperAdapter.scrape(url);
-      console.log("scrape: ", scrapedData);
-      let res = await summarizeReviewAdapter.getReviews();
-      res.pick = {
-        image: scrapedData.thumbnail_url,
-        name: scrapedData.name,
-        price: scrapedData.price,
-        url: url,
-      };
-      return res;
-    } catch (err) {
-      throw new ErrorDomain("error with scrape", 500);
-    }
-  }
-
-  async getReviews(pickId: string): Promise<{
-    pick: {
-      id: string;
-      image: string;
-      name: string;
-      price: number;
-      url: string;
-    };
-    reviews: {
-      cons: {
-        content: string;
-        count: number;
-        comments: {
-          name?: string;
-          height?: number;
-          weight?: number;
-          comment: string;
-          image?: string;
-        }[];
-      }[];
-      pros: {
-        content: string;
-        count: number;
-        comments: {
-          name?: string;
-          height?: number;
-          weight?: number;
-          comment: string;
-          image?: string;
-        }[];
-      }[];
-    };
-  }> {
-    try {
-      const pick = await pickRepository.findById(pickId);
-      let res = await summarizeReviewAdapter.getReviews();
-      res.pick = pick;
-      return res;
-    } catch (err) {
-      console.log(err);
-      throw new ErrorDomain("error with scrape", 500);
-    }
   }
 
   async getMyPicks(

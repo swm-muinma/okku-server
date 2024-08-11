@@ -133,7 +133,7 @@ export class Oauth2Service {
 
       const accessToken = tokenResponse.data.access_token;
 
-      return this.kakaoLoginWithToken(accessToken);
+      return this.kakaoLoginWithToken(accessToken, "");
     } catch (err) {
       console.error("Error during Kakao login:", err);
       throw new ErrorDomain("err", 500);
@@ -147,7 +147,10 @@ export class Oauth2Service {
     return jwkToPem(key);
   }
 
-  public async kakaoLoginWithToken(accessToken: string): Promise<{
+  public async kakaoLoginWithToken(
+    accessToken: string,
+    recomend: string
+  ): Promise<{
     accessToken: string;
     refreshToken: string;
     isNewUser: boolean;
@@ -182,6 +185,10 @@ export class Oauth2Service {
         FormEnum.NORMAL
       );
       user.kakaoId = kakaoId;
+      if (recomend != null && recomend != "") {
+        await userRepository.updateToPremium(recomend);
+        user.isPremium = true;
+      }
       user = await userRepository.create(user);
       isNewUser = true;
     }
