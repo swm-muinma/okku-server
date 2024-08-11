@@ -13,37 +13,33 @@ const userRepository = new UserRepository();
 
 export class PickService {
   async createPick(userId: string, url: string): Promise<PickDomain> {
-    try {
-      const user = await userRepository.getById(userId);
-      if (!user?.isPremium) {
-        const picks = await pickRepository.findByUserId(userId, 1, 10);
-        if (picks.page.totalDataCnt > 8) {
-          throw new ErrorDomain("must invite", 402);
-        }
+    const user = await userRepository.getById(userId);
+    if (!user?.isPremium) {
+      const picks = await pickRepository.findByUserId(userId, 1, 10);
+      if (picks.page.totalDataCnt > 8) {
+        throw new ErrorDomain("must invite", 402);
       }
-      const scrapedData = await scraperAdapter.scrape(url);
-      console.log("scrape: ", scrapedData);
-      const platform = new PlatformDomain(
-        scrapedData.platform,
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUAAACtrarj5eb19vempqY2MzC7uLXk4+Hx8fGmqamusK/P0dD////FxsZHR0X8+/nGx8LFysyRk5B5fX5+fnphY2ago550dXlaWligoKCztLY4OTciIiCsq610cm6Li40tLSsbGxm9wrlMS0u3ubHs8fT0+/+EgoLY1dcDqKGoAAAAlElEQVR4AeSPgwEEQQxFs8b8tW30X+Gt1cINk7yQ/mxxvCBugiQrqvZmvKAzGItgWopuw3kyFx6Rj4BI5YkoRPSAcbK+SCnDKuUo6LNKVFRDXnND/LAaa0Z1zW0jfrNcQLM1BNaC/zCgO5rrhzF7Q/XOpCP6znk5S3DeLIVqyLIxLWLDD/kbGgoPAPpacv5NgmGkAQAbCgckaxy7FQAAAABJRU5ErkJggg==",
-        "https://www.29cm.co.kr/home/"
-      );
-
-      const pick = new PickDomain(
-        url,
-        userId,
-        scrapedData.name,
-        scrapedData.price,
-        scrapedData.thumbnail_url,
-        platform,
-        scrapedData.product_pk
-      );
-
-      const savedPick = await pickRepository.create(pick);
-      return savedPick;
-    } catch (error: any) {
-      throw new Error(`Failed to create pick: ${error.message}`);
     }
+    const scrapedData = await scraperAdapter.scrape(url);
+    console.log("scrape: ", scrapedData);
+    const platform = new PlatformDomain(
+      scrapedData.platform,
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAMAAABF0y+mAAAAe1BMVEUAAACtrarj5eb19vempqY2MzC7uLXk4+Hx8fGmqamusK/P0dD////FxsZHR0X8+/nGx8LFysyRk5B5fX5+fnphY2ago550dXlaWligoKCztLY4OTciIiCsq610cm6Li40tLSsbGxm9wrlMS0u3ubHs8fT0+/+EgoLY1dcDqKGoAAAAlElEQVR4AeSPgwEEQQxFs8b8tW30X+Gt1cINk7yQ/mxxvCBugiQrqvZmvKAzGItgWopuw3kyFx6Rj4BI5YkoRPSAcbK+SCnDKuUo6LNKVFRDXnND/LAaa0Z1zW0jfrNcQLM1BNaC/zCgO5rrhzF7Q/XOpCP6znk5S3DeLIVqyLIxLWLDD/kbGgoPAPpacv5NgmGkAQAbCgckaxy7FQAAAABJRU5ErkJggg==",
+      "https://www.29cm.co.kr/home/"
+    );
+
+    const pick = new PickDomain(
+      url,
+      userId,
+      scrapedData.name,
+      scrapedData.price,
+      scrapedData.thumbnail_url,
+      platform,
+      scrapedData.product_pk
+    );
+
+    const savedPick = await pickRepository.create(pick);
+    return savedPick;
   }
 
   async deletePicks(

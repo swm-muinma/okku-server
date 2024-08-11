@@ -133,11 +133,12 @@ class UserRepository {
   }
 
   public async updateToPremium(id: string): Promise<UserDomain | null> {
+    console.log("call premium");
     try {
       // Perform the update in the database
       const updatedUserEntity = await UserModel.findByIdAndUpdate(
         id,
-        { isPremium: true }, // Set isPremium to true
+        { is_premium: true }, // Set isPremium to true
         { new: true } // Return the updated document
       ).exec();
 

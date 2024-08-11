@@ -155,6 +155,7 @@ export class Oauth2Service {
     refreshToken: string;
     isNewUser: boolean;
   }> {
+    console.log("recomend", recomend);
     let isNewUser = false;
     const userResponse = await axios.get("https://kapi.kakao.com/v2/user/me", {
       headers: {
@@ -187,7 +188,6 @@ export class Oauth2Service {
       user.kakaoId = kakaoId;
       if (recomend != null && recomend != "") {
         await userRepository.updateToPremium(recomend);
-        user.isPremium = true;
       }
       user = await userRepository.create(user);
       isNewUser = true;
