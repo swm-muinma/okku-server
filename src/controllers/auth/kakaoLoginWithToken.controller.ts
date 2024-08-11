@@ -10,13 +10,16 @@ export const kakaoLoginWithTokenController = async (
   next: NextFunction
 ) => {
   const token = req.body.token;
+  const recomend = req.body.recomend;
   console.log("call login with kakaotalk");
   try {
     if (token == null) {
       throw new ErrorDomain("'token' is required", 400);
     }
 
-    return res.status(200).json(await oauth2Service.kakaoLoginWithToken(token));
+    return res
+      .status(200)
+      .json(await oauth2Service.kakaoLoginWithToken(token, recomend));
   } catch (err) {
     console.log("Err", err);
     return next(err);

@@ -10,7 +10,8 @@ class PickEntity {
     public name: string,
     public price: number,
     public image: string,
-    public platform: PlatformDomain, // Here PlatformDomain is included
+    public platform: PlatformDomain,
+    public pk: string,
     public created_at: Date | null = new Date(),
     public updated_at: Date | null = new Date()
   ) {}
@@ -46,7 +47,8 @@ class PickPersistenceMapper {
       entity.name,
       entity.price,
       entity.image,
-      platform
+      platform,
+      entity.pk
     );
     res.id = entity._id!;
     res.createdAt = entity.created_at;
@@ -68,6 +70,7 @@ class PickPersistenceMapper {
       domain.price,
       domain.image,
       platform,
+      domain.pk,
       domain.createdAt,
       domain.updatedAt
     );

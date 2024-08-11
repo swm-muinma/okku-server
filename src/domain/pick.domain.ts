@@ -9,7 +9,8 @@ export class PickDomain {
     public name: string,
     public price: number,
     public image: string,
-    public platform: PlatformDomain
+    public platform: PlatformDomain,
+    public pk: string
   ) {
     this.id = null;
     this.createdAt = null;

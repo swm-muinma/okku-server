@@ -12,6 +12,7 @@ import cors from "cors";
 import { authenticateJWT } from "./infra/middleware/jwt.authenticate";
 
 import { UserDomain } from "@src/domain/user.domain";
+import { WithoutLoginRouter } from "./controllers/withoutLogin";
 
 declare global {
   namespace Express {
@@ -31,6 +32,7 @@ app.use("/carts", authenticateJWT, CartRouter);
 app.use("/picks", authenticateJWT, PickRouter);
 app.use("/users", authenticateJWT, UserRouter);
 app.use("/login", LoginRouter);
+app.use("/", WithoutLoginRouter);
 
 app.use(errorHandler);
 

@@ -131,6 +131,25 @@ class UserRepository {
       throw new ErrorDomain("Error updating user", 500);
     }
   }
+
+  public async updateToPremium(id: string): Promise<UserDomain | null> {
+    console.log("call premium");
+    try {
+      // Perform the update in the database
+      const updatedUserEntity = await UserModel.findByIdAndUpdate(
+        id,
+        { is_premium: true }, // Set isPremium to true
+        { new: true } // Return the updated document
+      ).exec();
+
+      if (!updatedUserEntity) return null;
+
+      return UserPersistenceMapper.toDomain(updatedUserEntity);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      throw new ErrorDomain("Error updating user", 500);
+    }
+  }
 }
 
 export { UserRepository };

@@ -12,6 +12,7 @@ class UserEntity {
     public height: number,
     public weight: number,
     public form: FormEnum,
+    public is_premium: boolean,
     public kakao_id: string,
     public apple_id: string,
     public created_at: Date | null = new Date(),
@@ -27,6 +28,7 @@ const UserSchema: Schema<UserEntity & Document> = new Schema({
   weight: { type: Number, required: false },
   kakao_id: { type: String, unique: false },
   apple_id: { type: String, unique: false },
+  is_premium: { type: Boolean, required: true, unique: false },
   form: { type: String, enum: Object.values(FormEnum), required: false },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
@@ -48,6 +50,7 @@ class UserPersistenceMapper {
     res.updatedAt = entity.updated_at;
     res.appleId = entity.apple_id;
     res.kakaoId = entity.kakao_id;
+    res.isPremium = entity.is_premium;
     return res;
   }
 
@@ -58,6 +61,7 @@ class UserPersistenceMapper {
       domain.height,
       domain.weight,
       domain.form,
+      domain.isPremium,
       domain.kakaoId,
       domain.appleId,
       domain.createdAt,

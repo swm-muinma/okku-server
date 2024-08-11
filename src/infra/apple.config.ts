@@ -17,6 +17,6 @@ export const appleConfig = {
   scope: appleScope,
 };
 
-export const appleLoginUrl = `https://appleid.apple.com/auth/authorize?client_id=${appleClientId}&redirect_uri=${appleRedirectUri}&response_type=code`;
+export const appleLoginUrl = `https://appleid.apple.com/auth/authorize?client_id=${appleClientId}&response_type=code&redirect_uri=${appleRedirectUri}`;
 
 export const keyFilePath = appleKeyFilePath;

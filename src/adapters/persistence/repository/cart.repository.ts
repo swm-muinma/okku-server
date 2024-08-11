@@ -189,7 +189,9 @@ class CartRepository {
         destinationCartId,
         session
       );
-
+      if (!addedPicks) {
+        throw new ErrorDomain("Dulicated pick", 400);
+      }
       // Remove picks from the original carts
       await this.deleteFromCartWithSession(pickIds, sourceCartId, session);
 
