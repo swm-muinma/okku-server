@@ -1,7 +1,7 @@
 import { ReviewDomain } from "@src/domain/review.domain";
 import {
   ReviewEntity,
-  ReviewModel,
+  createReviewModel,
   ReviewPersistenceMapper,
 } from "../model/review.model";
 import { ErrorDomain } from "@src/domain/error.domain";
@@ -9,12 +9,15 @@ import mongoose, { Types } from "mongoose";
 
 class ReviewRepository {
   /**
-   * Get up to 100 reviews by product primary key, sorted by rating in ascending order.
+   * Get up to `limitNum` reviews by product primary key, sorted by rating in ascending order.
    * @param productPk - The primary key of the product.
+   * @param platform - The platform to use for selecting the correct collection.
+   * @param limitNum - The maximum number of reviews to retrieve.
    * @returns A promise that resolves to an array of ReviewDomain objects.
    */
   public async getReviewsByProductPk(
     productPk: string,
+    platform: string,
     limitNum: number
   ): Promise<ReviewDomain[]> {
     if (!productPk) {
@@ -22,10 +25,13 @@ class ReviewRepository {
     }
 
     try {
-      // Find reviews by productPk, sorted by rating in ascending order, limit to 100
+      // 플랫폼에 따라 ReviewModel 생성
+      const ReviewModel = createReviewModel(platform);
+
+      // Find reviews by productPk, sorted by rating in ascending order, limit to limitNum
       const reviews = await ReviewModel.find({ product_pk: productPk })
         .sort({ rating: 1 }) // Sort by rating ascending
-        .limit(limitNum) // Limit to 100 results
+        .limit(limitNum) // Limit the number of results
         .exec();
 
       if (!reviews.length) {
@@ -41,14 +47,15 @@ class ReviewRepository {
     }
   }
 
-  // 추가적인 메서드들이 필요하다면 여기에 추가할 수 있습니다.
-
-  public async findById(id: string): Promise<ReviewDomain> {
+  public async findById(id: string, platform: string): Promise<ReviewDomain> {
     if (!Types.ObjectId.isValid(id)) {
       throw new ErrorDomain("Invalid ID format", 400);
     }
 
     try {
+      // 플랫폼에 따라 ReviewModel 생성
+      const ReviewModel = createReviewModel(platform);
+
       const review = await ReviewModel.findById(id).exec();
       if (!review) {
         throw new ErrorDomain("Cannot find review with given ID", 404);
@@ -59,8 +66,12 @@ class ReviewRepository {
     }
   }
 
-  public async create(review: ReviewDomain): Promise<ReviewDomain> {
+  public async create(
+    review: ReviewDomain,
+    platform: string
+  ): Promise<ReviewDomain> {
     try {
+      const ReviewModel = createReviewModel(platform);
       const reviewEntity = ReviewPersistenceMapper.toEntity(review);
       const newReview = new ReviewModel(reviewEntity);
       const savedReview = await newReview.save();
@@ -71,8 +82,9 @@ class ReviewRepository {
     }
   }
 
-  public async delete(reviewIds: string[]): Promise<boolean> {
+  public async delete(reviewIds: string[], platform: string): Promise<boolean> {
     try {
+      const ReviewModel = createReviewModel(platform);
       const result = await ReviewModel.deleteMany({
         _id: { $in: reviewIds },
       }).exec();

@@ -23,6 +23,7 @@ const PickSchema: Schema<PickEntity & Document> = new Schema({
   name: { type: String, required: true },
   price: { type: Number, required: true },
   image: { type: String, required: true },
+  pk: { type: String, required: true },
   platform: {
     name: { type: String, required: true },
     image: { type: String, required: true },
