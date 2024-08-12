@@ -1,5 +1,5 @@
 import { CartDomain } from "@src/domain/cart.domain";
-import { createModel } from "@src/infra/mongo.config";
+import { createModel, mainConnection } from "@src/infra/mongo.config";
 import { Document, Schema } from "mongoose";
 
 class CartEntity {
@@ -27,7 +27,11 @@ const CartSchema: Schema<CartEntity & Document> = new Schema({
   updated_at: { type: Date, default: Date.now },
 });
 
-const CartModel = createModel<CartEntity & Document>("Cart", CartSchema);
+const CartModel = createModel<CartEntity & Document>(
+  "Cart",
+  CartSchema,
+  mainConnection
+);
 
 class CartPersistenceMapper {
   static toDomain(entity: CartEntity): CartDomain {

@@ -24,8 +24,9 @@ class ReviewInsightRepository {
     if (!productPk) {
       throw new ErrorDomain("Product PK is required", 400);
     }
+    console.log("inRepo: ", platform, " ", productPk);
 
-    const maxPollingTime = 180000; // 3 minutes in milliseconds
+    const maxPollingTime = 60000; // 1 minutes in milliseconds
     const pollingInterval = 1000; // 1 second in milliseconds
     let elapsedTime = 0;
 
@@ -71,18 +72,20 @@ class ReviewInsightRepository {
     productPk: string,
     platform: string
   ): Promise<ReviewInsightDomain> {
+    console.log("inRepo: ", platform, " ", productPk);
     if (!productPk) {
       throw new ErrorDomain("Product PK is required", 400);
     }
 
     try {
       const ReviewInsightModel = createReviewInsightModel(platform);
-
+      console.log("1");
       const insights: ReviewInsightEntity | null =
         await ReviewInsightModel.findOne({
           product_pk: productPk,
         }).exec();
-
+      console.log("2");
+      console.log(insights);
       if (!insights) {
         throw new ErrorDomain(
           "No insights found for the given product PK",

@@ -1,3 +1,4 @@
+import { createModel, mainConnection } from "@src/infra/mongo.config";
 import { Document, Schema, model } from "mongoose";
 // UserEntity 클래스
 class RefreshEntity {
@@ -7,10 +8,14 @@ class RefreshEntity {
 }
 
 // Mongoose 스키마
-const UserSchema: Schema<RefreshEntity & Document> = new Schema({
+const RefreshSchema: Schema<RefreshEntity & Document> = new Schema({
   refreshToken: { type: String, required: true },
 });
 
-const RefreshModel = model<RefreshEntity & Document>("Refresh", UserSchema);
+const RefreshModel = createModel<RefreshEntity & Document>(
+  "Refresh",
+  RefreshSchema,
+  mainConnection
+);
 
 export { RefreshModel, RefreshEntity };

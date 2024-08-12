@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 import { ReviewDomain } from "@src/domain/review.domain";
+import { createModel, reviewConnection } from "@src/infra/mongo.config";
 
 // ReviewEntity 클래스
 class ReviewEntity {
@@ -40,10 +41,10 @@ const ReviewSchema: Schema<ReviewEntity & Document> = new Schema({
 const createReviewModel = (
   platform: string
 ): Model<ReviewEntity & Document> => {
-  return mongoose.model<ReviewEntity & Document>(
-    "reviews",
+  return createModel<ReviewEntity & Document>(
+    platform,
     ReviewSchema,
-    platform
+    reviewConnection
   );
 };
 

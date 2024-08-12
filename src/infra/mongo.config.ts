@@ -1,29 +1,38 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
+import mongoose, { Document, Schema, Model, Connection } from "mongoose";
 import * as dotenv from "dotenv";
-
+mongoose.set("debug", true);
 dotenv.config();
 
-const mongoDbURI = process.env.MONGODB_URI || "";
+const mainDbURI = process.env.MONGODB_URI_MAIN || "";
+const reviewInsightDbURI = process.env.MONGODB_URI_REVIEW_INSIGHT || "";
+const reviewDbURI = process.env.MONGODB_URI_REVIEW || "";
 
-mongoose
-  .connect(mongoDbURI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-    process.exit(1);
+const connectToDatabase = (uri: string, dbName: string): Connection => {
+  const connection = mongoose.createConnection(uri);
+
+  connection.on("connected", () => {
+    console.log(`Connected to ${dbName} Database`);
   });
 
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => {
-  console.log("Connected to MongoDB");
-});
+  connection.on("error", (error) => {
+    console.error(`${dbName} Database connection error:`, error);
+    process.exit(1); // Connection 실패 시, 프로세스 종료
+  });
+
+  return connection;
+};
+
+export const mainConnection = connectToDatabase(mainDbURI, "Main");
+export const reviewInsightConnection = connectToDatabase(
+  reviewInsightDbURI,
+  "Review_Insight"
+);
+export const reviewConnection = connectToDatabase(reviewDbURI, "Review");
 
 export const createModel = <T extends Document>(
   name: string,
-  schema: Schema<T>
+  schema: Schema<T>,
+  connection: Connection
 ): Model<T> => {
-  return mongoose.model<T>(name, schema);
+  return connection.model<T>(name, schema);
 };

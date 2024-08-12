@@ -1,3 +1,4 @@
+import { createModel, reviewInsightConnection } from "@src/infra/mongo.config";
 import { Document, Schema, Model, model } from "mongoose";
 
 // ReviewSummaryEntity 클래스
@@ -50,10 +51,10 @@ const ReviewInsightSchema: Schema<ReviewInsightEntity & Document> = new Schema({
 export const createReviewInsightModel = (
   platform: string
 ): Model<ReviewInsightEntity & Document> => {
-  return model<ReviewInsightEntity & Document>(
-    "review_insights",
+  return createModel<ReviewInsightEntity & Document>(
+    platform,
     ReviewInsightSchema,
-    platform
+    reviewInsightConnection
   );
 };
 

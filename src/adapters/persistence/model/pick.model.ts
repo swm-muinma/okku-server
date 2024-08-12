@@ -1,5 +1,6 @@
 import { Document, Schema, model } from "mongoose";
 import { PickDomain, PlatformDomain } from "@src/domain/pick.domain";
+import { createModel, mainConnection } from "@src/infra/mongo.config";
 
 class PickEntity {
   _id?: string;
@@ -33,7 +34,11 @@ const PickSchema: Schema<PickEntity & Document> = new Schema({
   updated_at: { type: Date, default: Date.now },
 });
 
-const PickModel = model<PickEntity & Document>("Pick", PickSchema);
+const PickModel = createModel<PickEntity & Document>(
+  "Pick",
+  PickSchema,
+  mainConnection
+);
 
 class PickPersistenceMapper {
   static toDomain(entity: PickEntity): PickDomain {

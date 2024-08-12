@@ -1,3 +1,4 @@
+import { createModel, mainConnection } from "@src/infra/mongo.config";
 import { Document, Schema, model } from "mongoose";
 // UserEntity 클래스
 class PromptEntity {
@@ -7,11 +8,15 @@ class PromptEntity {
 }
 
 // Mongoose 스키마
-const UserSchema: Schema<PromptEntity & Document> = new Schema({
+const PromptSchema: Schema<PromptEntity & Document> = new Schema({
   name: { type: String, required: true },
   prompt: { type: String, required: true },
 });
 
-const PromptModel = model<PromptEntity & Document>("Prompt", UserSchema);
+const PromptModel = createModel<PromptEntity & Document>(
+  "Prompt",
+  PromptSchema,
+  mainConnection
+);
 
 export { PromptModel, PromptEntity };

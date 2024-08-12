@@ -1,6 +1,7 @@
 import { Document, Schema, model } from "mongoose";
 import { FormEnum } from "@src/enum/form.enum";
 import { UserDomain } from "@src/domain/user.domain";
+import { createModel, mainConnection } from "@src/infra/mongo.config";
 
 // UserEntity 클래스
 class UserEntity {
@@ -34,7 +35,11 @@ const UserSchema: Schema<UserEntity & Document> = new Schema({
   updated_at: { type: Date, default: Date.now },
 });
 
-const UserModel = model<UserEntity & Document>("User", UserSchema);
+const UserModel = createModel<UserEntity & Document>(
+  "User",
+  UserSchema,
+  mainConnection
+);
 
 class UserPersistenceMapper {
   static toDomain(entity: UserEntity): UserDomain {

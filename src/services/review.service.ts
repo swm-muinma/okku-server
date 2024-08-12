@@ -28,6 +28,7 @@ export class ReviewService {
       if (okkuIds.includes(okkuId)) {
         throw new ErrorDomain("must login", 402);
       }
+
       const scrapedData = await scraperAdapter.scrape(url);
       console.log("scrape: ", scrapedData);
 
@@ -58,6 +59,7 @@ export class ReviewService {
       if (okkuIds.includes(okkuId)) {
         throw new ErrorDomain("must login", 402);
       }
+      console.log(err);
       throw new ErrorDomain("error with scrape", 500);
     }
   }
