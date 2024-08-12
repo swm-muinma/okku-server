@@ -25,7 +25,12 @@ declare global {
 const app = express();
 const port = 80;
 
-app.use(cors());
+let corsOptions = {
+  origin: "https://www.okku.kr",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 app.use("/carts", authenticateJWT, CartRouter);

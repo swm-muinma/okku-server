@@ -29,16 +29,8 @@ export class ReviewService {
         throw new ErrorDomain("must login", 402);
       }
 
-      // const scrapedData = await scraperAdapter.scrape(url);
-      // console.log("scrape: ", scrapedData);
-      const scrapedData = {
-        name: "string",
-        price: 12345,
-        thumbnail_url: "string",
-        task_id: "string",
-        product_pk: "3438956",
-        platform: "musinsa",
-      };
+      const scrapedData = await scraperAdapter.scrape(url);
+      console.log("scrape: ", scrapedData);
 
       const insight =
         await reviewInsightRepository.getInsightsByProductPkWithPolling(
