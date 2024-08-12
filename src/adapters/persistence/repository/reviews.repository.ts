@@ -47,7 +47,10 @@ class ReviewRepository {
     }
   }
 
-  public async findById(id: string, platform: string): Promise<ReviewDomain> {
+  public async findById(
+    id: string,
+    platform: string
+  ): Promise<ReviewDomain | null> {
     if (!Types.ObjectId.isValid(id)) {
       throw new ErrorDomain("Invalid ID format", 400);
     }
@@ -58,10 +61,11 @@ class ReviewRepository {
 
       const review = await ReviewModel.findById(id).exec();
       if (!review) {
-        throw new ErrorDomain("Cannot find review with given ID", 404);
+        return null;
       }
       return ReviewPersistenceMapper.toDomain(review);
     } catch (err) {
+      console.log(err);
       throw new ErrorDomain("Error finding review by ID", 500);
     }
   }

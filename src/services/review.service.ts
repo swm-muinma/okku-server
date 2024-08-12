@@ -29,8 +29,16 @@ export class ReviewService {
         throw new ErrorDomain("must login", 402);
       }
 
-      const scrapedData = await scraperAdapter.scrape(url);
-      console.log("scrape: ", scrapedData);
+      // const scrapedData = await scraperAdapter.scrape(url);
+      // console.log("scrape: ", scrapedData);
+      const scrapedData = {
+        name: "string",
+        price: 12345,
+        thumbnail_url: "string",
+        task_id: "string",
+        product_pk: "3438956",
+        platform: "musinsa",
+      };
 
       const insight =
         await reviewInsightRepository.getInsightsByProductPkWithPolling(
@@ -47,6 +55,7 @@ export class ReviewService {
 
       okkuIds.push(okkuId);
       return this.toDto(
+        scrapedData.platform,
         reviews,
         insight,
         null,
@@ -81,6 +90,7 @@ export class ReviewService {
         );
 
       return this.toDto(
+        pick.platform.name,
         reviews,
         insight,
         null,
@@ -96,6 +106,7 @@ export class ReviewService {
   }
 
   private async toDto(
+    platform: string,
     reviews: ReviewDomain[],
     insight: ReviewInsightDomain,
     pickDomain: PickDomain | null,
@@ -104,33 +115,46 @@ export class ReviewService {
     price: number,
     url: string
   ): Promise<ProductReviewDTO> {
-    const cons: ReviewSectionDTO[] = [];
-    const pros: ReviewSectionDTO[] = [];
-
     // ReviewSectionDTO를 만드는 헬퍼 함수
-    function createReviewSectionDTO(
+    async function createReviewSectionDTO(
       description: string,
       reviewIds: string[]
-    ): ReviewSectionDTO {
-      // reviewIds를 기반으로 ReviewDomain 객체를 찾아 CommentDTO 리스트를 생성
-      const comments: CommentDTO[] = reviewIds.map((reviewId) => {
-        const review = reviews.find((r) => r.id === reviewId);
-        return review
-          ? {
-              name: review.gender || "", // 기본값을 빈 문자열로 설정
-              height: review.height || 0, // 기본값을 0으로 설정
-              weight: review.weight || 0, // 기본값을 0으로 설정
-              comment: review.content,
-              image: review.imageUrl || "", // 기본값을 빈 문자열로 설정
-            }
-          : {
+    ): Promise<ReviewSectionDTO> {
+      // reviewIds를 기반으로 CommentDTO 리스트를 생성
+      const commentsPromises = reviewIds.map(async (reviewId) => {
+        const review = reviews.find((r) => r.id.toString() === reviewId);
+        if (!review) {
+          const tempReview = await reviewRepository.findById(
+            reviewId,
+            platform
+          );
+          if (!tempReview) {
+            return {
               name: "", // 기본값을 빈 문자열로 설정
               height: 0, // 기본값을 0으로 설정
               weight: 0, // 기본값을 0으로 설정
-              comment: "No content", // 기본값을 적절한 문자열로 설정
+              comment: "",
               image: "", // 기본값을 빈 문자열로 설정
             };
+          }
+          return {
+            name: tempReview.gender || "", // 기본값을 빈 문자열로 설정
+            height: tempReview.height || 0, // 기본값을 0으로 설정
+            weight: tempReview.weight || 0, // 기본값을 0으로 설정
+            comment: tempReview.content,
+            image: tempReview.imageUrl || "", // 기본값을 빈 문자열로 설정
+          };
+        }
+        return {
+          name: review.gender || "", // 기본값을 빈 문자열로 설정
+          height: review.height || 0, // 기본값을 0으로 설정
+          weight: review.weight || 0, // 기본값을 0으로 설정
+          comment: review.content,
+          image: review.imageUrl || "", // 기본값을 빈 문자열로 설정
+        };
       });
+
+      const comments = await Promise.all(commentsPromises);
 
       return {
         content: description,
@@ -140,15 +164,17 @@ export class ReviewService {
     }
 
     // insight 객체에서 cons와 pros를 생성
-    insight.cautions.forEach((caution) => {
-      cons.push(createReviewSectionDTO(caution.description, caution.reviewIds));
-    });
+    const consPromises = insight.cautions.map((caution) =>
+      createReviewSectionDTO(caution.description, caution.reviewIds)
+    );
+    const prosPromises = insight.positives.map((positive) =>
+      createReviewSectionDTO(positive.description, positive.reviewIds)
+    );
 
-    insight.positives.forEach((positive) => {
-      pros.push(
-        createReviewSectionDTO(positive.description, positive.reviewIds)
-      );
-    });
+    const [cons, pros] = await Promise.all([
+      Promise.all(consPromises),
+      Promise.all(prosPromises),
+    ]);
 
     // ProductReviewDTO를 반환
     return {
