@@ -1,5 +1,6 @@
+import mongoose, { Document, Schema, Model } from "mongoose";
 import { ReviewDomain } from "@src/domain/review.domain";
-import { Document, Schema, model } from "mongoose";
+import { createModel, reviewConnection } from "@src/infra/mongo.config";
 
 // ReviewEntity 클래스
 class ReviewEntity {
@@ -34,11 +35,18 @@ const ReviewSchema: Schema<ReviewEntity & Document> = new Schema({
   content: { type: String, required: true },
   image_url: { type: String, required: false },
   product_pk: { type: String, required: true },
-  platform: { type: String, required: true },
 });
 
-// ReviewModel 정의
-const ReviewModel = model<ReviewEntity & Document>("Review", ReviewSchema);
+// createModel 함수 수정: 컬렉션 이름을 platform 필드의 값으로 설정
+const createReviewModel = (
+  platform: string
+): Model<ReviewEntity & Document> => {
+  return createModel<ReviewEntity & Document>(
+    platform,
+    ReviewSchema,
+    reviewConnection
+  );
+};
 
 // ReviewPersistenceMapper 정의
 class ReviewPersistenceMapper {
@@ -127,4 +135,4 @@ class ReviewPersistenceMapper {
   }
 }
 
-export { ReviewPersistenceMapper, ReviewModel, ReviewEntity };
+export { ReviewPersistenceMapper, createReviewModel, ReviewEntity };
