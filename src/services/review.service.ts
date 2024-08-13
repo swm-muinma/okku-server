@@ -68,6 +68,9 @@ export class ReviewService {
   async getReviews(pickId: string): Promise<ProductReviewDTO> {
     try {
       const pick = await pickRepository.findById(pickId);
+      if (pick == null) {
+        return {} as ProductReviewDTO;
+      }
       const insight =
         await reviewInsightRepository.getInsightsByProductPkWithPolling(
           pick.pk,

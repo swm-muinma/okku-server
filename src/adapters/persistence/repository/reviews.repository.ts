@@ -52,11 +52,10 @@ class ReviewRepository {
     platform: string
   ): Promise<ReviewDomain | null> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new ErrorDomain("Invalid ID format", 400);
+      return null;
     }
 
     try {
-      // 플랫폼에 따라 ReviewModel 생성
       const ReviewModel = createReviewModel(platform);
 
       const review = await ReviewModel.findById(id).exec();
@@ -100,8 +99,6 @@ class ReviewRepository {
   }
 
   isValidObjectId = (id: string): boolean => mongoose.isValidObjectId(id);
-
-  // 기타 필요한 메서드들을 이곳에 추가할 수 있습니다.
 }
 
 export { ReviewRepository };

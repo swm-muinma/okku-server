@@ -72,9 +72,9 @@ class PickRepository {
     }
   }
 
-  public async findById(id: string): Promise<PickDomain> {
+  public async findById(id: string): Promise<PickDomain | null> {
     if (!Types.ObjectId.isValid(id)) {
-      throw new ErrorDomain("Invalid ID format", 400);
+      return null;
     }
 
     try {
