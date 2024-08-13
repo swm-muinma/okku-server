@@ -26,7 +26,7 @@ class ReviewInsightRepository {
     }
     console.log("inRepo: ", platform, " ", productPk);
 
-    const maxPollingTime = 60000; // 1 minutes in milliseconds
+    const maxPollingTime = 180000; // 1 minutes in milliseconds
     const pollingInterval = 1000; // 1 second in milliseconds
     let elapsedTime = 0;
 
