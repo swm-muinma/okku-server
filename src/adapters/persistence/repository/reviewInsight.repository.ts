@@ -24,7 +24,6 @@ class ReviewInsightRepository {
     if (!productPk) {
       throw new ErrorDomain("Product PK is required", 400);
     }
-    console.log("inRepo: ", platform, " ", productPk);
 
     const maxPollingTime = 180000; // 1 minutes in milliseconds
     const pollingInterval = 1000; // 1 second in milliseconds

@@ -8,6 +8,7 @@ import { ReviewDomain } from "@src/domain/review.domain";
 import { ReviewInsightDomain } from "@src/domain/reviewInsight.domain";
 import {
   CommentDTO,
+  PickDTO,
   ProductReviewDTO,
   ReviewSectionDTO,
 } from "@src/dto/summarizedReviews.dto";
@@ -20,42 +21,50 @@ const pickRepository = new PickRepository();
 const okkuIds: string[] = [];
 
 export class ReviewService {
+  async getItemInfoWithoutLogin(url: string, okkuId: string): Promise<PickDTO> {
+    try {
+      if (okkuIds.includes(okkuId)) {
+        throw new ErrorDomain("must login", 402);
+      }
+      const scrapedData = await scraperAdapter.scrape(url);
+      return {
+        image: scrapedData.thumbnail_url,
+        name: scrapedData.name,
+        price: scrapedData.price,
+        url: url,
+      };
+    } catch (err) {
+      if (okkuIds.includes(okkuId)) {
+        throw new ErrorDomain("must login", 402);
+      }
+      console.log(err);
+      throw new ErrorDomain("error with scrape", 500);
+    }
+  }
+
   async getReviewsWithoutLogin(
-    url: string,
+    product_pk: string,
+    platform: string,
     okkuId: string
   ): Promise<ProductReviewDTO> {
     try {
       if (okkuIds.includes(okkuId)) {
         throw new ErrorDomain("must login", 402);
       }
-
-      const scrapedData = await scraperAdapter.scrape(url);
-      console.log("scrape: ", scrapedData);
-
       const insight =
         await reviewInsightRepository.getInsightsByProductPkWithPolling(
-          scrapedData.product_pk,
-          scrapedData.platform
+          product_pk,
+          platform
         );
+      console.log("generate Insight");
+      console.log(insight);
 
       const reviews: ReviewDomain[] =
-        await reviewRepository.getReviewsByProductPk(
-          scrapedData.product_pk,
-          scrapedData.platform,
-          100
-        );
+        await reviewRepository.getReviewsByProductPk(product_pk, platform, 100);
 
       okkuIds.push(okkuId);
-      return this.toDto(
-        scrapedData.platform,
-        reviews,
-        insight,
-        null,
-        scrapedData.thumbnail_url,
-        scrapedData.name,
-        scrapedData.price,
-        url
-      );
+      // "", 0으로 들어가는 것들은 추후 제거되어야함. 원래 pick정보도 여기서 리턴했었어서 남아있는 잔재
+      return this.toDto(platform, reviews, insight, null, "", "", 0, "url");
     } catch (err) {
       if (okkuIds.includes(okkuId)) {
         throw new ErrorDomain("must login", 402);

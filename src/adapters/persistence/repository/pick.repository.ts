@@ -79,7 +79,6 @@ class PickRepository {
 
     try {
       const pick = await PickModel.findById(id).exec();
-      console.log("find pick! ", pick);
       if (!pick) {
         throw new ErrorDomain("Cannot find pick with given ID", 404);
       }

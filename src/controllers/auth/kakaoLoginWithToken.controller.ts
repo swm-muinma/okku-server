@@ -16,10 +16,8 @@ export const kakaoLoginWithTokenController = async (
     if (token == null) {
       throw new ErrorDomain("'token' is required", 400);
     }
-
-    return res
-      .status(200)
-      .json(await oauth2Service.kakaoLoginWithToken(token, recomend));
+    const ressult = await oauth2Service.kakaoLoginWithToken(token, recomend);
+    return res.status(200).json(ressult);
   } catch (err) {
     console.log("Err", err);
     return next(err);
