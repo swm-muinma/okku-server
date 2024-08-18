@@ -21,6 +21,9 @@ export class PickService {
       }
     }
     const scrapedData = await scraperAdapter.scrape(url);
+    if (!scrapedData) {
+      throw new ErrorDomain("domain invalid", 400);
+    }
     console.log("scrape: ", scrapedData);
     const platform = new PlatformDomain(
       scrapedData.platform,

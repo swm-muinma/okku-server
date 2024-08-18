@@ -15,8 +15,8 @@ class LogEntity {
 
 const LogSchema: Schema<LogEntity & Document> = new Schema({
   api: { type: String, required: true },
-  request: { type: Document, required: false },
-  response: { type: Document, required: false },
+  request: { type: Object, required: false },
+  response: { type: Object, required: false },
   user_agent: { type: String, required: false },
   ip: { type: String, required: false },
   is_error: { type: Boolean, required: true },

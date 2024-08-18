@@ -8,13 +8,16 @@ interface ScrapedData {
   task_id: string;
   product_pk: string;
   platform: string;
+  tasks_id: string[];
 }
 
 class ScraperAdapter {
   private readonly scraperUrl: string;
+  private readonly checkrUrl: string;
 
   constructor() {
-    this.scraperUrl = scraperUrl;
+    this.scraperUrl = scraperUrl + "/scrap";
+    this.checkrUrl = scraperUrl + "/status";
   }
   findPlatform(url: string): string {
     const platforms = ["musinsa", "zigzag", "a-bly"];
@@ -36,13 +39,22 @@ class ScraperAdapter {
     return platforms[positions.indexOf(minPosition)];
   }
 
-  async scrape(url: string): Promise<ScrapedData> {
+  async scrape(url: string): Promise<ScrapedData | null> {
     try {
       const response = await axios.post(this.scraperUrl, { path: url });
       response.data.platform = this.findPlatform(url);
       return response.data;
     } catch (error: any) {
-      throw new Error(`Failed to scrape data: ${error.message}`);
+      return null;
+    }
+  }
+
+  async checkWorkId(workId: string): Promise<ScrapedData> {
+    try {
+      const response = await axios.get(`this.scraperUrl/${workId}`);
+      return response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to check workId: ${error.message}`);
     }
   }
 }

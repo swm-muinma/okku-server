@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import { PickService } from "@src/services/pick.service";
 import { ReviewService } from "@src/services/review.service";
 import { LogRepository } from "@src/adapters/persistence/repository/log.repository";
 
@@ -28,7 +27,7 @@ export const getItemInfoWithoutLoginViewController = async (
       false
     );
 
-    res.status(200).send();
+    res.status(200).send(result);
   } catch (error) {
     await logRepository.create(
       "/scrape",

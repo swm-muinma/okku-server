@@ -7,8 +7,6 @@ import { PickDomain } from "@src/domain/pick.domain";
 import { ReviewDomain } from "@src/domain/review.domain";
 import { ReviewInsightDomain } from "@src/domain/reviewInsight.domain";
 import {
-  CommentDTO,
-  PickDTO,
   ProductReviewDTO,
   ReviewSectionDTO,
 } from "@src/dto/summarizedReviews.dto";
@@ -21,25 +19,23 @@ const pickRepository = new PickRepository();
 const okkuIds: string[] = [];
 
 export class ReviewService {
-  async getItemInfoWithoutLogin(url: string, okkuId: string): Promise<PickDTO> {
-    try {
-      if (okkuIds.includes(okkuId)) {
-        throw new ErrorDomain("must login", 402);
-      }
-      const scrapedData = await scraperAdapter.scrape(url);
-      return {
-        image: scrapedData.thumbnail_url,
-        name: scrapedData.name,
-        price: scrapedData.price,
-        url: url,
-      };
-    } catch (err) {
-      if (okkuIds.includes(okkuId)) {
-        throw new ErrorDomain("must login", 402);
-      }
-      console.log(err);
-      throw new ErrorDomain("error with scrape", 500);
+  async getItemInfoWithoutLogin(url: string, okkuId: string): Promise<any> {
+    if (okkuIds.includes(okkuId)) {
+      throw new ErrorDomain("must login", 402);
     }
+    const scrapedData = await scraperAdapter.scrape(url);
+    if (!scrapedData) {
+      throw new ErrorDomain("domain invalid", 400);
+    }
+    return {
+      image: scrapedData.thumbnail_url,
+      name: scrapedData.name,
+      price: scrapedData.price,
+      url: url,
+      productPk: scrapedData.product_pk,
+      platform: scrapedData.platform,
+      task_ids: scrapedData.tasks_id,
+    };
   }
 
   async getReviewsWithoutLogin(
@@ -47,66 +43,63 @@ export class ReviewService {
     platform: string,
     okkuId: string
   ): Promise<ProductReviewDTO> {
-    try {
-      if (okkuIds.includes(okkuId)) {
-        throw new ErrorDomain("must login", 402);
-      }
-      const insight =
-        await reviewInsightRepository.getInsightsByProductPkWithPolling(
-          product_pk,
-          platform
-        );
-      console.log("generate Insight");
-      console.log(insight);
-
-      const reviews: ReviewDomain[] =
-        await reviewRepository.getReviewsByProductPk(product_pk, platform, 100);
-
-      okkuIds.push(okkuId);
-      // "", 0으로 들어가는 것들은 추후 제거되어야함. 원래 pick정보도 여기서 리턴했었어서 남아있는 잔재
-      return this.toDto(platform, reviews, insight, null, "", "", 0, "url");
-    } catch (err) {
-      if (okkuIds.includes(okkuId)) {
-        throw new ErrorDomain("must login", 402);
-      }
-      console.log(err);
-      throw new ErrorDomain("error with scrape", 500);
+    if (okkuIds.includes(okkuId)) {
+      throw new ErrorDomain("must login", 402);
     }
+    const insight =
+      await reviewInsightRepository.getInsightsByProductPkWithPolling(
+        product_pk,
+        platform
+      );
+    console.log("generate Insight");
+    console.log(insight);
+
+    const reviews: ReviewDomain[] =
+      await reviewRepository.getReviewsByProductPk(product_pk, platform, 100);
+
+    okkuIds.push(okkuId);
+    // "", 0으로 들어가는 것들은 추후 제거되어야함. 원래 pick정보도 여기서 리턴했었어서 남아있는 잔재
+    return this.toDto(platform, reviews, insight, null, "", "", 0, "url");
   }
 
   async getReviews(pickId: string): Promise<ProductReviewDTO> {
-    try {
-      const pick = await pickRepository.findById(pickId);
-      if (pick == null) {
-        return {} as ProductReviewDTO;
-      }
-      const insight =
-        await reviewInsightRepository.getInsightsByProductPkWithPolling(
-          pick.pk,
-          pick.platform.name
-        );
-
-      const reviews: ReviewDomain[] =
-        await reviewRepository.getReviewsByProductPk(
-          pick.pk,
-          pick.platform.name,
-          100
-        );
-
-      return this.toDto(
-        pick.platform.name,
-        reviews,
-        insight,
-        null,
-        pick.image,
-        pick.name,
-        pick.price,
-        pick.url
-      );
-    } catch (err) {
-      console.log(err);
-      throw new ErrorDomain("error with scrape", 500);
+    const pick = await pickRepository.findById(pickId);
+    if (pick == null) {
+      return {} as ProductReviewDTO;
     }
+    const insight =
+      await reviewInsightRepository.getInsightsByProductPkWithPolling(
+        pick.pk,
+        pick.platform.name
+      );
+
+    const reviews: ReviewDomain[] =
+      await reviewRepository.getReviewsByProductPk(
+        pick.pk,
+        pick.platform.name,
+        100
+      );
+
+    return this.toDto(
+      pick.platform.name,
+      reviews,
+      insight,
+      null,
+      pick.image,
+      pick.name,
+      pick.price,
+      pick.url
+    );
+  }
+
+  private async getReviewInsight(pk: string, platform: string) {
+    const insight =
+      await reviewInsightRepository.getInsightsByProductPkWithPolling(
+        pk,
+        platform
+      );
+    const reviews: ReviewDomain[] =
+      await reviewRepository.getReviewsByProductPk(pk, platform, 100);
   }
 
   private async toDto(

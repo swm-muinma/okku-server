@@ -32,7 +32,7 @@ export const getReviewWithoutLoginViewController = async (
       ip!.toString(),
       false
     );
-    res.status(200).send();
+    res.status(200).send(result);
   } catch (error) {
     await logRepository.create(
       "/reviews",
