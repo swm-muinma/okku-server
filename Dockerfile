@@ -12,7 +12,6 @@ RUN npm install
 
 # 프로젝트의 모든 파일을 작업 디렉토리로 복사합니다.
 COPY . .
-COPY .env .env
 
 # TypeScript를 컴파일합니다.
 RUN npm run build
