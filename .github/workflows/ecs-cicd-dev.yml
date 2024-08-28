@@ -50,6 +50,22 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+    env:
+      AUTH_KEY_PATH: ${{ secrets.AUTH_KEY_PATH }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MONGODB_URI_MAIN: ${{secrets.MONGODB_URI_MAIN}}
+      MONGODB_URI_REVIEW_INSIGHT: ${{secrets.MONGODB_URI_REVIEW_INSIGHT}}
+      MONGODB_URI_REVIEW: ${{secrets.MONGODB_URI_REVIEW}}
+      EXPIRATION_TIME: ${{secrets.EXPIRATION_TIME}}
+      REFRESHTOKEN_EXPIRATION_TIME: ${{secrets.REFRESHTOKEN_EXPIRATION_TIME}}
+      BASE_REDIRECT_URI: ${{secrets.BASE_REDIRECT_URI}}
+      APPLE_CLIENT_ID: ${{secrets.APPLE_CLIENT_ID}}
+      APPLE_TEAM_ID: ${{secrets.APPLE_TEAM_ID}}
+      APPLE_SCOPE: ${{secrets.APPLE_SCOPE}}
+      APPLE_KEY_ID: ${{secrets.APPLE_KEY_ID}}
+      APPLE_KEY_FILE_PATH: ${{secrets.APPLE_KEY_FILE_PATH}}
+      KAKAO_CLIENT_ID: ${{secrets.KAKAO_CLIENT_ID}}
+      SCRAPER_URL: ${{secrets.SCRAPER_URL}}
 
     steps:
       - name: Checkout
