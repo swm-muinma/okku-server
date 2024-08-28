@@ -2,3 +2,5 @@ node_modules/
 .env
 AuthKey_7NN2NV7FA6.p8
 dist/
+Dockerfile.local
+Dockerfile.legacy.k8s
