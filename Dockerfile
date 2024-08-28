@@ -12,6 +12,7 @@ RUN npm install
 
 # 프로젝트의 모든 파일을 작업 디렉토리로 복사합니다.
 COPY . .
+COPY .env .env
 
 # TypeScript를 컴파일합니다.
 RUN npm run build
@@ -25,7 +26,8 @@ WORKDIR /usr/src/app
 # 빌드된 파일만 복사합니다.
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/package*.json ./
-COPY --from=build /usr/src/app/.env .env
+
+COPY .env .env
 # COPY AuthKey_7NN2NV7FA6.p8 /usr/src/app/AuthKey_7NN2NV7FA6.p8
 # RUN chmod 600 /usr/src/app/AuthKey_7NN2NV7FA6.p8
 
