@@ -50,24 +50,11 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
-    env:
-      AUTH_KEY_PATH: ${{ secrets.AUTH_KEY_PATH }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      MONGODB_URI_MAIN: ${{secrets.MONGODB_URI_MAIN}}
-      MONGODB_URI_REVIEW_INSIGHT: ${{secrets.MONGODB_URI_REVIEW_INSIGHT}}
-      MONGODB_URI_REVIEW: ${{secrets.MONGODB_URI_REVIEW}}
-      EXPIRATION_TIME: ${{secrets.EXPIRATION_TIME}}
-      REFRESHTOKEN_EXPIRATION_TIME: ${{secrets.REFRESHTOKEN_EXPIRATION_TIME}}
-      BASE_REDIRECT_URI: ${{secrets.BASE_REDIRECT_URI}}
-      APPLE_CLIENT_ID: ${{secrets.APPLE_CLIENT_ID}}
-      APPLE_TEAM_ID: ${{secrets.APPLE_TEAM_ID}}
-      APPLE_SCOPE: ${{secrets.APPLE_SCOPE}}
-      APPLE_KEY_ID: ${{secrets.APPLE_KEY_ID}}
-      APPLE_KEY_FILE_PATH: ${{secrets.APPLE_KEY_FILE_PATH}}
-      KAKAO_CLIENT_ID: ${{secrets.KAKAO_CLIENT_ID}}
-      SCRAPER_URL: ${{secrets.SCRAPER_URL}}
-
     steps:
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV }}" > .credentials
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -91,22 +78,7 @@ jobs:
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build --build-arg AUTH_KEY_PATH="${{env.AUTH_KEY_PATH}}" \
-          --build-arg JWT_SECRET="${{env.JWT_SECRET}}" \
-          --build-arg MONGODB_URI_MAIN="${{env.MONGODB_URI_MAIN}}" \
-          --build-arg MONGODB_URI_REVIEW_INSIGHT="${{env.MONGODB_URI_REVIEW_INSIGHT}}" \
-          --build-arg MONGODB_URI_REVIEW="${{env.MONGODB_URI_REVIEW}}" \
-          --build-arg EXPIRATION_TIME="${{env.EXPIRATION_TIME}}" \
-          --build-arg REFRESHTOKEN_EXPIRATION_TIME="${{env.REFRESHTOKEN_EXPIRATION_TIME}}" \
-          --build-arg BASE_REDIRECT_URI="${{env.BASE_REDIRECT_URI}}" \
-          --build-arg APPLE_CLIENT_ID="${{env.APPLE_CLIENT_ID}}" \
-          --build-arg APPLE_TEAM_ID="${{env.APPLE_TEAM_ID}}" \
-          --build-arg APPLE_SCOPE="${{env.APPLE_SCOPE}}" \
-          --build-arg APPLE_KEY_ID="${{env.APPLE_KEY_ID}}" \
-          --build-arg APPLE_KEY_FILE_PATH="${{env.APPLE_KEY_FILE_PATH}}" \
-          --build-arg KAKAO_CLIENT_ID="${{env.KAKAO_CLIENT_ID}}" \
-          --build-arg SCRAPER_URL="${{env.SCRAPER_URL}}" \
-          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
