@@ -42,16 +42,18 @@ class ScraperAdapter {
   async scrape(url: string): Promise<ScrapedData | null> {
     try {
       const response = await axios.post(this.scraperUrl, { path: url });
+      console.log("scrapUrl: ", this.scraperUrl);
       response.data.platform = this.findPlatform(url);
       return response.data;
     } catch (error: any) {
+      console.log(error);
       return null;
     }
   }
 
   async checkWorkId(workId: string): Promise<ScrapedData> {
     try {
-      const response = await axios.get(`this.scraperUrl/${workId}`);
+      const response = await axios.get(`${this.checkrUrl}/${workId}`);
       return response.data;
     } catch (error: any) {
       throw new Error(`Failed to check workId: ${error.message}`);
