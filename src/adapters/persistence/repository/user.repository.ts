@@ -7,6 +7,7 @@ import {
   UserPersistenceMapper,
 } from "../model/user.model";
 import { FormEnum } from "@src/enum/form.enum";
+import { Types } from "mongoose";
 
 class UserRepository {
   /**
@@ -157,9 +158,10 @@ class UserRepository {
    * @returns A promise that resolves to an array of CartDomain of deleted carts or null.
    */
   public async delete(userId: string): Promise<string | null> {
+    const objectId = new Types.ObjectId(userId);
     try {
       const entity = await UserModel.deleteOne({
-        _id: userId,
+        _id: objectId,
       }).exec();
       if (entity.deletedCount == 0) return null;
       return userId;
