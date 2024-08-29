@@ -56,6 +56,20 @@ class CartRepository {
       throw new ErrorDomain("Error finding carts by user ID", 500);
     }
   }
+  public async findByUserIdWithoutPage(userId: string): Promise<CartDomain[]> {
+    try {
+      // Get paginated carts
+      const carts = await CartModel.find({ user_id: userId }).exec();
+
+      // Map to domain models
+      const cartDomains = carts.map(CartPersistenceMapper.toDomain);
+
+      return cartDomains;
+    } catch (error) {
+      console.error("Error finding carts by user ID:", error);
+      throw new ErrorDomain("Error finding carts by user ID", 500);
+    }
+  }
 
   /**
    * Create a new cart for a user.

@@ -1,10 +1,15 @@
+import { CartRepository } from "@src/adapters/persistence/repository/cart.repository";
+import { PickRepository } from "@src/adapters/persistence/repository/pick.repository";
 import { UserRepository } from "@src/adapters/persistence/repository/user.repository";
 import { ErrorDomain } from "@src/domain/error.domain";
+import { PickDomain } from "@src/domain/pick.domain";
 import { UserDomain } from "@src/domain/user.domain";
 import { FormEnum } from "@src/enum/form.enum";
 import axios from "axios";
 
 const userRepository = new UserRepository();
+const pickRepository = new PickRepository();
+const cartRepository = new CartRepository();
 export class UserService {
   async getProfile(userId: string) {
     const user: UserDomain | null = await userRepository.getById(userId);
@@ -51,7 +56,21 @@ export class UserService {
   }
 
   async withdrawAccount(userId: string): Promise<boolean> {
-    const result = await userRepository.delete(userId);
+    const picks: PickDomain[] = await pickRepository.findByUserIdWithoutPage(
+      userId
+    );
+    const pickIds = picks.map((el) => el.id!);
+
+    await pickRepository.delete(pickIds);
+    await cartRepository.deletePickFromAllCart(pickIds);
+
+    const carts = await cartRepository.findByUserIdWithoutPage(userId);
+    carts.forEach(async (cart) => {
+      if (cart.id) {
+        await cartRepository.delete(cart.id);
+      }
+    });
+    await userRepository.delete(userId);
     return true;
   }
 }
