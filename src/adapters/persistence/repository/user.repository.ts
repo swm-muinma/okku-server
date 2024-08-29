@@ -150,6 +150,24 @@ class UserRepository {
       throw new ErrorDomain("Error updating user", 500);
     }
   }
+
+  /**
+   * Delete carts by user ID.
+   * @param userId - The user ID to delete carts for.
+   * @returns A promise that resolves to an array of CartDomain of deleted carts or null.
+   */
+  public async delete(userId: string): Promise<string | null> {
+    try {
+      const entity = await UserModel.deleteOne({
+        _id: userId,
+      }).exec();
+      if (entity.deletedCount == 0) return null;
+      return userId;
+    } catch (error) {
+      console.error("Error deleting carts by userId:", error);
+      throw new ErrorDomain("Error deleting carts by userId", 500);
+    }
+  }
 }
 
 export { UserRepository };

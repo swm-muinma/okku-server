@@ -2,6 +2,7 @@ import { UserRepository } from "@src/adapters/persistence/repository/user.reposi
 import { ErrorDomain } from "@src/domain/error.domain";
 import { UserDomain } from "@src/domain/user.domain";
 import { FormEnum } from "@src/enum/form.enum";
+import axios from "axios";
 
 const userRepository = new UserRepository();
 export class UserService {
@@ -47,5 +48,10 @@ export class UserService {
       throw new ErrorDomain("updated user info failed", 500);
     }
     return updatedUser;
+  }
+
+  async withdrawAccount(userId: string): Promise<boolean> {
+    const result = await userRepository.delete(userId);
+    return true;
   }
 }
