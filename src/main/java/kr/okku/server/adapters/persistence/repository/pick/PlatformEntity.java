@@ -1,11 +1,14 @@
-package kr.okku.server.domain;
-import lombok.Builder;
+package kr.okku.server.adapters.persistence.repository.pick;
+
 import lombok.Data;
 
 @Data
-@Builder
-public class PlatformDomain {
+public class PlatformEntity {
+
     private String name;
+
     private String image;
+
     private String url;
+
 }
