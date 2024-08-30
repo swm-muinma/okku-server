@@ -3,6 +3,8 @@ package kr.okku.server.mapper;
 import kr.okku.server.adapters.persistence.repository.cart.CartEntity;
 import kr.okku.server.domain.CartDomain;
 
+import java.util.Arrays;
+
 public class CartMapper {
 
     // CartEntity <-> CartDomain
@@ -15,7 +17,7 @@ public class CartMapper {
                 .userId(cartEntity.getUserId())
                 .name(cartEntity.getName())
                 .pickNum(cartEntity.getPickNum())
-                .pickItemIds(cartEntity.getPickItemIds())
+                .pickItemIds(Arrays.stream(cartEntity.getPickItemIds()).toList())
                 .build();
     }
 
@@ -28,7 +30,7 @@ public class CartMapper {
         cartEntity.setUserId(cartDomain.getUserId());
         cartEntity.setName(cartDomain.getName());
         cartEntity.setPickNum(cartDomain.getPickNum());
-        cartEntity.setPickItemIds(cartDomain.getPickItemIds());
+        cartEntity.setPickItemIds(cartDomain.getPickItemIds().toArray(new String[0]));
         return cartEntity;
     }
 

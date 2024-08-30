@@ -2,6 +2,8 @@ package kr.okku.server.domain;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class ScrapedDataDomain {
     private String name;
@@ -10,5 +12,5 @@ public class ScrapedDataDomain {
     private String taskId;
     private String productPk;
     private String platform;
-    private String[] taskIds;
+    private List<String> taskIds;
 }

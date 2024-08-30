@@ -3,12 +3,14 @@ package kr.okku.server.domain;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class ReviewInsightDomain {
     private String id;
     private String platform;
     private String productPk;
-    private ReviewSummaryDomain[] cautions;
-    private ReviewSummaryDomain[] positives;
+    private List<ReviewSummaryDomain> cautions;
+    private List<ReviewSummaryDomain> positives;
 }

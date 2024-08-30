@@ -5,6 +5,8 @@ import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewSummar
 import kr.okku.server.domain.ReviewInsightDomain;
 import kr.okku.server.domain.ReviewSummaryDomain;
 
+import java.util.Arrays;
+
 public class ReviewInsightMapper {
 
     // ReviewInsightEntity <-> ReviewInsightDomain
@@ -16,8 +18,8 @@ public class ReviewInsightMapper {
                 .id(reviewInsightEntity.getId())
                 .platform(reviewInsightEntity.getPlatform())
                 .productPk(reviewInsightEntity.getProductPk())
-                .cautions(toDomain(reviewInsightEntity.getCautions()))
-                .positives(toDomain(reviewInsightEntity.getPositives()))
+                .cautions(Arrays.stream(toDomain(reviewInsightEntity.getCautions())).toList())
+                .positives(Arrays.stream(toDomain(reviewInsightEntity.getPositives())).toList())
                 .build();
     }
 
@@ -29,8 +31,8 @@ public class ReviewInsightMapper {
         reviewInsightEntity.setId(reviewInsightDomain.getId());
         reviewInsightEntity.setPlatform(reviewInsightDomain.getPlatform());
         reviewInsightEntity.setProductPk(reviewInsightDomain.getProductPk());
-        reviewInsightEntity.setCautions(toEntity(reviewInsightDomain.getCautions()));
-        reviewInsightEntity.setPositives(toEntity(reviewInsightDomain.getPositives()));
+        reviewInsightEntity.setCautions(toEntity(reviewInsightDomain.getCautions().toArray(new ReviewSummaryDomain[0])));
+        reviewInsightEntity.setPositives(toEntity(reviewInsightDomain.getPositives().toArray(new ReviewSummaryDomain[0])));
         return reviewInsightEntity;
     }
 

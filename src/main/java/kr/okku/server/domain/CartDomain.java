@@ -3,6 +3,8 @@ package kr.okku.server.domain;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class CartDomain {
@@ -10,5 +12,5 @@ public class CartDomain {
     private String userId;
     private String name;
     private int pickNum;
-    private String[] pickItemIds;
+    private List<String> pickItemIds;
 }
