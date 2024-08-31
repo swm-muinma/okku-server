@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -83,10 +84,9 @@ public class PickService {
             if (cartId != null && !cartId.isEmpty()) {
                 throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
             }
-        } else {
-            if (cartId == null || cartId.isEmpty()) {
+        }
+        if (isDeletePermenant==false && (cartId == null || cartId.isEmpty())) {
                 throw new ErrorDomain(ErrorCode.INVALID_CARTID);
-            }
         }
 
         if (pickIds.isEmpty()) {
@@ -248,7 +248,6 @@ public class PickService {
     public List<String> deletePickFromAllCart(List<String> pickIds) {
             // Retrieve all carts containing the pick IDs
             List<CartDomain> carts = cartPersistenceAdapter.findByPickItemIdsIn(pickIds);
-
             // Check if any carts were found
             if (carts.isEmpty()) {
                 return null; // No carts found with the given pick IDs
@@ -257,7 +256,9 @@ public class PickService {
             // Process each cart
             for (CartDomain cart : carts) {
                 // Remove the pick IDs from each cart
-                cart.getPickItemIds().removeAll(pickIds);
+                List<String> modifiablePickItemIds = new ArrayList<>(cart.getPickItemIds());
+                modifiablePickItemIds.removeAll(pickIds);
+                cart.setPickItemIds(modifiablePickItemIds);
                 // Save the updated cart
                 cartPersistenceAdapter.save(cart);
             }

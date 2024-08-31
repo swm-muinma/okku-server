@@ -1,5 +1,6 @@
 package kr.okku.server.dto.controller.pick;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -10,7 +11,9 @@ public class DeletePicksRequest {
     private String userId;
     private List<String> pickIds;
     private String cartId;
-    private boolean deletePermenant;
+
+    @JsonProperty("isDeletePermenant")
+    private boolean isDeletePermenant;
 
     // Getters and Setters
 }
