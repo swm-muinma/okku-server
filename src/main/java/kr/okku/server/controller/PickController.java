@@ -2,6 +2,7 @@ package kr.okku.server.controller;
 
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.dto.controller.pick.DeletePicksRequest;
+import kr.okku.server.dto.controller.pick.MovePicksRequest;
 import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
 import kr.okku.server.service.PickService;
 import org.springframework.http.ResponseEntity;
@@ -51,11 +52,11 @@ public class PickController {
 //        return ResponseEntity.ok(pickService.getReviews(pickId));
 //    }
 //
-//    @PatchMapping("/")
-//    public ResponseEntity<Void> movePicks(
-//            @RequestBody MovePicksRequest request
-//    ) {
-//        pickService.movePicks(request.getUserId(), request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
-//        return ResponseEntity.ok().build();
-//    }
+    @PatchMapping("/")
+    public ResponseEntity<Void> movePicks(
+            @RequestBody MovePicksRequest request
+    ) {
+        pickService.movePicks(request.getUserId(), request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
+        return ResponseEntity.ok().build();
+    }
 }

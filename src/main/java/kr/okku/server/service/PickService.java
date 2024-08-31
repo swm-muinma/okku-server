@@ -1,11 +1,13 @@
 package kr.okku.server.service;
 
+import com.mongodb.client.ClientSession;
+import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.repository.cart.CartEntity;
-import kr.okku.server.adapters.persistence.repository.cart.CartRepository;
 import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
+import kr.okku.server.domain.CartDomain;
 import kr.okku.server.domain.ScrapedDataDomain;
 import kr.okku.server.dto.controller.PageInfoResponseDTO;
 import kr.okku.server.dto.controller.pick.*;
@@ -17,24 +19,27 @@ import kr.okku.server.enums.PlatformInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class PickService {
     private final PickPersistenceAdapter pickPersistenceAdapter;
-    private final CartRepository cartRepository;
+    private final CartPersistenceAdapter cartPersistenceAdapter;
     private final ScraperAdapter scraperAdapter;
     private final UserRepository userRepository;
 
     @Autowired
-    public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartRepository cartRepository,
+    public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
                        ScraperAdapter scraperAdapter, UserRepository userRepository) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
-        this.cartRepository = cartRepository;
+        this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.scraperAdapter = scraperAdapter;
         this.userRepository = userRepository;
     }
@@ -100,9 +105,9 @@ public class PickService {
 
 //        if (isDeletePermenant) {
 //            long deleteNum = pickPersistenceAdapter.deleteByIdIn(pickIds);
-//            boolean isDeletedFromCart = cartRepository.deletePickFromAllCart(pickIds);
+//            boolean isDeletedFromCart = cartPersistenceAdapter.deletePickFromAllCart(pickIds);
 //        } else {
-//            var isDeleted = cartRepository.deleteFromCart(pickIds, cartId);
+//            var isDeleted = cartPersistenceAdapter.deleteFromCart(pickIds, cartId);
 //        }
     }
 
@@ -122,9 +127,9 @@ public class PickService {
         PageInfoResponseDTO pageInfo;
 
         if (cartId != null) {
-            CartEntity cart = cartRepository.findById(cartId)
+            CartDomain cart = cartPersistenceAdapter.findById(cartId)
                     .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
-            Page<PickDomain> pickPage = pickPersistenceAdapter.findByIdIn(Arrays.stream(cart.getPickItemIds()).toList(), pageable);
+            Page<PickDomain> pickPage = pickPersistenceAdapter.findByIdIn(cart.getPickItemIds(), pageable);
             UserEntity user = userRepository.findById(cart.getUserId())
                     .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND));
 
@@ -156,6 +161,95 @@ public class PickService {
         responseDTO.setPicks(picks);
         responseDTO.setPage(pageInfo);
         return responseDTO;
+    }
+
+    public Map<String, Object> movePicks(String userId, List<String> pickIds, String sourceCartId, String destinationCartId, Boolean isDeleteFromOrigin) {
+        if (isDeleteFromOrigin == null) {
+            throw new ErrorDomain(ErrorCode.IS_DELETE_FROM_ORIGIN_REQUIRED);
+        }
+        if (destinationCartId == null || destinationCartId.isEmpty()) {
+            throw new ErrorDomain(ErrorCode.DESTINATION_CART_ID_REQUIRED);
+        }
+        if (!isDeleteFromOrigin) {
+            List<String> movedPickIds = this.addToCart(pickIds, destinationCartId);
+            if (movedPickIds == null || movedPickIds.isEmpty()) {
+                throw new ErrorDomain(ErrorCode.ALREADY_EXIST_CART);
+            }
+            if (pickIds.isEmpty()) {
+                throw new ErrorDomain(ErrorCode.PICK_IDS_REQUIRED);
+            }
+            List<PickDomain> picksInfo = pickPersistenceAdapter.findByIdIn(pickIds);
+            picksInfo.forEach(pick -> {
+                if (!pick.getUserId().equals(userId)) {
+                    throw new ErrorDomain(ErrorCode.NOT_OWNER);
+                }
+            });
+            return Map.of(
+                    "source", Map.of("cartId", sourceCartId != null ? sourceCartId : "__all__", "pickIds", movedPickIds),
+                    "destination", Map.of("cartId", destinationCartId, "pickIds", movedPickIds)
+            );
+        } else {
+            List<String> movedPickIds = this.moveCart(pickIds, sourceCartId, destinationCartId);
+            return Map.of(
+                    "source", Map.of("cartId", sourceCartId != null ? sourceCartId : "__all__", "pickIds", List.of()),
+                    "destination", Map.of("cartId", destinationCartId, "pickIds", movedPickIds)
+            );
+        }
+    }
+
+    @Transactional
+    List<String> moveCart(List<String> pickIds, String sourceCartId, String destinationCartId) {
+            // Add picks to the target cart
+            List<String> addedPicks = this.addToCart(pickIds, destinationCartId);
+            if (addedPicks == null || addedPicks.isEmpty()) {
+                throw new ErrorDomain(ErrorCode.DUPLICATED_PICK);
+            }
+
+            // Remove picks from the original carts
+            this.deleteFromCart(pickIds, sourceCartId);
+
+            return addedPicks;
+    }
+
+
+    @Transactional
+    public List<String> addToCart(List<String> pickIds, String cartId) {
+        checkPickIdExist(pickIds); // Custom method to check if pickIds exist
+
+        // Retrieve the cart from the repository
+        CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
+
+        // Add pick IDs to the cart
+        cart.getPickItemIds().addAll(pickIds);
+
+        // Save the updated cart
+        CartDomain updatedCart = cartPersistenceAdapter.save(cart);
+
+        // Return the pick IDs if the cart was updated, otherwise return null
+        return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
+    }
+    @Transactional
+    public List<String> deleteFromCart(List<String> pickIds, String cartId) {
+        // Check if pickIds exist (this is a custom method, assumed to be implemented)
+        checkPickIdExist(pickIds);
+
+        // Retrieve the cart from the repository
+        CartDomain cart = cartPersistenceAdapter.findById(cartId)
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
+
+        // Remove pick IDs from the cart
+        cart.getPickItemIds().removeAll(pickIds);
+
+        // Save the updated cart
+        CartDomain updatedCart = cartPersistenceAdapter.save(cart);
+
+        // Return the pick IDs if any were removed, otherwise return null
+        return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
+    }
+
+    private void checkPickIdExist(List<String> pickIds) {
+        // Implement your logic to check if pickIds exist
+        // This could involve querying the database to ensure the pickIds are valid
     }
 
     // DTO 변환 메서드들

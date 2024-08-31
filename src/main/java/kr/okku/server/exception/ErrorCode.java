@@ -10,7 +10,12 @@ public enum ErrorCode {
     NOT_OWNER("not owner", 400),
     INVALID_PAGE("Page and size must be larger than 0", 400),
     CART_NOT_EXIST("cart not exist", 404),
-    PICK_NOT_EXIST("Picks not exist", 404);
+    PICK_NOT_EXIST("Picks not exist", 404),
+    IS_DELETE_FROM_ORIGIN_REQUIRED("'isDeleteFromOrigin' field is required", 400),
+    DESTINATION_CART_ID_REQUIRED("'destinationCartId' field is required", 400),
+    ALREADY_EXIST_CART("already exist in cart", 400),
+    PICK_IDS_REQUIRED("pickIds is required", 400),
+    DUPLICATED_PICK("Duplicated pick", 400);
     private final String message;
     private final int statusCode;
 
