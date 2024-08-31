@@ -1,9 +1,7 @@
 package kr.okku.server.service;
 
-import com.mongodb.client.ClientSession;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
-import kr.okku.server.adapters.persistence.repository.cart.CartEntity;
 import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
@@ -19,7 +17,6 @@ import kr.okku.server.enums.PlatformInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,12 +100,12 @@ public class PickService {
             }
         });
 
-//        if (isDeletePermenant) {
-//            long deleteNum = pickPersistenceAdapter.deleteByIdIn(pickIds);
-//            boolean isDeletedFromCart = cartPersistenceAdapter.deletePickFromAllCart(pickIds);
-//        } else {
-//            var isDeleted = cartPersistenceAdapter.deleteFromCart(pickIds, cartId);
-//        }
+        if (isDeletePermenant) {
+            long deleteNum = pickPersistenceAdapter.deleteByIdIn(pickIds);
+            this.deletePickFromAllCart(pickIds);
+        } else {
+            var isDeleted = this.deleteFromCart(pickIds, cartId);
+        }
     }
 
     public UserPicksResponseDTO getMyPicks(String userId, String cartId, int page, int size) {
@@ -247,9 +244,35 @@ public class PickService {
         return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
     }
 
+    @Transactional
+    public List<String> deletePickFromAllCart(List<String> pickIds) {
+            // Retrieve all carts containing the pick IDs
+            List<CartDomain> carts = cartPersistenceAdapter.findByPickItemIdsIn(pickIds);
+
+            // Check if any carts were found
+            if (carts.isEmpty()) {
+                return null; // No carts found with the given pick IDs
+            }
+
+            // Process each cart
+            for (CartDomain cart : carts) {
+                // Remove the pick IDs from each cart
+                cart.getPickItemIds().removeAll(pickIds);
+                // Save the updated cart
+                cartPersistenceAdapter.save(cart);
+            }
+
+            // Return the pick IDs if any carts were updated, otherwise return null
+            return pickIds;
+
+
+    }
+
     private void checkPickIdExist(List<String> pickIds) {
-        // Implement your logic to check if pickIds exist
-        // This could involve querying the database to ensure the pickIds are valid
+        List<PickDomain> persistencePicks = pickPersistenceAdapter.findByIdIn(pickIds);
+        if(pickIds.size() != persistencePicks.size()){
+            throw new ErrorDomain(ErrorCode.INVALID_PICKIDS);
+        }
     }
 
     // DTO 변환 메서드들

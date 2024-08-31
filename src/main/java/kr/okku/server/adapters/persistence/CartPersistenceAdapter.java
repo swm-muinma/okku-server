@@ -37,4 +37,13 @@ public class CartPersistenceAdapter {
         return Optional.ofNullable(CartMapper.toDomain(cartEntity));
     }
 
+    public  List<CartDomain> findByPickItemIdsIn(List<String> pickItemIds){
+        return cartRepository.findByPickItemIdsIn(pickItemIds)
+                .stream()
+                .map(CartMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+
+
 }
