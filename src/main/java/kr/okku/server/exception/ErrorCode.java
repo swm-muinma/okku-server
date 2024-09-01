@@ -9,6 +9,7 @@ public enum ErrorCode {
     INVALID_PICKIDS("pickIds invalid", 400),
     NOT_OWNER("not owner", 400),
     INVALID_PAGE("Page and size must be larger than 0", 400),
+    INVALID_SIZE("Size and size must be larger than 0", 400),
     CART_NOT_EXIST("cart not exist", 404),
     PICK_NOT_EXIST("Picks not exist", 404),
     IS_DELETE_FROM_ORIGIN_REQUIRED("'isDeleteFromOrigin' field is required", 400),

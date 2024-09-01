@@ -2,8 +2,11 @@ package kr.okku.server.adapters.persistence;
 
 import kr.okku.server.adapters.persistence.repository.cart.CartEntity;
 import kr.okku.server.adapters.persistence.repository.cart.CartRepository;
+import kr.okku.server.adapters.persistence.repository.pick.PickEntity;
 import kr.okku.server.domain.CartDomain;
+import kr.okku.server.domain.PickDomain;
 import kr.okku.server.mapper.CartMapper;
+import kr.okku.server.mapper.PickMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,5 +38,16 @@ public class CartPersistenceAdapter {
                 .stream()
                 .map(CartMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    public List<CartDomain> findByUserId(String userId){
+        return  cartRepository.findByUserId(userId)
+                .stream()
+                .map(CartMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteById(String cartId) {
+        cartRepository.deleteById(cartId);
     }
 }
