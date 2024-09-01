@@ -38,7 +38,7 @@ public class Oauth2Service {
     @Value("${spring.oauth.kakao.client-id}")
     private String kakaoClientId;
 
-    @Value("${spring.oauth.redirect-uri}")
+    @Value("${spring.oauth.kakao.redirect-uri}")
     private String kakaoRedirectUri;
 
     @Value("${spring.jwt.acess-token.secret}")

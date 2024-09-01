@@ -16,6 +16,7 @@ public enum ErrorCode {
     DESTINATION_CART_ID_REQUIRED("'destinationCartId' field is required", 400),
     ALREADY_EXIST_CART("already exist in cart", 400),
     PICK_IDS_REQUIRED("pickIds is required", 400),
+    MUST_LOGIN("must login", 402),
     DUPLICATED_PICK("Duplicated pick", 400);
     private final String message;
     private final int statusCode;

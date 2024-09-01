@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,9 @@ public class PickPersistenceAdapter {
         return pickRepository.findByUserId(userId, pageable)
                 .map(PickMapper::toDomain);
     }
-
+    public PickDomain findById(String id) {
+        return PickMapper.toDomain(pickRepository.findById(id).get());
+    }
     // 사용자 ID로 Pick 조회
     public List<PickDomain> findByUserId(String userId) {
         return pickRepository.findByUserId(userId)
