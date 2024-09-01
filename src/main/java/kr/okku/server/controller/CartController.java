@@ -10,6 +10,7 @@ import kr.okku.server.dto.controller.pick.DeletePicksRequest;
 import kr.okku.server.dto.controller.pick.MovePicksRequest;
 import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
 import kr.okku.server.service.CartService;
+import kr.okku.server.service.Oauth2Service;
 import kr.okku.server.service.PickService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/carts")
 public class CartController {
 
-    @Autowired
-    private CartService cartService;
-
+    private final CartService cartService;
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
     // Get My Carts - List the carts of the user with pagination
     @GetMapping
     public ResponseEntity<MyCartsResponseDto> getMyCarts(

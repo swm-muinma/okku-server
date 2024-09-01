@@ -4,6 +4,8 @@ import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.repository.cart.CartRepository;
 import kr.okku.server.adapters.persistence.repository.pick.PickRepository;
+import kr.okku.server.adapters.persistence.repository.user.UserRepository;
+import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.CartDomain;
 import kr.okku.server.dto.controller.cart.CartDto;
 import kr.okku.server.dto.controller.cart.MyCartsResponseDto;
@@ -19,11 +21,16 @@ import java.util.stream.Collectors;
 @Service
 public class CartService {
 
-    @Autowired
-    private CartPersistenceAdapter cartPersistenceAdapter;
+    private final CartPersistenceAdapter cartPersistenceAdapter;
+
+    private final PickPersistenceAdapter pickPersistenceAdapter;
 
     @Autowired
-    private PickPersistenceAdapter pickPersistenceAdapter;
+    public CartService(CartPersistenceAdapter cartPersistenceAdapter, PickPersistenceAdapter pickPersistenceAdapter) {
+        this.cartPersistenceAdapter = cartPersistenceAdapter;
+        this.pickPersistenceAdapter = pickPersistenceAdapter;
+
+    }
 
     // Method to fetch carts associated with a user with pagination
     public MyCartsResponseDto getMyCarts(String userId, int page, int size) {

@@ -3,6 +3,8 @@ package kr.okku.server.service;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
+import kr.okku.server.adapters.persistence.repository.user.UserRepository;
+import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.CartDomain;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.UserDomain;
@@ -27,6 +29,14 @@ public class UserService {
 
     @Autowired
     private CartPersistenceAdapter cartPersistenceAdapter;
+
+    @Autowired
+    public UserService(CartPersistenceAdapter cartPersistenceAdapter, PickPersistenceAdapter pickPersistenceAdapter,
+                       UserPersistenceAdapter userPersistenceAdapter) {
+        this.pickPersistenceAdapter = pickPersistenceAdapter;
+        this.cartPersistenceAdapter = cartPersistenceAdapter;
+        this.userPersistenceAdapter = userPersistenceAdapter;
+    }
 
     // Retrieve user profile by user ID
     public UserDomain getProfile(String userId) {

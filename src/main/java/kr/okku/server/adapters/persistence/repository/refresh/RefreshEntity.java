@@ -1,6 +1,5 @@
-package kr.okku.server.adapters.persistence.repository.user;
+package kr.okku.server.adapters.persistence.repository.refresh;
 
-import kr.okku.server.enums.FormEnum;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -11,23 +10,13 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 
 @Data
-@Document(collection = "users")
-public class UserEntity {
+@Document(collection = "refreshes")
+public class RefreshEntity {
 
     @Id
     private String id;
-
-    private String name;
-    private String image;
-    private Integer height;
-    private Integer weight;
-    private FormEnum form;
-    @Field("is_premium")
-    private Boolean isPremium;
-    @Field("kakao_id")
-    private String kakaoId;
-    @Field("apple_id")
-    private String appleId;
+    @Field("refresh_token")
+    private String refreshToken;
 
     @Field("created_at")
     @CreatedDate
@@ -37,5 +26,4 @@ public class UserEntity {
     @LastModifiedDate
     private Date updatedAt;
 
-    // Getters and Setters
 }

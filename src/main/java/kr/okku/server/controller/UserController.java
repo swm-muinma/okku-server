@@ -2,17 +2,21 @@ package kr.okku.server.controller;
 import kr.okku.server.domain.UserDomain;
 import kr.okku.server.dto.controller.user.UpdateProfileRequest;
 import kr.okku.server.dto.controller.user.UserResponse;
+import kr.okku.server.service.PickService;
 import kr.okku.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     // Retrieve user profile
     @GetMapping

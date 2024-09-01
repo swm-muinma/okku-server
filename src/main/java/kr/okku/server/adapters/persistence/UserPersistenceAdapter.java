@@ -33,6 +33,10 @@ public class UserPersistenceAdapter {
         UserEntity userEntity = userRepository.findById(id).get();
         return Optional.ofNullable(UserMapper.toDomain(userEntity));
     }
+    public Optional<UserDomain> findByKakaoId(String kakaoId){
+        UserEntity userEntity = userRepository.findByKakaoId(kakaoId).get();
+        return Optional.ofNullable(UserMapper.toDomain(userEntity));
+    }
 
 
     public void deleteById(String userId) {
