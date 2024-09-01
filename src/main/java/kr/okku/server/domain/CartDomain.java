@@ -3,6 +3,7 @@ package kr.okku.server.domain;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,4 +14,11 @@ public class CartDomain {
     private String name;
     private int pickNum;
     private List<String> pickItemIds;
+
+    public void deletePicks(List<String> pickIds){
+        List<String> modifiablePickItemIds = new ArrayList<>(this.pickItemIds);
+        modifiablePickItemIds.removeAll(pickIds);
+        this.pickItemIds = modifiablePickItemIds;
+        this.pickNum = modifiablePickItemIds.size();
+    }
 }

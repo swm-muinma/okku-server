@@ -1,5 +1,6 @@
 package kr.okku.server.domain;
 
+import kr.okku.server.enums.FormEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,9 +10,9 @@ public class UserDomain {
     private String id;
     private String name;
     private String image;
-    private String height;
-    private String weight;
-    private String form;
+    private Integer height;
+    private Integer weight;
+    private FormEnum form;
     private Boolean isPremium;
     private String kakaoId;
     private String appleId;

@@ -235,9 +235,7 @@ public class PickService {
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
 
         // Remove pick IDs from the cart
-        List<String> modifiablePickItemIds = new ArrayList<>(cart.getPickItemIds());
-        modifiablePickItemIds.removeAll(pickIds);
-        cart.setPickItemIds(modifiablePickItemIds);
+       cart.deletePicks(pickIds);
 
         // Save the updated cart
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
@@ -258,17 +256,14 @@ public class PickService {
             // Process each cart
             for (CartDomain cart : carts) {
                 // Remove the pick IDs from each cart
-                List<String> modifiablePickItemIds = new ArrayList<>(cart.getPickItemIds());
-                modifiablePickItemIds.removeAll(pickIds);
-                cart.setPickItemIds(modifiablePickItemIds);
+                cart.deletePicks(pickIds);
+
                 // Save the updated cart
                 cartPersistenceAdapter.save(cart);
             }
 
             // Return the pick IDs if any carts were updated, otherwise return null
             return pickIds;
-
-
     }
 
     private void checkPickIdExist(List<String> pickIds) {
