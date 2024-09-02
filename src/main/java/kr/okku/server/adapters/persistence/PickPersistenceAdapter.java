@@ -35,8 +35,8 @@ public class PickPersistenceAdapter {
         return pickRepository.findByUserId(userId, pageable)
                 .map(PickMapper::toDomain);
     }
-    public PickDomain findById(String id) {
-        return PickMapper.toDomain(pickRepository.findById(id).get());
+    public Optional<PickDomain> findById(String id) {
+        return Optional.ofNullable(PickMapper.toDomain(pickRepository.findById(id).get()));
     }
     // 사용자 ID로 Pick 조회
     public List<PickDomain> findByUserId(String userId) {

@@ -1,4 +1,4 @@
-package kr.okku.server.adapters.persistence.repository.reviewInsight;
+package kr.okku.server.adapters.persistence.repository.item;
 
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -10,20 +10,20 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 
 @Data
-@Document(collection = "reviewInsights")
-public class ReviewInsightEntity {
+@Document(collection = "items")
+public class ItemEntity {
 
     @Id
     private String id;
 
     private String platform;
+    private String product_key;
+    private String url;
+    private String name;
+    private Integer price;
 
-    @Field("product_pk")
-    private String productPk;
-
-    private ReviewSummaryEntity[] cautions;
-
-    private ReviewSummaryEntity[] positives;
+    @Field("img_url")
+    private String imgUrl;
 
     @Field("created_at")
     @CreatedDate
@@ -32,4 +32,6 @@ public class ReviewInsightEntity {
     @Field("updated_at")
     @LastModifiedDate
     private Date updatedAt;
+
+    // Getters and Setters
 }

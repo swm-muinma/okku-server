@@ -4,6 +4,7 @@ import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.ReviewInsightPersistenceAdapter;
 import kr.okku.server.adapters.persistence.ReviewPersistenceAdapter;
 import kr.okku.server.adapters.persistence.repository.pick.PickRepository;
+import kr.okku.server.adapters.persistence.repository.review.ReviewEntity;
 import kr.okku.server.adapters.persistence.repository.review.ReviewRepository;
 import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewInsightRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public class ReviewService {
 
     public ScrapedDataDomain getItemInfoWithoutLogin(String url, String okkuId) {
         if (okkuIds.contains(okkuId)) {
-            throw new ErrorDomain(ErrorCode.MUST_LOGIN)
+            throw new ErrorDomain(ErrorCode.MUST_LOGIN);
         }
 
         ScrapedDataDomain scrapedData = scraperAdapter.scrape(url);
@@ -51,10 +53,10 @@ public class ReviewService {
     }
     // 해당 서비스 내 공통 로직을 처리하는 private 메서드
     private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
-                                                 String image, String name, double price, String url) {
-        ReviewInsightDomain insight = reviewInsightPersistenceAdapter.getInsightsByProductPkWithPolling(productPk, platform);
-        List<ReviewDomain> reviews = reviewPersistenceAdapter.getReviewsByProductPk(productPk, platform, 100);
-        return toDto(platform, reviews, insight, pick, image, name, price, url);
+                                                 String image, String name, Integer price, String url) {
+        ReviewInsightDomain insight = this.createReviewInsightDomain(productPk, platform);
+        ReviewDomain reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
+        return toDto(platform, reviews.getReviews(), insight, pick, image, name, price, url);
     }
 
     // 로그인 없이 리뷰를 가져오는 메서드
@@ -89,8 +91,8 @@ public class ReviewService {
         );
     }
 
-    private ProductReviewDto toDto(String platform, List<ReviewDomain> reviews, ReviewInsightDomain insight,
-                                   PickDomain pickDomain, String image, String name, int price, String url) {
+    private ProductReviewDto toDto(String platform, List<ReviewDetailDomain> reviews, ReviewInsightDomain insight,
+                                   PickDomain pickDomain, String image, String name, Integer price, String url) {
         // cons와 pros의 ReviewSectionDTO 생성
         List<ReviewSectionDto> cons = insight.getCautions().stream()
                 .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
@@ -112,13 +114,12 @@ public class ReviewService {
                 .build();
     }
 
-    private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDomain> reviews, String platform) {
+    private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
         List<CommentDto> comments = reviewIds.stream()
-                .map(reviewId -> reviews.stream()
+                .flatMap(reviewId -> reviews.stream()
                         .filter(review -> review.getId().equals(reviewId))
                         .findFirst()
-                        .orElseGet(() -> reviewPersistenceAdapter.findById(reviewId, platform)
-                                .orElse(new ReviewDomain())))
+                        .stream()) // Optional을 스트림으로 변환하여, 값이 없으면 빈 스트림이 되도록 처리
                 .map(review -> new CommentDto(
                         review.getGender() != null ? review.getGender() : "",
                         review.getHeight(),
@@ -128,6 +129,34 @@ public class ReviewService {
                 ))
                 .collect(Collectors.toList());
 
+
         return new ReviewSectionDto(description, comments.size(), comments);
+    }
+
+    private ReviewInsightDomain createReviewInsightDomain(String productPk, String platform) {
+        ReviewDomain reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk,platform);
+        if (!reviewDomain.isDoneScrapeReviews() && reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
+            return reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
+        }
+
+        if (!reviewDomain.isDoneScrapeReviews() && (reviewDomain.getReviews() == null || reviewDomain.getReviews().isEmpty())) {
+            return createEmptyReviewInsightDomain();
+        }
+
+        if (reviewDomain.isDoneScrapeReviews() && (reviewDomain.getReviews() == null || reviewDomain.getReviews().isEmpty())) {
+            return createEmptyReviewInsightDomain();
+        }
+
+        return createEmptyReviewInsightDomain();
+    }
+
+    private ReviewInsightDomain createEmptyReviewInsightDomain() {
+        return ReviewInsightDomain.builder()
+                .id("")
+                .platform("")
+                .productPk("")
+                .cautions(Collections.emptyList())
+                .positives(Collections.emptyList())
+                .build();
     }
 }

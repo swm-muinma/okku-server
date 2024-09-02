@@ -8,6 +8,6 @@ public class PickDto {
     private String id;
     private String image;
     private String name;
-    private double price;
+    private Integer price;
     private String url;
 }
