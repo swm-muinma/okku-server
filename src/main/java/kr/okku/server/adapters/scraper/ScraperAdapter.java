@@ -1,6 +1,10 @@
 package kr.okku.server.adapters.scraper;
 
 import kr.okku.server.domain.ScrapedDataDomain;
+import kr.okku.server.dto.adapter.ScraperResponseDto;
+import kr.okku.server.exception.ErrorCode;
+import kr.okku.server.exception.ErrorDomain;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -8,47 +12,30 @@ import org.springframework.web.client.RestTemplate;
 public class ScraperAdapter {
 
     private final RestTemplate restTemplate;
-    private final String scraperUrl = "your-scraper-url";
+    @Value("${spring.msa.scraper.uri}")
+    private String scraperUrl;
     private final String checkrUrl = scraperUrl + "/status";
 
     public ScraperAdapter(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public String findPlatform(String url) {
-        String[] platforms = {"musinsa", "zigzag", "a-bly"};
-        int minPosition = Integer.MAX_VALUE;
-        String platform = "";
-
-        for (String p : platforms) {
-            int position = url.indexOf(p);
-            if (position != -1 && position < minPosition) {
-                minPosition = position;
-                platform = p;
-            }
-        }
-        return platform;
-    }
-
     public ScrapedDataDomain scrape(String url) {
         try {
-            ScrapedDataDomain response = restTemplate.postForObject(scraperUrl + "/scrap", new ScrapeRequest(url), ScrapedDataDomain.class);
-            if (response != null) {
-                response.setPlatform(findPlatform(url));
-            }
-            return response;
+            ScraperResponseDto response = restTemplate.postForObject(scraperUrl + "/scrap", new ScrapeRequest(url), ScraperResponseDto.class);
+            return ScrapedDataDomain.builder()
+                    .price(response.getPrice())
+                    .image(response.getImg_url())
+                    .name(response.getName())
+                    .platform(response.getPlatform())
+                    .productPk(response.getProduct_key())
+                    .url(response.getUrl())
+                    .build();
         } catch (Exception e) {
-            return null;
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR);
         }
     }
 
-    public ScrapedDataDomain checkWorkId(String workId) {
-        try {
-            return restTemplate.getForObject(checkrUrl + "/" + workId, ScrapedDataDomain.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to check workId: " + e.getMessage());
-        }
-    }
 
     // Inner class for request body
     static class ScrapeRequest {
