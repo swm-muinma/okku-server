@@ -3,10 +3,6 @@ package kr.okku.server.service;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.ReviewInsightPersistenceAdapter;
 import kr.okku.server.adapters.persistence.ReviewPersistenceAdapter;
-import kr.okku.server.adapters.persistence.repository.pick.PickRepository;
-import kr.okku.server.adapters.persistence.repository.review.ReviewEntity;
-import kr.okku.server.adapters.persistence.repository.review.ReviewRepository;
-import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewInsightRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
 import kr.okku.server.dto.controller.review.*;
@@ -54,9 +50,9 @@ public class ReviewService {
     // 해당 서비스 내 공통 로직을 처리하는 private 메서드
     private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
                                                  String image, String name, Integer price, String url) {
-        ReviewInsightDomain insight = this.createReviewInsightDomain(productPk, platform);
         ReviewDomain reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
-        return toDto(platform, reviews.getReviews(), insight, pick, image, name, price, url);
+        ReviewInsightDomain insight = this.createReviewInsightDomain(reviews);
+        return toDto(platform, reviews, insight, pick, image, name, price, url);
     }
 
     // 로그인 없이 리뷰를 가져오는 메서드
@@ -91,8 +87,9 @@ public class ReviewService {
         );
     }
 
-    private ProductReviewDto toDto(String platform, List<ReviewDetailDomain> reviews, ReviewInsightDomain insight,
+    private ProductReviewDto toDto(String platform, ReviewDomain review, ReviewInsightDomain insight,
                                    PickDomain pickDomain, String image, String name, Integer price, String url) {
+        List<ReviewDetailDomain> reviews =review.getReviews();
         // cons와 pros의 ReviewSectionDTO 생성
         List<ReviewSectionDto> cons = insight.getCautions().stream()
                 .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
@@ -110,7 +107,7 @@ public class ReviewService {
                         price,
                         url
                 ))
-                .reviews(new ReviewsDto(cons, pros))
+                .reviews(new ReviewsDto(review.isDoneScrapeReviews(),cons, pros))
                 .build();
     }
 
@@ -133,8 +130,7 @@ public class ReviewService {
         return new ReviewSectionDto(description, comments.size(), comments);
     }
 
-    private ReviewInsightDomain createReviewInsightDomain(String productPk, String platform) {
-        ReviewDomain reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk,platform);
+    private ReviewInsightDomain createReviewInsightDomain(ReviewDomain reviewDomain) {
         if (!reviewDomain.isDoneScrapeReviews() && reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
             return reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
         }

@@ -6,6 +6,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ReviewsDto {
+    private Boolean done;
     private List<ReviewSectionDto> cons;
     private List<ReviewSectionDto> pros;
 }
