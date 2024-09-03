@@ -6,6 +6,8 @@ import kr.okku.server.service.PickService;
 import kr.okku.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +22,8 @@ public class UserController {
 
     // Retrieve user profile
     @GetMapping
-    public ResponseEntity<UserResponse> getProfile(@RequestHeader("userId") String userId) {
+    public ResponseEntity<UserResponse> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
         UserDomain user = userService.getProfile(userId);
         UserResponse response = new UserResponse(user.getId(), user.getName(), user.getHeight(), user.getWeight(), user.getForm());
         return ResponseEntity.ok(response);
@@ -29,9 +32,10 @@ public class UserController {
     // Update user profile
     @PatchMapping
     public ResponseEntity<UserResponse> updateProfile(
-            @RequestHeader("userId") String userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UpdateProfileRequest request
     ) {
+        String userId = userDetails.getUsername();
         UserDomain updatedUser = userService.updateProfile(userId, request.getName(), request.getHeight(), request.getWeight(), request.getForm());
         UserResponse response = new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getHeight(), updatedUser.getWeight(), updatedUser.getForm());
         return ResponseEntity.ok(response);
@@ -39,7 +43,8 @@ public class UserController {
 
     // Withdraw user account
     @GetMapping("/withdraw")
-    public ResponseEntity<Void> withdrawAccount(@RequestHeader("userId") String userId) {
+    public ResponseEntity<Void> withdrawAccount(@AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
         userService.withdrawAccount(userId);
         return ResponseEntity.ok().build();
     }

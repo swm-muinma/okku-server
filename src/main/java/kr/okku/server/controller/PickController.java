@@ -6,6 +6,8 @@ import kr.okku.server.dto.controller.pick.MovePicksRequest;
 import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
 import kr.okku.server.service.PickService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -21,27 +23,32 @@ public class PickController {
 
     @PostMapping("/new")
     public ResponseEntity<PickDomain> createPick(
-            @RequestParam String userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String url
     ) {
+        String userId = userDetails.getUsername();
         return ResponseEntity.ok(pickService.createPick(userId, url));
     }
 
     @PostMapping("/delete")
     public ResponseEntity<Void> deletePicks(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody DeletePicksRequest request
     ) {
-        pickService.deletePicks(request.getUserId(), request.getPickIds(), request.getCartId(), request.isDeletePermenant());
+        String userId = userDetails.getUsername();
+        pickService.deletePicks(userId, request.getPickIds(), request.getCartId(), request.isDeletePermenant());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("")
     public ResponseEntity<UserPicksResponseDTO> getMyPicks(
-            @RequestParam String userId,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) String cartId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        String userId = userDetails.getUsername();
+        System.out.println(userId);
         return ResponseEntity.ok(pickService.getMyPicks(userId, cartId, page, size));
     }
 
@@ -54,9 +61,11 @@ public class PickController {
 //
     @PatchMapping("/")
     public ResponseEntity<Void> movePicks(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody MovePicksRequest request
     ) {
-        pickService.movePicks(request.getUserId(), request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
+        String userId = userDetails.getUsername();
+        pickService.movePicks(userId, request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
         return ResponseEntity.ok().build();
     }
 }

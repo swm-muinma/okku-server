@@ -62,7 +62,7 @@ public class PickService {
                 .url(url)
                 .userId(userId)
                 .price(scrapedData.getPrice())
-                .image(scrapedData.getThumbnail_image())
+                .image(scrapedData.getImage())
                 .platform(platformInfo)
                 .pk(scrapedData.getProductPk())
                 .build();

@@ -7,7 +7,6 @@ import java.util.List;
 @Data
 public class MovePicksRequest {
 
-    private String userId;
     private List<String> pickIds;
     private String sourceCartId;
     private String destinationCartId;

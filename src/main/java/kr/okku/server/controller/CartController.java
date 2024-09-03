@@ -14,6 +14,8 @@ import kr.okku.server.service.Oauth2Service;
 import kr.okku.server.service.PickService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,10 +29,11 @@ public class CartController {
     // Get My Carts - List the carts of the user with pagination
     @GetMapping
     public ResponseEntity<MyCartsResponseDto> getMyCarts(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestHeader("userId") String userId // Assuming the userId is passed as a header
+            @RequestParam(defaultValue = "10") int size
     ) {
+        String userId = userDetails.getUsername();
         MyCartsResponseDto carts = cartService.getMyCarts(userId, page, size);
         return ResponseEntity.ok(carts);
     }
@@ -39,8 +42,9 @@ public class CartController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCart(
             @PathVariable String id,
-            @RequestHeader("userId") String userId // Assuming the userId is passed as a header
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
+        String userId = userDetails.getUsername();
         cartService.deleteCart(userId, id);
         return ResponseEntity.ok().build();
     }
@@ -49,8 +53,9 @@ public class CartController {
     @PostMapping
     public ResponseEntity<CreateCartResponseDto> createCart(
             @RequestBody CreateCartRequestDto request,
-            @RequestHeader("userId") String userId // Assuming the userId is passed as a header
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
+        String userId = userDetails.getUsername();
         CartDomain savedCart = cartService.createCart(userId, request.getName(), request.getPickIds());
         CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
         return ResponseEntity.ok(response);

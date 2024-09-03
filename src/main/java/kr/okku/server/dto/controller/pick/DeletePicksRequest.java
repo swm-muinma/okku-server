@@ -8,7 +8,6 @@ import java.util.List;
 @Data
 public class DeletePicksRequest {
 
-    private String userId;
     private List<String> pickIds;
     private String cartId;
 
