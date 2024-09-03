@@ -1,4 +1,5 @@
 package kr.okku.server.exception;
+import io.sentry.Sentry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
         // 기타 예외 처리 (로그 추가 가능)
         // ex.printStackTrace() 또는 logger 사용 가능
-        System.out.println(ex);
+        Sentry.captureException(ex); // 예외 캡쳐
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
