@@ -1,5 +1,6 @@
 package kr.okku.server.service;
 
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
@@ -11,15 +12,23 @@ import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.UserDomain;
 import kr.okku.server.enums.FormEnum;
+import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
+import kr.okku.server.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -29,11 +38,14 @@ public class Oauth2Service {
 
     private final RefreshPersistenceAdapter refreshPersistenceAdapter;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Autowired
     public Oauth2Service(RefreshPersistenceAdapter refreshPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserRepository userRepository) {
+                         JwtTokenProvider jwtTokenProvider) {
         this.refreshPersistenceAdapter = refreshPersistenceAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
     @Value("${spring.oauth.kakao.client-id}")
     private String kakaoClientId;
@@ -88,21 +100,28 @@ public class Oauth2Service {
 
     // Kakao login with token and optional recommendation
     @Transactional
-    public Map<String, Object> kakaoLoginWithToken(String accessToken, String recommend) {
-        Map<String, Object> result = new HashMap<>();
-        boolean isNewUser = false;
-
+    public Map<String, Object> kakaoLoginWithToken(String accessToken, String recomend) {
+        // Kakao API URL
         String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + accessToken);
 
-        Map<String, Object> userResponse = restTemplate.getForObject(userInfoUrl, Map.class, headers);
-        String kakaoId = String.valueOf(userResponse.get("id"));
+        // HttpHeaders 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
 
-        if (kakaoId == null) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+        // HttpEntity 생성
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // 요청 보내기
+        ResponseEntity<Map> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, entity, Map.class);
+        Map<String, Object> userResponse = response.getBody();
+
+        if (userResponse == null || userResponse.get("id") == null) {
+            throw new RuntimeException("Kakao ID not found from Kakao");
         }
 
+        String kakaoId = userResponse.get("id").toString();
+
+        boolean isNewUser = false;
         UserDomain user = userPersistenceAdapter.findByKakaoId(kakaoId).get();
         if (user == null) {
             String nickname = (String) ((Map<String, Object>) userResponse.get("kakao_account")).get("nickname");
@@ -110,8 +129,8 @@ public class Oauth2Service {
                     .name(nickname)
                     .build();
             user.setKakaoId(kakaoId);
-            if (recommend != null && !recommend.isEmpty()) {
-                UserDomain recomendUser = userPersistenceAdapter.findById(recommend).get();
+            if (recomend != null && !recomend.isEmpty()) {
+                UserDomain recomendUser = userPersistenceAdapter.findById(recomend).get();
                 recomendUser.setIsPremium(true);
                 userPersistenceAdapter.save(recomendUser);
             }
@@ -119,21 +138,20 @@ public class Oauth2Service {
             isNewUser = true;
         }
 
-        String newAccessToken = Jwts.builder()
-                .setSubject(user.getId())
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        List<String> roles = new ArrayList<>();
+        roles.add(RoleEnum.USER.getValue());
 
-        String refreshToken = Jwts.builder()
-                .setSubject(user.getId())
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
+        String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(),roles);
+
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
         refreshPersistenceAdapter.save(refreshToken);
 
-        result.put("accessToken", newAccessToken);
-        result.put("refreshToken", refreshToken);
-        result.put("isNewUser", isNewUser);
-        return result;
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("accessToken", newAccessToken);
+        responseMap.put("refreshToken", refreshToken);
+        responseMap.put("isNewUser", isNewUser);
+
+        return responseMap;
     }
 }
