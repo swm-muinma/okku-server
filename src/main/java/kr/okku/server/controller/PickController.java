@@ -1,14 +1,19 @@
 package kr.okku.server.controller;
 
 import kr.okku.server.domain.PickDomain;
+import kr.okku.server.domain.ReviewDomain;
 import kr.okku.server.dto.controller.pick.DeletePicksRequest;
 import kr.okku.server.dto.controller.pick.MovePicksRequest;
 import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
+import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.service.PickService;
+import kr.okku.server.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -17,8 +22,11 @@ public class PickController {
 
     private final PickService pickService;
 
-    public PickController(PickService pickService) {
+    private final ReviewService reviewService;
+
+    public PickController(PickService pickService, ReviewService reviewService) {
         this.pickService = pickService;
+        this.reviewService = reviewService;
     }
 
     @PostMapping("/new")
@@ -52,13 +60,13 @@ public class PickController {
         return ResponseEntity.ok(pickService.getMyPicks(userId, cartId, page, size));
     }
 
-//    @GetMapping("/reviews")
-//    public ResponseEntity<List<ReviewDomain>> getReviews(
-//            @RequestParam String pickId
-//    ) {
-//        return ResponseEntity.ok(pickService.getReviews(pickId));
-//    }
-//
+    @GetMapping("/reviews")
+    public ResponseEntity<ProductReviewDto> getReviews(
+            @RequestParam String pickId
+    ) {
+        return ResponseEntity.ok(reviewService.getReviews(pickId));
+    }
+
     @PatchMapping("/")
     public ResponseEntity<Void> movePicks(
             @AuthenticationPrincipal UserDetails userDetails,
