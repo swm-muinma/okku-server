@@ -36,7 +36,7 @@ env:
   ECS_SERVICE: crud-server-service # set this to your Amazon ECS service name
   ECS_CLUSTER: okku-dev # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION:
-    crud-server-task-definition-dev.json # set this to the path to your Amazon ECS task definition
+    crud-server-task-definition-prod.json # set this to the path to your Amazon ECS task definition
   # file, e.g. .aws/task-definition.json
   CONTAINER_NAME:
     crud-server # set this to the name of the container in the
