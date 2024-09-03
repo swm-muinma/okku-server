@@ -13,12 +13,15 @@ plugins {
 }
 sentry {
     debug = true
+    authToken = System.getenv('SENTRY_AUTH_TOKEN')
     includeSourceContext = true
     additionalSourceDirsForSourceContext = ["mysrc/java", "other-source-dir/main/kotlin"]
     includeDependenciesReport = true
     autoInstallation {
         enabled = true
     }
+    org = "okku"
+    projectName = "crud-server"
 }
 group = 'kr.okku'
 version = '0.0.1-SNAPSHOT'
