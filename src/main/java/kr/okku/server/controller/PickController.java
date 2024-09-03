@@ -4,6 +4,7 @@ import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.ReviewDomain;
 import kr.okku.server.dto.controller.pick.DeletePicksRequest;
 import kr.okku.server.dto.controller.pick.MovePicksRequest;
+import kr.okku.server.dto.controller.pick.NewPickRequest;
 import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.service.PickService;
@@ -32,10 +33,10 @@ public class PickController {
     @PostMapping("/new")
     public ResponseEntity<PickDomain> createPick(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam String url
+            @RequestBody NewPickRequest request
     ) {
         String userId = userDetails.getUsername();
-        return ResponseEntity.ok(pickService.createPick(userId, url));
+        return ResponseEntity.ok(pickService.createPick(userId, request.getUrl()));
     }
 
     @PostMapping("/delete")

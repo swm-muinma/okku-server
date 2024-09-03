@@ -7,12 +7,25 @@ import lombok.Getter;
 public enum FormEnum {
     SLIM("slim"),
     NORMAL("normal"),
-    PLUMP("plump"), //통통
-    FAT ("fat");
+    PLUMP("plump"),
+    FAT("fat");
+
     private final String value;
 
     FormEnum(String value) {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    public static FormEnum fromValue(String value) {
+        for (FormEnum formEnum : FormEnum.values()) {
+            if (formEnum.getValue().equalsIgnoreCase(value)) {
+                return formEnum;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant with value " + value);
+    }
 }
