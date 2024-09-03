@@ -1,19 +1,27 @@
+# First stage: Build the application
+FROM bellsoft/liberica-openjdk-alpine:17 AS build
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Build the application using Gradle
+RUN ./gradlew clean build --no-daemon
+
+# Uncomment if using Maven instead
+# RUN ./mvnw clean package -DskipTests
+
+# Second stage: Run the application
 FROM bellsoft/liberica-openjdk-alpine:17
-# or
-# FROM openjdk:8-jdk-alpine
-# FROM openjdk:11-jdk-alpine
 
-CMD ["./gradlew", "clean", "build"]
-# or Maven 
-# CMD ["./mvnw", "clean", "package"]
+# Set working directory
+WORKDIR /app
 
-VOLUME /tmp
+# Copy only the built JAR file from the build stage
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# or Maven
-# ARG JAR_FILE_PATH=target/*.jar
-
-COPY build/libs/*.jar app.jar
-
+# Expose port 8080
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","/app.jar"]
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
