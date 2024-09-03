@@ -26,7 +26,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.disable())
+        http
                 .csrf(AbstractHttpConfigurer::disable)    // CSRF 보호 비활성화 (필요에 따라 활성화할 수 있습니다)
                 .authorizeRequests()
                 .requestMatchers("/oauth2/**","/scrape/**","/reviews/**","/healthy/**").permitAll()  // 공개 경로 설정
