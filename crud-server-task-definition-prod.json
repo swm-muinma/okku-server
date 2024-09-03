@@ -18,18 +18,6 @@
       "environment": [],
       "mountPoints": [],
       "volumesFrom": [],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/crud-server",
-          "mode": "non-blocking",
-          "awslogs-create-group": "true",
-          "max-buffer-size": "25m",
-          "awslogs-region": "ap-northeast-2",
-          "awslogs-stream-prefix": "ecs"
-        },
-        "secretOptions": []
-      },
       "systemControls": []
     }
   ],
@@ -71,7 +59,7 @@
   "placementConstraints": [],
   "compatibilities": ["EC2", "FARGATE"],
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
+  "cpu": "512",
   "memory": "512",
   "runtimePlatform": {
     "cpuArchitecture": "X86_64",
