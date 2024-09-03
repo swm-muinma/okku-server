@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()  // CSRF 보호 비활성화 (필요에 따라 활성화할 수 있습니다)
                 .authorizeRequests()
-                .requestMatchers("/oauth2/**").permitAll()  // 공개 경로 설정
+                .requestMatchers("/oauth2/**","/scrape/**","/reviews/**","/healthy/**").permitAll()  // 공개 경로 설정
                 .anyRequest().authenticated()  // 모든 요청을 인증 요구
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
