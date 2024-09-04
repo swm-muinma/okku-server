@@ -109,13 +109,13 @@ public class PickService {
     }
 
     public UserPicksResponseDTO getMyPicks(String userId, String cartId, int page, int size) {
-        if (page < 1) {
-            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
-        }
-
-        if (size < 1) {
-            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
-        }
+//        if (page < 1) {
+//            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
+//        }
+//
+//        if (size < 1) {
+//            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
+//        }
 
         PageRequest pageable = PageRequest.of(page - 1, size);
 
