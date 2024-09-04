@@ -117,7 +117,7 @@ public class PickService {
 //            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
 //        }
 
-        PageRequest pageable = PageRequest.of(page - 1, size);
+        PageRequest pageable = PageRequest.of(page, size);
 
         PickCartResponseDTO cartDTO;
         List<PickItemResponseDTO> picks;
