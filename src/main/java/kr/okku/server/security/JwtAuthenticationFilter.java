@@ -5,9 +5,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.okku.server.enums.RoleEnum;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -51,4 +53,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
 
     }
+
 }

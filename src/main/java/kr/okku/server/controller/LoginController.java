@@ -49,7 +49,6 @@ public class LoginController {
         return jwtTokenProvider.createAccessToken(userId, rolse);
     }
 
-    // Handle OAuth2 login request
     @GetMapping("/oauth2/code/{platform}")
     public ResponseEntity<Map<String, Object>> oauth2Login(
             @PathVariable String platform,
@@ -57,9 +56,6 @@ public class LoginController {
         Map<String, Object> result = oauth2Service.oauth2Login(platform, code);
         return ResponseEntity.ok(result);
     }
-
-
-
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
@@ -73,7 +69,6 @@ public class LoginController {
         return ResponseEntity.ok(result);
     }
 
-    // RefreshRequest DTO
     public static class RefreshRequest {
         private String refreshToken;
 
