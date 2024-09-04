@@ -18,6 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/carts")
 public class CartController {
@@ -29,12 +32,10 @@ public class CartController {
     // Get My Carts - List the carts of the user with pagination
     @GetMapping
     public ResponseEntity<MyCartsResponseDto> getMyCarts(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userId = userDetails.getUsername();
-        MyCartsResponseDto carts = cartService.getMyCarts(userId, page, size);
+        MyCartsResponseDto carts = cartService.getMyCarts(userId);
         return ResponseEntity.ok(carts);
     }
 
