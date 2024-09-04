@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,15 +34,7 @@ public class CartService {
     }
 
     // Method to fetch carts associated with a user with pagination
-    public MyCartsResponseDto getMyCarts(String userId, int page, int size) {
-        // Validate page and size
-        if (page < 1) {
-            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
-        }
-        if (size < 1) {
-            throw new ErrorDomain(ErrorCode.INVALID_SIZE);
-        }
-
+    public MyCartsResponseDto getMyCarts(String userId) {
         // Fetch carts associated with the user
         List<CartDomain> cartDomains = cartPersistenceAdapter.findByUserId(userId);
 
@@ -100,13 +93,16 @@ public class CartService {
         if (name == null || name.isEmpty()) {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
         }
-
+        Integer size = 0;
+        if(pickIds==null){
+            pickIds = new ArrayList<>();
+        }
         // Create the cart
         CartDomain cart =  CartDomain.builder()
                 .pickItemIds(pickIds)
                 .userId(userId)
                 .name(name)
-                .pickNum(pickIds.size())
+                .pickNum(size)
                 .build();
 
         CartDomain savedCart = cartPersistenceAdapter.save(cart);

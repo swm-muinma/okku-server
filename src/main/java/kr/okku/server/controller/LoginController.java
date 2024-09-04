@@ -1,10 +1,12 @@
 package kr.okku.server.controller;
 
+import kr.okku.server.dto.controller.refresh.TokenResponse;
 import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.security.JwtTokenProvider;
 import kr.okku.server.service.Oauth2Service;
+import kr.okku.server.service.RefreshService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +19,13 @@ import java.util.Map;
 public class LoginController {
 
     private final Oauth2Service oauth2Service;
-
+    private final RefreshService refreshService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginController(Oauth2Service oauth2Service, JwtTokenProvider jwtTokenProvider) {
+    public LoginController(Oauth2Service oauth2Service, JwtTokenProvider jwtTokenProvider,RefreshService refreshService) {
         this.oauth2Service = oauth2Service;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.refreshService = refreshService;
     }
 
     // Handle Kakao login with token
@@ -53,5 +56,33 @@ public class LoginController {
             @RequestParam String code) {
         Map<String, Object> result = oauth2Service.oauth2Login(platform, code);
         return ResponseEntity.ok(result);
+    }
+
+
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
+        String refreshToken = refreshRequest.getRefreshToken();
+
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new ErrorDomain(ErrorCode.REFRESH_INVALID);
+        }
+
+        TokenResponse result = refreshService.updateRefresh(refreshToken);
+        return ResponseEntity.ok(result);
+    }
+
+    // RefreshRequest DTO
+    public static class RefreshRequest {
+        private String refreshToken;
+
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+
+        public void setRefreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
+        }
     }
 }
