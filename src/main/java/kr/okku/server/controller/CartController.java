@@ -29,7 +29,6 @@ public class CartController {
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-    // Get My Carts - List the carts of the user with pagination
     @GetMapping
     public ResponseEntity<MyCartsResponseDto> getMyCarts(
             @AuthenticationPrincipal UserDetails userDetails
@@ -39,7 +38,6 @@ public class CartController {
         return ResponseEntity.ok(carts);
     }
 
-    // Delete a Cart - Delete a specific cart by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCart(
             @PathVariable String id,
@@ -50,7 +48,6 @@ public class CartController {
         return ResponseEntity.ok().build();
     }
 
-    // Create a Cart - Create a new cart for the user
     @PostMapping
     public ResponseEntity<CreateCartResponseDto> createCart(
             @RequestBody CreateCartRequestDto request,

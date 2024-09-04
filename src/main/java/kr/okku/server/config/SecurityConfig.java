@@ -1,5 +1,6 @@
 package kr.okku.server.config;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import kr.okku.server.security.JwtAuthenticationFilter;
 import kr.okku.server.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -57,10 +59,22 @@ public class SecurityConfig {
                 .requestMatchers("/oauth2/**","/scrape/**","/reviews/**","/healthy/**","/login/**").permitAll()  // 공개 경로 설정
                 .anyRequest().authenticated()  // 모든 요청을 인증 요구
                 .and()
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401로 설정
+                    response.getWriter().write("Unauthorized: " + authException.getMessage());
+                })
+                .accessDeniedHandler(accessDeniedHandler());
 
         return http.build();
     }
-
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
+        };
+    }
 
 }

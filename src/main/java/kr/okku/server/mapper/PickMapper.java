@@ -42,7 +42,7 @@ public class PickMapper {
     }
 
     // PlatformEntity -> PlatformDomain
-    private static PlatformDomain toDomain(PlatformEntity platformEntity) {
+    public static PlatformDomain toDomain(PlatformEntity platformEntity) {
         if (platformEntity == null) {
             return null;
         }
