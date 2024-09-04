@@ -1,18 +1,15 @@
 package kr.okku.server.service;
 
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
+import kr.okku.server.adapters.persistence.ItemPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
-import kr.okku.server.adapters.persistence.repository.user.UserEntity;
-import kr.okku.server.adapters.persistence.repository.user.UserRepository;
+import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
-import kr.okku.server.domain.CartDomain;
-import kr.okku.server.domain.ScrapedDataDomain;
+import kr.okku.server.domain.*;
 import kr.okku.server.dto.controller.PageInfoResponseDTO;
 import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
-import kr.okku.server.domain.PickDomain;
-import kr.okku.server.domain.PlatformDomain;
 import kr.okku.server.enums.PlatformInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,29 +17,37 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 @Service
 public class PickService {
     private final PickPersistenceAdapter pickPersistenceAdapter;
     private final CartPersistenceAdapter cartPersistenceAdapter;
     private final ScraperAdapter scraperAdapter;
-    private final UserRepository userRepository;
+    private final UserPersistenceAdapter userPersistenceAdapter;
+
+    private final ItemPersistenceAdapter itemPersistenceAdapter;
 
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserRepository userRepository) {
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.scraperAdapter = scraperAdapter;
-        this.userRepository = userRepository;
+        this.userPersistenceAdapter = userPersistenceAdapter;
+        this.itemPersistenceAdapter = itemPersistenceAdapter;
     }
+
     private void validateUserAndPickLimit(String userId) {
-        UserEntity user = userRepository.findById(userId)
+        UserDomain user = userPersistenceAdapter.findById(userId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND));
 
         if (!user.getIsPremium()) {
@@ -71,12 +76,60 @@ public class PickService {
     public PickDomain createPick(String userId, String url) {
         validateUserAndPickLimit(userId);
 
-        var scrapedData = scraperAdapter.scrape(url);
+        Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
+        ScrapedDataDomain scrapedData;
+
+        if(scrapedCachData.isEmpty()){
+            Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(url);
+
+            scrapedData = scrapedRawData
+                    .orElseGet(() -> handleNullCase(url));
+
+            itemPersistenceAdapter.save(url,scrapedData.getName(),scrapedData.getImage(),scrapedData.getPrice(),scrapedData.getProductPk(),scrapedData.getPlatform());
+        }else{
+            scrapedData=scrapedCachData.get();
+        }
+
+
 
         PickDomain pick = createPickDomain(userId, url, scrapedData);
-        pickPersistenceAdapter.save(pick);
+        PickDomain savedPick = pickPersistenceAdapter.save(pick);
 
-        return pick;
+        return savedPick;
+    }
+    private String getMetaTagContent(Document document, String cssQuery) {
+        Element element = document.selectFirst(cssQuery);
+        return element != null ? element.attr("content") : null;
+    }
+
+    private String extractDomain(String url) {
+        try {
+            URI uri = new URI(url);
+            String domain = uri.getHost();
+            return domain != null ? domain.replace("www.", "") : null;
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+    public ScrapedDataDomain handleNullCase(String url) {
+        try {
+            Document document = Jsoup.connect(url).get();
+
+            // Open Graph 메타 태그에서 데이터 추출
+            String title = getMetaTagContent(document, "meta[property=og:title]");
+            String image = getMetaTagContent(document, "meta[property=og:image]");
+            String platform = extractDomain(url);
+
+            // 추출한 데이터를 사용해 ScrapedDataDomain 객체 생성
+            return ScrapedDataDomain.builder()
+                    .name(title != null ? title : "제목 없음")
+                    .image(image != null ? image : "default-image.png") // 기본 이미지 설정 가능
+                    .url(url)
+                    .platform(platform != null ? platform : "Unknown Platform")
+                    .build();
+        } catch (IOException e) {
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR);
+        }
     }
 
     public void deletePicks(String userId, List<String> pickIds, String cartId, boolean isDeletePermenant) {
@@ -127,7 +180,7 @@ public class PickService {
             CartDomain cart = cartPersistenceAdapter.findById(cartId)
                     .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
             Page<PickDomain> pickPage = pickPersistenceAdapter.findByIdIn(cart.getPickItemIds(), pageable);
-            UserEntity user = userRepository.findById(cart.getUserId())
+            UserDomain user = userPersistenceAdapter.findById(cart.getUserId())
                     .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND));
 
             cartDTO = new PickCartResponseDTO();

@@ -43,9 +43,9 @@ public class ReviewService {
             throw new ErrorDomain(ErrorCode.MUST_LOGIN);
         }
 
-        ScrapedDataDomain scrapedData = scraperAdapter.scrape(url);
+        Optional<ScrapedDataDomain> scrapedData = scraperAdapter.scrape(url);
 
-        return scrapedData;
+        return scrapedData.get();
     }
     // 해당 서비스 내 공통 로직을 처리하는 private 메서드
     private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,

@@ -38,6 +38,4 @@ public class PickEntity {
     @Field("updated_at")
     @LastModifiedDate
     private Date updatedAt;
-
-    // Getters and Setters
 }

@@ -28,6 +28,9 @@ public enum PlatformInfo {
                         .build();
             }
         }
-        throw new IllegalArgumentException("Unknown platform name: " + platformName);
+        return PlatformDomain.builder()
+                .name(platformName)
+                .url(platformName)
+                .build();
     }
 }

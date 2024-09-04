@@ -1,5 +1,6 @@
 package kr.okku.server.adapters.persistence.repository.item;
 
+import kr.okku.server.adapters.persistence.repository.pick.PlatformEntity;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -16,14 +17,17 @@ public class ItemEntity {
     @Id
     private String id;
 
-    private String platform;
-    private String product_key;
     private String url;
-    private String name;
-    private Integer price;
 
-    @Field("img_url")
-    private String imgUrl;
+    private String name;
+
+    private int price;
+
+    private String image;
+
+    private String platform;
+
+    private String pk;
 
     @Field("created_at")
     @CreatedDate
@@ -32,6 +36,4 @@ public class ItemEntity {
     @Field("updated_at")
     @LastModifiedDate
     private Date updatedAt;
-
-    // Getters and Setters
 }

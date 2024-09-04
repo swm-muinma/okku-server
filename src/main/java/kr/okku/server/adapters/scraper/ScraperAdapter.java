@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
+
 @Service
 public class ScraperAdapter {
 
@@ -20,19 +22,19 @@ public class ScraperAdapter {
         this.restTemplate = restTemplate;
     }
 
-    public ScrapedDataDomain scrape(String url) {
+    public Optional<ScrapedDataDomain> scrape(String url) {
         try {
             ScraperResponseDto response = restTemplate.postForObject(scraperUrl + "/scrap", new ScrapeRequest(url), ScraperResponseDto.class);
-            return ScrapedDataDomain.builder()
+            return Optional.ofNullable(ScrapedDataDomain.builder()
                     .price(response.getPrice())
                     .image(response.getImg_url())
                     .name(response.getName())
                     .platform(response.getPlatform())
                     .productPk(response.getProduct_key())
                     .url(response.getUrl())
-                    .build();
+                    .build());
         } catch (Exception e) {
-            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR);
+            return Optional.ofNullable(null);
         }
     }
 
