@@ -65,6 +65,7 @@ public class ReviewInsightMapper {
         }
         return ReviewSummaryDomain.builder()
                 .description(reviewSummaryEntity.getDescription())
+                .reviewIds(Arrays.stream(reviewSummaryEntity.getReviewIds()).toList())
                 .build();
     }
 

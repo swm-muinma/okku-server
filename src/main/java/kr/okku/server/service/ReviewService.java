@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class ReviewService {
@@ -91,6 +92,7 @@ public class ReviewService {
                                    PickDomain pickDomain, String image, String name, Integer price, String url) {
         List<ReviewDetailDomain> reviews =review.getReviews();
         // cons와 pros의 ReviewSectionDTO 생성
+        System.out.println(insight.getCautions());
         List<ReviewSectionDto> cons = insight.getCautions().stream()
                 .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
                 .collect(Collectors.toList());
@@ -112,26 +114,42 @@ public class ReviewService {
     }
 
     private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
-        List<CommentDto> comments = reviewIds.stream()
-                .flatMap(reviewId -> reviews.stream()
-                        .filter(review -> review.getId().equals(reviewId))
-                        .findFirst()
-                        .stream()) // Optional을 스트림으로 변환하여, 값이 없으면 빈 스트림이 되도록 처리
-                .map(review -> new CommentDto(
-                        review.getGender() != null ? review.getGender() : "",
-                        review.getHeight(),
-                        review.getWeight(),
-                        review.getContent(),
-                        review.getImageUrl() != null ? review.getImageUrl() : ""
-                ))
+//        List<CommentDto> comments = reviewIds.stream()
+//                .flatMap(reviewId -> reviews.stream()
+//                        .filter(review -> review.getId().equals(reviewId))
+//                        .findFirst()
+//                        .stream()) // Optional을 스트림으로 변환하여, 값이 없으면 빈 스트림이 되도록 처리
+//                .map(review -> new CommentDto(
+//                        review.getGender() != null ? review.getGender() : "",
+//                        review.getHeight(),
+//                        review.getWeight(),
+//                        review.getContent(),
+//                        review.getImageUrl() != null ? review.getImageUrl() : ""
+//                ))
+//                .collect(Collectors.toList());
+        List<CommentDto> comments = IntStream.range(0, reviewIds.size())
+                .mapToObj(index -> {
+                    if (index < reviews.size()) {
+                        ReviewDetailDomain review = reviews.get(index); // 인덱스를 사용하여 리뷰를 가져옴
+                        return new CommentDto(
+                                review.getGender() != null ? review.getGender() : "",
+                                review.getHeight(),
+                                review.getWeight(),
+                                review.getContent(),
+                                review.getImageUrl() != null ? review.getImageUrl() : ""
+                        );
+                    } else {
+                        // 인덱스가 reviews 리스트의 크기를 초과하면 null 또는 빈 CommentDto 반환
+                        return new CommentDto("", 0, 0, "", "");
+                    }
+                })
                 .collect(Collectors.toList());
-
 
         return new ReviewSectionDto(description, comments.size(), comments);
     }
 
     private ReviewInsightDomain createReviewInsightDomain(ReviewDomain reviewDomain) {
-        if (!reviewDomain.isDoneScrapeReviews() && reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
+        if (reviewDomain.isDoneScrapeReviews() && reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
             return reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
         }
 

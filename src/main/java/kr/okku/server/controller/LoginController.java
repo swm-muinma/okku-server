@@ -1,12 +1,15 @@
 package kr.okku.server.controller;
 
+import kr.okku.server.domain.ReviewInsightDomain;
 import kr.okku.server.dto.controller.refresh.TokenResponse;
+import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.security.JwtTokenProvider;
 import kr.okku.server.service.Oauth2Service;
 import kr.okku.server.service.RefreshService;
+import kr.okku.server.service.ReviewService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +23,15 @@ public class LoginController {
 
     private final Oauth2Service oauth2Service;
     private final RefreshService refreshService;
+
+    private final ReviewService reviewService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginController(Oauth2Service oauth2Service, JwtTokenProvider jwtTokenProvider,RefreshService refreshService) {
+    public LoginController(Oauth2Service oauth2Service, JwtTokenProvider jwtTokenProvider,RefreshService refreshService, ReviewService reviewService) {
         this.oauth2Service = oauth2Service;
         this.jwtTokenProvider = jwtTokenProvider;
         this.refreshService = refreshService;
+        this.reviewService = reviewService;
     }
 
     // Handle Kakao login with token
@@ -47,6 +53,11 @@ public class LoginController {
         List<String> rolse = new ArrayList<>();
         rolse.add(RoleEnum.USER.getValue());
         return jwtTokenProvider.createAccessToken(userId, rolse);
+    }
+
+    @GetMapping("/review-test")
+    public ProductReviewDto reviewTest(){
+        return reviewService.getReviewsWithoutLogin("114266966","zigzag","sada");
     }
 
     @GetMapping("/oauth2/code/{platform}")

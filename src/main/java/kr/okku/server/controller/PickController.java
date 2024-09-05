@@ -53,7 +53,7 @@ public class PickController {
     public ResponseEntity<UserPicksResponseDTO> getMyPicks(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(required = false) String cartId,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         String userId = userDetails.getUsername();

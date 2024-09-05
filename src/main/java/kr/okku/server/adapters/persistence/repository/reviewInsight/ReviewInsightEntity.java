@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 
 @Data
-@Document(collection = "reviewInsights")
+@Document(collection = "insights")
 public class ReviewInsightEntity {
 
     @Id
@@ -18,7 +18,7 @@ public class ReviewInsightEntity {
 
     private String platform;
 
-    @Field("product_pk")
+    @Field("product_key")
     private String productPk;
 
     private ReviewSummaryEntity[] cautions;

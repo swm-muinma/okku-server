@@ -23,6 +23,6 @@ public class ReviewEntity {
     @Field("is_done_scrape_reviews")
     private boolean isDoneScrapeReviews;
 
-    @Field("reviews")
+    @Field("review_list")
     private List<ReviewDetailEntity> reviews;
 }
