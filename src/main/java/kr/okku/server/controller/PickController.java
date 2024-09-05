@@ -68,7 +68,7 @@ public class PickController {
         return ResponseEntity.ok(reviewService.getReviews(pickId));
     }
 
-    @PatchMapping("/")
+    @PatchMapping("")
     public ResponseEntity<Void> movePicks(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody MovePicksRequest request
