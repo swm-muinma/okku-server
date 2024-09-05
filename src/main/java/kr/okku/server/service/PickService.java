@@ -269,8 +269,11 @@ public class PickService {
         // Retrieve the cart from the repository
         CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
 
-        // Add pick IDs to the cart
-        cart.getPickItemIds().addAll(pickIds);
+        List<String> mutablePickIds = new ArrayList<>(cart.getPickItemIds() != null ? cart.getPickItemIds() : new ArrayList<>());
+
+        mutablePickIds.addAll(pickIds);
+
+        cart.setPickItemIds(mutablePickIds);
 
         // Save the updated cart
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
