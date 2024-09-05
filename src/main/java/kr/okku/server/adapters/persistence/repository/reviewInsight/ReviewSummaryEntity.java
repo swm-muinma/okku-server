@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class ReviewSummaryEntity {
 
     private String description;
-    @Field("review_ids")
+    @Field("reviewIds")
     private String[] reviewIds;
 
 }

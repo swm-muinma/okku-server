@@ -8,9 +8,11 @@ import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.ReviewDomain;
 import kr.okku.server.mapper.PickMapper;
 import kr.okku.server.mapper.ReviewMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +20,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewPersistenceAdapter {
-
     private final ReviewRepository reviewRepository;
 
     // PickRepository 의존성 주입
@@ -27,7 +28,7 @@ public class ReviewPersistenceAdapter {
     }
 
     public ReviewDomain findByProductPkAndPlatform(String productPk, String platform){
-        return ReviewMapper.toDomain(reviewRepository.findByPlatformAndProductKey(productPk,platform).get());
+        return ReviewMapper.toDomain(reviewRepository.findByPlatformAndProductKey(platform,productPk).get());
     }
 
 }
