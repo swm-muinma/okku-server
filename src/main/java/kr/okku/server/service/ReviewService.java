@@ -6,6 +6,7 @@ import kr.okku.server.adapters.persistence.ReviewPersistenceAdapter;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
 import kr.okku.server.dto.controller.review.*;
+import kr.okku.server.enums.ReviewStatusEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,8 @@ public class ReviewService {
     // 해당 서비스 내 공통 로직을 처리하는 private 메서드
     private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
                                                  String image, String name, Integer price, String url) {
-        ReviewDomain reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
-        ReviewInsightDomain insight = this.createReviewInsightDomain(reviews);
-        return toDto(platform, reviews, insight, pick, image, name, price, url);
+        Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
+        return createProductReviewDto(reviews, platform, pick, image, name, price, url);
     }
 
     // 로그인 없이 리뷰를 가져오는 메서드
@@ -88,30 +88,6 @@ public class ReviewService {
         );
     }
 
-    private ProductReviewDto toDto(String platform, ReviewDomain review, ReviewInsightDomain insight,
-                                   PickDomain pickDomain, String image, String name, Integer price, String url) {
-        List<ReviewDetailDomain> reviews =review.getReviews();
-        // cons와 pros의 ReviewSectionDTO 생성
-        System.out.println(insight.getCautions());
-        List<ReviewSectionDto> cons = insight.getCautions().stream()
-                .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
-                .collect(Collectors.toList());
-
-        List<ReviewSectionDto> pros = insight.getPositives().stream()
-                .map(positive -> createReviewSectionDTO(positive.getDescription(), positive.getReviewIds(), reviews, platform))
-                .collect(Collectors.toList());
-
-        return ProductReviewDto.builder()
-                .pick(new PickDto(
-                        pickDomain != null ? pickDomain.getId() : null,
-                        image,
-                        name,
-                        price,
-                        url
-                ))
-                .reviews(new ReviewsDto(review.isDoneScrapeReviews(),cons, pros))
-                .build();
-    }
 
     private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
 //        List<CommentDto> comments = reviewIds.stream()
@@ -148,20 +124,85 @@ public class ReviewService {
         return new ReviewSectionDto(description, comments.size(), comments);
     }
 
-    private ReviewInsightDomain createReviewInsightDomain(ReviewDomain reviewDomain) {
-        if (reviewDomain.isDoneScrapeReviews() && reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
-            return reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
+    public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url) {
+        // ReviewInsightDomain 생성 로직
+        ReviewInsightDomain insight;
+        boolean isInsightEmpty = true;
+        if (optionalReviewDomain.isEmpty()) {
+            // Optional이 비어있을 경우 빈 ReviewInsightDomain 생성
+            insight = createEmptyReviewInsightDomain();
+        } else {
+            ReviewDomain reviewDomain = optionalReviewDomain.get();
+            if (reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
+                // 정상적으로 리뷰가 완료되었고 리뷰 목록이 존재할 경우
+                Optional<ReviewInsightDomain> optionalInsight = reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
+
+
+                if(optionalInsight.isEmpty()){
+                    insight = createEmptyReviewInsightDomain();
+                }else{
+                    insight = optionalInsight.get();
+                    isInsightEmpty = false;
+                }
+            } else {
+                // 리뷰가 완료되지 않았거나 리뷰 목록이 없을 경우 빈 ReviewInsightDomain 생성
+                insight = createEmptyReviewInsightDomain();
+            }
+        }
+        // 만약 insight가 비어있는 경우라면, toDto 호출 없이 빈 ProductReviewDto를 반환할 수도 있음
+        if (!isInsightEmpty) {
+            return createEmptyProductReviewDto(pick, image, name, price, url);
         }
 
-        if (!reviewDomain.isDoneScrapeReviews() && (reviewDomain.getReviews() == null || reviewDomain.getReviews().isEmpty())) {
-            return createEmptyReviewInsightDomain();
-        }
+        // toDto 로직 통합
+        ReviewDomain review = optionalReviewDomain.orElse(null);
+        List<ReviewDetailDomain> reviews = review != null ? review.getReviews() : Collections.emptyList();
 
-        if (reviewDomain.isDoneScrapeReviews() && (reviewDomain.getReviews() == null || reviewDomain.getReviews().isEmpty())) {
-            return createEmptyReviewInsightDomain();
-        }
+        // cons와 pros의 ReviewSectionDTO 생성
+        List<ReviewSectionDto> cons = insight.getCautions().stream()
+                .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
+                .collect(Collectors.toList());
 
-        return createEmptyReviewInsightDomain();
+        List<ReviewSectionDto> pros = insight.getPositives().stream()
+                .map(positive -> createReviewSectionDTO(positive.getDescription(), positive.getReviewIds(), reviews, platform))
+                .collect(Collectors.toList());
+
+        // ProductReviewDto 생성
+        return ProductReviewDto.builder()
+                .pick(new PickDto(
+                        pick != null ? pick.getId() : null,
+                        image,
+                        name,
+                        price,
+                        url
+                ))
+                .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
+                .build();
+    }
+
+
+    // 만약 빈 ProductReviewDto 생성 로직이 필요하다면 이 메서드를 이용할 수 있음
+    private ProductReviewDto createEmptyProductReviewDto(PickDomain pick, String image, String name, Integer price, String url) {
+        return ProductReviewDto.builder()
+                .pick(new PickDto(
+                        pick != null ? pick.getId() : null,
+                        image,
+                        name,
+                        price,
+                        url
+                ))
+                .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
+                .build();
+    }
+
+    private ReviewStatusEnum getReviewStatus(ReviewDomain review){
+        if(review.getReviews() != null && review.getReviews().size()!=0  && review.isDoneScrapeReviews()){
+            return ReviewStatusEnum.DONE;
+        }
+        if(review.isDoneScrapeReviews()){
+            return ReviewStatusEnum.REVIEW_NOT_EXIST;
+        }
+        return ReviewStatusEnum.PROCESSING;
     }
 
     private ReviewInsightDomain createEmptyReviewInsightDomain() {

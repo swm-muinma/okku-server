@@ -18,8 +18,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
         // 기타 예외 처리 (로그 추가 가능)
         // ex.printStackTrace() 또는 logger 사용 가능
-        Sentry.captureException(ex); // 예외 캡쳐
-//        ex.printStackTrace(); // 스택 트레
+//        Sentry.captureException(ex); // 예외 캡쳐
+        ex.printStackTrace(); // 스택 트레
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

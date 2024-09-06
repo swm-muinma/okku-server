@@ -16,6 +16,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +28,10 @@ public class ReviewPersistenceAdapter {
         this.reviewRepository = reviewRepository;
     }
 
-    public ReviewDomain findByProductPkAndPlatform(String productPk, String platform){
-        return ReviewMapper.toDomain(reviewRepository.findByPlatformAndProductKey(platform,productPk).get());
+    public Optional<ReviewDomain> findByProductPkAndPlatform(String productPk, String platform) {
+        return reviewRepository.findByPlatformAndProductKey(platform, productPk)
+                .map(ReviewMapper::toDomain);
     }
+
 
 }
