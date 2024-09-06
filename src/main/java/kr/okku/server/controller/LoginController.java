@@ -71,11 +71,9 @@ public class LoginController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.REFRESH_INVALID);
+        if (refreshToken == null) {
+            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
         }
-
         TokenResponse result = refreshService.updateRefresh(refreshToken);
         return ResponseEntity.ok(result);
     }
