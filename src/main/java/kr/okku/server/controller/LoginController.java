@@ -57,7 +57,7 @@ public class LoginController {
 
     @GetMapping("/review-test")
     public ProductReviewDto reviewTest(){
-        return reviewService.getReviewsWithoutLogin("140062023","zigzag","sada");
+        return reviewService.getReviewsWithoutLogin("140062026","zigzag","sada");
     }
 
     @GetMapping("/oauth2/code/{platform}")
