@@ -8,6 +8,7 @@ import kr.okku.server.mapper.ReviewInsightMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReviewInsightPersistenceAdapter {
@@ -19,9 +20,15 @@ public class ReviewInsightPersistenceAdapter {
         this.reviewInsightRepository = reviewInsightRepository;
     }
 
-    public ReviewInsightDomain findByProductPkAndPlatform(String productPk, String platform){
-        List<ReviewInsightEntity> reviewInsightEntities = reviewInsightRepository.findAllByProductPkAndPlatform(productPk,platform);
+    public Optional<ReviewInsightDomain> findByProductPkAndPlatform(String productPk, String platform) {
+        // Repository에서 데이터를 조회하여 리스트로 받음
+        List<ReviewInsightEntity> reviewInsightEntities = reviewInsightRepository.findAllByProductPkAndPlatform(productPk, platform);
         System.out.println(reviewInsightEntities);
-        return ReviewInsightMapper.toDomain(reviewInsightEntities.get(0));
+
+        // 리스트가 비어있지 않다면 첫 번째 요소를 맵핑하여 Optional로 감싸고, 비어있다면 Optional.empty() 반환
+        return reviewInsightEntities.isEmpty()
+                ? Optional.empty()
+                : Optional.ofNullable(ReviewInsightMapper.toDomain(reviewInsightEntities.get(0)));
     }
+
 }
