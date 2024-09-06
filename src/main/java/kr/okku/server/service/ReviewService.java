@@ -150,7 +150,7 @@ public class ReviewService {
             }
         }
         // 만약 insight가 비어있는 경우라면, toDto 호출 없이 빈 ProductReviewDto를 반환할 수도 있음
-        if (!isInsightEmpty) {
+        if (isInsightEmpty) {
             return createEmptyProductReviewDto(pick, image, name, price, url);
         }
 
