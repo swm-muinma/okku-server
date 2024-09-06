@@ -10,9 +10,9 @@ import java.util.List;
 public interface PickRepository extends MongoRepository<PickEntity, String> {
     Page<PickEntity> findByUserId(String userId, Pageable pageable);
 
-    List<PickEntity> findByUserId(String userId);
+    List<PickEntity> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    List<PickEntity> findByIdIn(List<String> pickIds);
+    List<PickEntity> findByIdInOrderByCreatedAtDesc(List<String> pickIds);
 
     Page<PickEntity> findByIdIn(List<String> pickIds,Pageable pageable);
 

@@ -40,7 +40,7 @@ public class PickPersistenceAdapter {
     }
     // 사용자 ID로 Pick 조회
     public List<PickDomain> findByUserId(String userId) {
-        return pickRepository.findByUserId(userId)
+        return pickRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(PickMapper::toDomain)
                 .collect(Collectors.toList());
@@ -48,7 +48,7 @@ public class PickPersistenceAdapter {
 
     // 여러 Pick ID로 조회
     public List<PickDomain> findByIdIn(List<String> pickIds) {
-        return pickRepository.findByIdIn(pickIds)
+        return pickRepository.findByIdInOrderByCreatedAtDesc(pickIds)
                 .stream()
                 .map(PickMapper::toDomain)
                 .collect(Collectors.toList());
