@@ -5,10 +5,8 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import kr.okku.server.adapters.oauth.apple.AppleClientAdapter;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.RefreshPersistenceAdapter;
@@ -17,13 +15,20 @@ import kr.okku.server.adapters.persistence.repository.refresh.RefreshRepository;
 import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.UserDomain;
+import kr.okku.server.dto.oauth.ApplePublicKey;
+import kr.okku.server.dto.oauth.ApplePublicKeys;
+import kr.okku.server.dto.oauth.AppleTokenParser;
+import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.enums.FormEnum;
 import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.security.JwtTokenProvider;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,12 +37,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.math.BigInteger;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
+import org.bouncycastle.openssl.PEMParser;
 
 @Service
 public class Oauth2Service {
@@ -47,13 +64,17 @@ public class Oauth2Service {
     private final RefreshPersistenceAdapter refreshPersistenceAdapter;
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final AppleClientAdapter appleClientAdapter;
+    private final AppleTokenParser appleTokenParser;
 
     @Autowired
     public Oauth2Service(RefreshPersistenceAdapter refreshPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter,
-                         JwtTokenProvider jwtTokenProvider) {
+                         JwtTokenProvider jwtTokenProvider, AppleClientAdapter appleClientAdapter, AppleTokenParser appleTokenParser) {
         this.refreshPersistenceAdapter = refreshPersistenceAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.appleClientAdapter = appleClientAdapter;
+        this.appleTokenParser = appleTokenParser;
     }
     @Value("${spring.oauth.kakao.client-id}")
     private String kakaoClientId;
@@ -83,7 +104,12 @@ public class Oauth2Service {
 
     @Value("${spring.oauth.apple.private-key}")
     private String applePrivateKey;
+
+    @Value("${spring.oauth.apple.aud}")
+    private String aud;
     private final RestTemplate restTemplate = new RestTemplate();
+
+
 
     // Retrieve the redirect URL for the platform
     public String getRedirect(String platform) {
@@ -93,6 +119,7 @@ public class Oauth2Service {
                     appleClientId, appleRedirectUri
             );
         }
+
         if ("kakao".equalsIgnoreCase(platform)) {
             return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
                     kakaoClientId, kakaoRedirectUri);
@@ -100,91 +127,92 @@ public class Oauth2Service {
         throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
     }
 
-    private Map<String, Object> handleAppleLogin(String authorizationCode) {
+    private static final String SIGN_ALGORITHM_HEADER = "alg";
+    private static final String KEY_ID_HEADER = "kid";
+    private static final int POSITIVE_SIGN_NUMBER = 1;
+
+
+    public PublicKey generate(Map<String, String> headers, ApplePublicKeys publicKeys) {
+        // id_token에서 추출한 alg, kid와 일치하는 alg, kid를 가진 publicKey
+        ApplePublicKey applePublicKey = publicKeys.getMatchingKey(
+                headers.get(SIGN_ALGORITHM_HEADER),
+                headers.get(KEY_ID_HEADER)
+        );
+        return generatePublicKey(applePublicKey);
+    }
+
+    // publicKey를 통해 RSAPublicKey 생성 & JWS E256 Signature 검증
+    private PublicKey generatePublicKey(ApplePublicKey applePublicKey) {
+        byte[] nBytes = Base64.getUrlDecoder().decode(applePublicKey.n());
+        byte[] eBytes = Base64.getUrlDecoder().decode(applePublicKey.e());
+
+        // publicKey의 n, e 값으로 RSAPublicKeySpec 생성
+        BigInteger n = new BigInteger(POSITIVE_SIGN_NUMBER, nBytes);
+        BigInteger e = new BigInteger(POSITIVE_SIGN_NUMBER, eBytes);
+        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(n, e);
+
         try {
-            // Apple Auth 관련 정보 설정
-            String privateKey = applePrivateKey;
-            String tokenUrl = "https://appleid.apple.com/auth/token";
-
-            // 토큰 요청
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/x-www-form-urlencoded");
-            Map<String, String> params = new HashMap<>();
-            params.put("grant_type", "authorization_code");
-            params.put("code", authorizationCode);
-            params.put("client_id", appleClientId);
-            params.put("client_secret", generateClientSecret(privateKey));
-
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(params, headers);
-            ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
-            Map<String, Object> tokenResponse = response.getBody();
-
-            // 토큰에서 ID Token 추출 및 검증
-            String idToken = (String) tokenResponse.get("id_token");
-            Jws<Claims> claims = validateAppleToken(idToken);
-            String appleId = claims.getBody().getSubject();
-
-            // 사용자 처리 로직
-            boolean isNewUser = false;
-            UserDomain user = userPersistenceAdapter.findByAppleId(appleId).orElse(null);
-            if (user == null) {
-                user = UserDomain.builder()
-                        .appleId(appleId)
-                        .build();
-                userPersistenceAdapter.save(user);
-                isNewUser = true;
-            }
-
-            // JWT 액세스 토큰 및 리프레시 토큰 생성
-            String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(), List.of(RoleEnum.USER.getValue()));
-            String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
-            refreshPersistenceAdapter.save(refreshToken);
-
-            Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put("accessToken", newAccessToken);
-            responseMap.put("refreshToken", refreshToken);
-            responseMap.put("isNewUser", isNewUser);
-            return responseMap;
-
-        } catch (Exception e) {
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED);
+            // publicKey의 kty 값으로 KeyFactory 생성
+            KeyFactory keyFactory = KeyFactory.getInstance(applePublicKey.kty());
+            // 생성한 KeyFactory와 PublicKeySpec으로 RSAPublicKey 생성
+            return keyFactory.generatePublic(rsaPublicKeySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
+            throw new ErrorDomain(ErrorCode.RSA_ERROR);
         }
     }
 
-    public String generateClientSecret(String privateKeyContent) {
+    private Map<String, Object> handleAppleLogin(String authorizationCode) {
+        String clientSecret = createClientSecret();
+        AppleTokenResponseDto authToken = appleClientAdapter.appleAuth(appleClientId, authorizationCode, "authorization_code", clientSecret);
+        Map<String, String> parseData = appleTokenParser.parseHeader(authToken.idToken());
+        ApplePublicKeys applePublicKeys = appleClientAdapter.getApplePublicKeys();
+        PublicKey validPublicKey = generate(parseData,applePublicKeys);
+        Claims clames = extractClaims(authToken.idToken(),validPublicKey);
+        String appleId = clames.get("sub").toString();
+        String name = clames.get("name").toString();
+        return processingAppleLogin(appleId,"",name);
+    }
+
+    public String createClientSecret() {
+        Date expirationDate = Date.from(LocalDateTime.now().plusDays(30).atZone(ZoneId.systemDefault()).toInstant());
+        Map<String, Object> jwtHeader = new HashMap<>();
+        jwtHeader.put("alg", "ES256");
+        jwtHeader.put("kid", appleKeyId);
+
+        return Jwts.builder()
+                .setHeaderParams(jwtHeader)
+                .setIssuer(appleTeamId)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(expirationDate)
+                .setAudience(aud)
+                .setSubject(appleClientId)
+                .signWith(getPrivateKey(), SignatureAlgorithm.ES256)
+                .compact();
+    }
+    public Claims extractClaims(String idToken, PublicKey publicKey) {
         try {
-            // Apple의 Private Key를 PKCS8 형식으로 변환
-            String privateKeyPEM = privateKeyContent
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s", "");
-
-            byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyPEM);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("EC"); // Apple은 EC(Elliptic Curve) 알고리즘 사용
-            PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-
-            // JWT Claims 생성
-            long nowMillis = System.currentTimeMillis();
-            Date now = new Date(nowMillis);
-            Date expiration = new Date(nowMillis + 1800000); // 30분 유효
-
-            String clientSecret = Jwts.builder()
-                    .setHeaderParam("kid", "APPLE_KEY_ID") // Apple 개발자 계정의 Key ID
-                    .setHeaderParam("alg", "ES256") // Apple에서 요구하는 알고리즘
-                    .setIssuer("APPLE_TEAM_ID") // Apple 개발자 계정의 Team ID
-                    .setIssuedAt(now)
-                    .setExpiration(expiration)
-                    .setAudience("https://appleid.apple.com")
-                    .setSubject("APPLE_CLIENT_ID") // Apple에서 설정한 Client ID
-                    .setId(UUID.randomUUID().toString())
-                    .signWith(privateKey, SignatureAlgorithm.ES256)
-                    .compact();
-
-            return clientSecret;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate Apple client secret", e);
+            return Jwts.parserBuilder()
+                    .setSigningKey(publicKey)
+                    .build()
+                    .parseClaimsJws(idToken)
+                    .getBody();
+        } catch (UnsupportedJwtException e) {
+            throw new UnsupportedJwtException("Extract Claims Error : 지원되지 않는 JWT 형식입니다.");
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Extract Claims Error : 유효하지 않은 값입니다.");
+        } catch (JwtException e) {
+            throw new JwtException("Extract Claims Error : JWT 처리 중 오류가 발생했습니다.");
+        }
+    }
+    private PrivateKey getPrivateKey() {
+        try {
+            Reader pemReader = new StringReader(applePrivateKey);
+            PEMParser pemParser = new PEMParser(pemReader);
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
+            return converter.getPrivateKey(object);
+        }catch (Exception e){
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED);
         }
     }
 
@@ -247,7 +275,6 @@ public class Oauth2Service {
             String accessToken = (String) tokenResponse.get("access_token");
 
             return kakaoLoginWithToken(accessToken, "");
-
     }
 
     // Kakao login with token and optional recommendation
@@ -281,6 +308,41 @@ public class Oauth2Service {
                     .name(nickname)
                     .build();
             user.setKakaoId(kakaoId);
+            if (recomend != null && !recomend.isEmpty()) {
+                UserDomain recomendUser = userPersistenceAdapter.findById(recomend).get();
+                recomendUser.setIsPremium(true);
+                userPersistenceAdapter.save(recomendUser);
+            }
+            user = userPersistenceAdapter.save(user);
+            isNewUser = true;
+        }
+
+        List<String> roles = new ArrayList<>();
+        roles.add(RoleEnum.USER.getValue());
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(),roles);
+
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+
+        refreshPersistenceAdapter.save(refreshToken);
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("accessToken", newAccessToken);
+        responseMap.put("refreshToken", refreshToken);
+        responseMap.put("isNewUser", isNewUser);
+
+        return responseMap;
+    }
+
+    // Apple 로그인 처리
+    public Map<String, Object> processingAppleLogin(String appleId, String recomend, String nickName) {
+        boolean isNewUser = false;
+        UserDomain user = userPersistenceAdapter.findByAppleId(appleId).get();
+        if (user == null) {
+            user = UserDomain.builder()
+                    .name(nickName)
+                    .build();
+            user.setKakaoId(appleId);
             if (recomend != null && !recomend.isEmpty()) {
                 UserDomain recomendUser = userPersistenceAdapter.findById(recomend).get();
                 recomendUser.setIsPremium(true);

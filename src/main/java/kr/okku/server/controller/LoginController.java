@@ -48,6 +48,19 @@ public class LoginController {
         return ResponseEntity.ok(result);
     }
 
+
+    @PostMapping("/app/apple")
+    public ResponseEntity<Map<String, Object>> appleLoginWithToken(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String recommend = request.get("recommend");
+
+        if (token == null) {
+            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+        }
+
+        Map<String, Object> result = oauth2Service.kakaoLoginWithToken(token, recommend);
+        return ResponseEntity.ok(result);
+    }
     @GetMapping("/test/{userId}")
     public String test(@PathVariable String userId){
         List<String> rolse = new ArrayList<>();
