@@ -38,6 +38,11 @@ public class UserPersistenceAdapter {
         return Optional.ofNullable(UserMapper.toDomain(userEntity));
     }
 
+    public Optional<UserDomain> findByAppleId(String appleId){
+        UserEntity userEntity = userRepository.findByAppleId(appleId).get();
+        return Optional.ofNullable(UserMapper.toDomain(userEntity));
+    }
+
 
     public void deleteById(String userId) {
         userRepository.deleteById(userId);

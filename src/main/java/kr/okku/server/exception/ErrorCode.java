@@ -19,7 +19,13 @@ public enum ErrorCode {
     MUST_LOGIN("must login", 402),
     SCRAPER_ERROR("scraper error", 500),
     REFRESH_INVALID("Not Valid refreshToken", 400),
-    DUPLICATED_PICK("Duplicated pick", 400);
+    DUPLICATED_PICK("Duplicated pick", 400),
+    APPLE_LOGIN_TOKEN_HEADER_MAPPING("Parsing Header Error : 토큰의 헤더를 매핑하는 데 실패했습니다", 500),
+    APPLE_LOGIN_TOKEN_HEADER("Parsing Header Error : 토큰 처리 중 오류가 발생했습니다",500),
+    APPLE_LOGIN_INVALID_TOKEN("Parsing Header Error : 유효하지 않은 토큰 형식입니다.",400),
+    RSA_ERROR("RSAPublicKey생성 중 오류가 발생했습니다.",500),
+    APPLE_LOGIN_FAILED("Apple login failed",500);
+
     private final String message;
     private final int statusCode;
 

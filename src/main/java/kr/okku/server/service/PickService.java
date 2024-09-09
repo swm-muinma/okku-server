@@ -11,6 +11,7 @@ import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.enums.PlatformInfo;
+import kr.okku.server.mapper.PickMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,45 +37,27 @@ public class PickService {
 
     private final ItemPersistenceAdapter itemPersistenceAdapter;
 
+
+    private final Utils utils;
+
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter) {
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter,Utils utils
+                     ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.scraperAdapter = scraperAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.itemPersistenceAdapter = itemPersistenceAdapter;
-    }
-
-    private void validateUserAndPickLimit(String userId) {
-        UserDomain user = userPersistenceAdapter.findById(userId)
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND));
-
-        if (!user.getIsPremium()) {
-            List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
-            if (picks.size() > 8) {
-                throw new ErrorDomain(ErrorCode.MUST_INVITE);
-            }
-        }
-    }
-
-    private PickDomain createPickDomain(String userId, String url, ScrapedDataDomain scrapedData) {
-        String platformName = scrapedData.getPlatform();
-        PlatformDomain platformInfo = PlatformInfo.fromPlatformName(platformName);
-
-        return PickDomain.builder()
-                .name(scrapedData.getName())
-                .url(url)
-                .userId(userId)
-                .price(scrapedData.getPrice())
-                .image(scrapedData.getImage())
-                .platform(platformInfo)
-                .pk(scrapedData.getProductPk())
-                .build();
+        this.utils = utils;
     }
 
     public PickDomain createPick(String userId, String url) {
-        validateUserAndPickLimit(userId);
+        UserDomain user = userPersistenceAdapter.findById(userId)
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND));
+        List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
+
+        utils.validatePickLimit(user,picks);
 
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
         ScrapedDataDomain scrapedData;
@@ -82,54 +65,37 @@ public class PickService {
         if(scrapedCachData.isEmpty()){
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(url);
 
-            scrapedData = scrapedRawData
-                    .orElseGet(() -> handleNullCase(url));
-
-            itemPersistenceAdapter.save(url,scrapedData.getName(),scrapedData.getImage(),scrapedData.getPrice(),scrapedData.getProductPk(),scrapedData.getPlatform());
+            scrapedData = scrapedRawData.orElseGet(() -> {
+                try {
+                    Document document = Jsoup.connect(url).get();
+                    return ScrapedDataDomain.fromDocument(document, url);
+                } catch (IOException e) {
+                    return ScrapedDataDomain.builder()
+                            .name("제목 없음")
+                            .image("default-image.png")
+                            .url(url)
+                            .platform("Unknown Platform")
+                            .build();
+                }
+            });
+            itemPersistenceAdapter.save(
+                    url,
+                    scrapedData.getName(),
+                    scrapedData.getImage(),
+                    scrapedData.getPrice(),
+                    scrapedData.getProductPk(),
+                    scrapedData.getPlatform()
+            );
         }else{
             scrapedData=scrapedCachData.get();
         }
 
-
-
-        PickDomain pick = createPickDomain(userId, url, scrapedData);
+        PickDomain pick = PickDomain.builder()
+                .setPickDomainFromScrapedData(userId, url, scrapedData)
+                .build();
         PickDomain savedPick = pickPersistenceAdapter.save(pick);
 
         return savedPick;
-    }
-    private String getMetaTagContent(Document document, String cssQuery) {
-        Element element = document.selectFirst(cssQuery);
-        return element != null ? element.attr("content") : null;
-    }
-
-    private String extractDomain(String url) {
-        try {
-            URI uri = new URI(url);
-            String domain = uri.getHost();
-            return domain != null ? domain.replace("www.", "") : null;
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-    public ScrapedDataDomain handleNullCase(String url) {
-        try {
-            Document document = Jsoup.connect(url).get();
-
-            // Open Graph 메타 태그에서 데이터 추출
-            String title = getMetaTagContent(document, "meta[property=og:title]");
-            String image = getMetaTagContent(document, "meta[property=og:image]");
-            String platform = extractDomain(url);
-
-            // 추출한 데이터를 사용해 ScrapedDataDomain 객체 생성
-            return ScrapedDataDomain.builder()
-                    .name(title != null ? title : "제목 없음")
-                    .image(image != null ? image : "default-image.png") // 기본 이미지 설정 가능
-                    .url(url)
-                    .platform(platform != null ? platform : "Unknown Platform")
-                    .build();
-        } catch (IOException e) {
-            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR);
-        }
     }
 
     public void deletePicks(String userId, List<String> pickIds, String cartId, boolean isDeletePermenant) {
@@ -162,13 +128,6 @@ public class PickService {
     }
 
     public UserPicksResponseDTO getMyPicks(String userId, String cartId, int page, int size) {
-//        if (page < 1) {
-//            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
-//        }
-//
-//        if (size < 1) {
-//            throw new ErrorDomain(ErrorCode.INVALID_PAGE);
-//        }
 
         PageRequest pageable = PageRequest.of(page, size);
 
@@ -188,10 +147,10 @@ public class PickService {
             cartDTO.setHost(new PickCartHostResponseDTO(cart.getUserId(), user.getName()));
 
             picks = pickPage.getContent().stream()
-                    .map(this::convertToPickDTO)
+                    .map(PickMapper::convertToPickDTO)
                     .collect(Collectors.toList());
 
-            pageInfo = convertToPageInfoDTO(pickPage);
+            pageInfo = PickMapper.convertToPageInfoDTO(pickPage);
         } else {
             Page<PickDomain> pickPage = pickPersistenceAdapter.findByUserId(userId, pageable);
             System.out.println(pickPage);
@@ -200,10 +159,10 @@ public class PickService {
             cartDTO.setHost(new PickCartHostResponseDTO(userId, "testUser"));
 
             picks = pickPage.getContent().stream()
-                    .map(this::convertToPickDTO)
+                    .map(PickMapper::convertToPickDTO)
                     .collect(Collectors.toList());
 
-            pageInfo = convertToPageInfoDTO(pickPage);
+            pageInfo = PickMapper.convertToPageInfoDTO(pickPage);
         }
 
         UserPicksResponseDTO responseDTO = new UserPicksResponseDTO();
@@ -255,12 +214,10 @@ public class PickService {
                 throw new ErrorDomain(ErrorCode.DUPLICATED_PICK);
             }
 
-            // Remove picks from the original carts
             this.deleteFromCart(pickIds, sourceCartId);
 
             return addedPicks;
     }
-
 
     @Transactional
     public List<String> addToCart(List<String> pickIds, String cartId) {
@@ -329,32 +286,4 @@ public class PickService {
         }
     }
 
-    // DTO 변환 메서드들
-    private PickItemResponseDTO convertToPickDTO(PickDomain pickDomain) {
-        PickItemResponseDTO dto = new PickItemResponseDTO();
-        dto.setId(pickDomain.getId());
-        dto.setName(pickDomain.getName());
-        dto.setPrice(pickDomain.getPrice());
-        dto.setImage(pickDomain.getImage());
-        dto.setUrl(pickDomain.getUrl());
-
-        PickPlatformResponseDTO platformDTO = new PickPlatformResponseDTO();
-        platformDTO.setName(pickDomain.getPlatform().getName());
-        platformDTO.setImage(pickDomain.getPlatform().getImage());
-        platformDTO.setUrl(pickDomain.getPlatform().getUrl());
-
-        dto.setPlatform(platformDTO);
-        return dto;
-    }
-
-    private PageInfoResponseDTO convertToPageInfoDTO(Page<PickDomain> page) {
-        PageInfoResponseDTO pageInfo = new PageInfoResponseDTO();
-        pageInfo.setTotalDataCnt((int) page.getTotalElements());
-        pageInfo.setTotalPages(page.getTotalPages());
-        pageInfo.setLastPage(page.isLast());
-        pageInfo.setFirstPage(page.isFirst());
-        pageInfo.setRequestPage(page.getNumber() + 1);
-        pageInfo.setRequestSize(page.getSize());
-        return pageInfo;
-    }
 }
