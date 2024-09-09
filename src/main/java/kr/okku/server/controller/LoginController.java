@@ -58,7 +58,7 @@ public class LoginController {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
         }
 
-        Map<String, Object> result = oauth2Service.kakaoLoginWithToken(token, recommend);
+        Map<String, Object> result = oauth2Service.appleLoginWithToken(token, recommend);
         return ResponseEntity.ok(result);
     }
     @GetMapping("/test/{userId}")
