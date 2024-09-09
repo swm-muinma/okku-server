@@ -161,6 +161,18 @@ public class Oauth2Service {
         }
     }
 
+    public Map<String, Object> appleLoginWithToken(String authorizationCode, String recommend) {
+        String clientSecret = createClientSecret();
+        AppleTokenResponseDto authToken = appleClientAdapter.appleAuth(appleClientId, authorizationCode, "authorization_code", clientSecret);
+        Map<String, String> parseData = appleTokenParser.parseHeader(authToken.idToken());
+        ApplePublicKeys applePublicKeys = appleClientAdapter.getApplePublicKeys();
+        PublicKey validPublicKey = generate(parseData,applePublicKeys);
+        Claims clames = extractClaims(authToken.idToken(),validPublicKey);
+        String appleId = clames.get("sub").toString();
+        String name = clames.get("name").toString();
+        return processingAppleLogin(appleId,recommend,name);
+    }
+
     private Map<String, Object> handleAppleLogin(String authorizationCode) {
         String clientSecret = createClientSecret();
         AppleTokenResponseDto authToken = appleClientAdapter.appleAuth(appleClientId, authorizationCode, "authorization_code", clientSecret);
