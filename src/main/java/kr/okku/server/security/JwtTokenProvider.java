@@ -1,5 +1,7 @@
 package kr.okku.server.security;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,8 +11,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -116,5 +122,22 @@ public class JwtTokenProvider {
                 "", // 비밀번호가 필요하다면 설정
                 roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
         );
+    }
+
+    public Map<String, String> parseHeaders(String token) throws JsonProcessingException {
+        String header = token.split("\\.")[0];
+        return new ObjectMapper().readValue(decodeHeader(header), Map.class);
+    }
+
+    public String decodeHeader(String token) {
+        return new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+    }
+
+    public Claims getTokenClaims(String token, PublicKey publicKey) {
+        return Jwts.parserBuilder()
+                .setSigningKey(publicKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

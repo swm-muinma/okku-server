@@ -8,7 +8,9 @@ import java.util.Optional;
 public interface UserRepository extends MongoRepository<UserEntity, String> {
     Optional<UserEntity> findById(String userId);
 
-    Optional<UserEntity>  findByKakaoId(String userId);
+    Optional<UserEntity>  findByKakaoId(String kakaoId);
+
+    Optional<UserEntity> findByAppleId(String appleId);
 
     // 필요한 커스텀 메소드 추가
 }

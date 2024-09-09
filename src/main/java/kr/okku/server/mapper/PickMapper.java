@@ -3,6 +3,10 @@ import kr.okku.server.adapters.persistence.repository.pick.PickEntity;
 import kr.okku.server.adapters.persistence.repository.pick.PlatformEntity;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.PlatformDomain;
+import kr.okku.server.dto.controller.PageInfoResponseDTO;
+import kr.okku.server.dto.controller.pick.PickItemResponseDTO;
+import kr.okku.server.dto.controller.pick.PickPlatformResponseDTO;
+import org.springframework.data.domain.Page;
 
 public class PickMapper {
 
@@ -63,5 +67,33 @@ public class PickMapper {
         platformEntity.setImage(platformDomain.getImage());
         platformEntity.setUrl(platformDomain.getUrl());
         return platformEntity;
+    }
+
+    public static PickItemResponseDTO convertToPickDTO(PickDomain pickDomain) {
+        PickItemResponseDTO dto = new PickItemResponseDTO();
+        dto.setId(pickDomain.getId());
+        dto.setName(pickDomain.getName());
+        dto.setPrice(pickDomain.getPrice());
+        dto.setImage(pickDomain.getImage());
+        dto.setUrl(pickDomain.getUrl());
+
+        PickPlatformResponseDTO platformDTO = new PickPlatformResponseDTO();
+        platformDTO.setName(pickDomain.getPlatform().getName());
+        platformDTO.setImage(pickDomain.getPlatform().getImage());
+        platformDTO.setUrl(pickDomain.getPlatform().getUrl());
+
+        dto.setPlatform(platformDTO);
+        return dto;
+    }
+
+    public static PageInfoResponseDTO convertToPageInfoDTO(Page<PickDomain> page) {
+        PageInfoResponseDTO pageInfo = new PageInfoResponseDTO();
+        pageInfo.setTotalDataCnt((int) page.getTotalElements());
+        pageInfo.setTotalPages(page.getTotalPages());
+        pageInfo.setLastPage(page.isLast());
+        pageInfo.setFirstPage(page.isFirst());
+        pageInfo.setRequestPage(page.getNumber() + 1);
+        pageInfo.setRequestSize(page.getSize());
+        return pageInfo;
     }
 }

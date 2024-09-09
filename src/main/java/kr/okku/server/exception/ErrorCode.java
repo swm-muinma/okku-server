@@ -19,7 +19,8 @@ public enum ErrorCode {
     MUST_LOGIN("must login", 402),
     SCRAPER_ERROR("scraper error", 500),
     REFRESH_INVALID("Not Valid refreshToken", 400),
-    DUPLICATED_PICK("Duplicated pick", 400);
+    DUPLICATED_PICK("Duplicated pick", 400),
+    APPLE_LOGIN_FAILED("Apple login failed",500);
     private final String message;
     private final int statusCode;
 
