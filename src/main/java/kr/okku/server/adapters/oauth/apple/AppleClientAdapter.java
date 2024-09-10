@@ -20,4 +20,10 @@ public interface AppleClientAdapter {
             @RequestParam("client_secret") String clientSecret);
     @GetMapping("/auth/keys")
     ApplePublicKeys getApplePublicKeys();
+
+    @PostMapping("/auth/revoke")
+    AppleTokenResponseDto appleRevoke(
+            @RequestParam("client_id") String clientId,
+            @RequestParam("client_secret") String clientSecret,
+            @RequestParam("token") String token);
 }
