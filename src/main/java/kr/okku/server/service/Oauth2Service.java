@@ -169,8 +169,9 @@ public class Oauth2Service {
                 PublicKey validPublicKey = generate(parseData, applePublicKeys);
                 Claims clames = extractClaims(authToken.idToken(), validPublicKey);
                 String appleId = clames.get("sub").toString();
-                String name = clames.get("name").toString();
-                return processingAppleLogin(appleId, recommend, name);
+        System.out.println("claims");
+        System.out.println(clames);
+                return processingAppleLogin(appleId, recommend, "name");
     }
 
     private Map<String, Object> handleAppleLogin(String authorizationCode) {
