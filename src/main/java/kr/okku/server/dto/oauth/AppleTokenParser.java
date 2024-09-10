@@ -25,7 +25,7 @@ public class AppleTokenParser {
     public Map<String, String> parseHeader(String idToken) {
         try {
             final String encodedHeader = idToken.split(ID_TOKEN_SEPARATOR)[HEADER_INDEX];
-            final String decodedHeader = Arrays.toString(Base64.getUrlDecoder().decode(encodedHeader));
+            final String decodedHeader = new String(Base64.getUrlDecoder().decode(encodedHeader));
 
             return objectMapper.readValue(decodedHeader, Map.class);
 
