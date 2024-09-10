@@ -202,19 +202,12 @@ public class Oauth2Service {
                 .compact();
     }
     public Claims extractClaims(String idToken, PublicKey publicKey) {
-        try {
             return Jwts.parserBuilder()
                     .setSigningKey(publicKey)
                     .build()
                     .parseClaimsJws(idToken)
                     .getBody();
-        } catch (UnsupportedJwtException e) {
-            throw new UnsupportedJwtException("Extract Claims Error : 지원되지 않는 JWT 형식입니다.");
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Extract Claims Error : 유효하지 않은 값입니다.");
-        } catch (JwtException e) {
-            throw new JwtException("Extract Claims Error : JWT 처리 중 오류가 발생했습니다.");
-        }
+
     }
     private PrivateKey getPrivateKey() {
         try {
