@@ -160,8 +160,6 @@ public class Oauth2Service {
                 PublicKey validPublicKey = generate(parseData, applePublicKeys);
                 Claims clames = extractClaims(authToken.idToken(), validPublicKey);
                 String appleId = clames.get("sub").toString();
-        System.out.println("claims");
-        System.out.println(clames);
                 return processingAppleLogin(appleId, recommend, "아기 오리");
     }
 
@@ -311,7 +309,7 @@ public class Oauth2Service {
             user = UserDomain.builder()
                     .name(nickName)
                     .build();
-            user.setKakaoId(appleId);
+            user.setAppleId(appleId);
             if (recomend != null && !recomend.isEmpty() && recomend!="") {
                 UserDomain recomendUser = userPersistenceAdapter.findById(recomend).orElse(null);
                 recomendUser.setIsPremium(true);

@@ -59,5 +59,4 @@ public class UserController {
         userService.withdrawAccount(userId,platform,code);
         return ResponseEntity.ok().build();
     }
-
 }
