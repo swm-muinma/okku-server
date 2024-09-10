@@ -30,13 +30,10 @@ public class AppleTokenParser {
             return objectMapper.readValue(decodedHeader, Map.class);
 
         } catch (JsonMappingException e) {
-            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER_MAPPING);
         } catch (JsonProcessingException e) {
-            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER);
         } catch (ArrayIndexOutOfBoundsException e) {
-            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_INVALID_TOKEN);
         }
     }
