@@ -24,6 +24,7 @@ public enum ErrorCode {
     APPLE_LOGIN_TOKEN_HEADER("Parsing Header Error : 토큰 처리 중 오류가 발생했습니다",500),
     APPLE_LOGIN_INVALID_TOKEN("Parsing Header Error : 유효하지 않은 토큰 형식입니다.",400),
     RSA_ERROR("RSAPublicKey생성 중 오류가 발생했습니다.",500),
+    INVALID_AUTHORIZATION_CODE("Apple login failed: the code has expired or has been revoked.",400),
     APPLE_LOGIN_FAILED("Apple login failed",500);
 
     private final String message;

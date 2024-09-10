@@ -3,6 +3,7 @@ package kr.okku.server.dto.oauth;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.sentry.Sentry;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,13 @@ public class AppleTokenParser {
             return objectMapper.readValue(decodedHeader, Map.class);
 
         } catch (JsonMappingException e) {
+            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER_MAPPING);
         } catch (JsonProcessingException e) {
+            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER);
         } catch (ArrayIndexOutOfBoundsException e) {
+            Sentry.captureException(e); // 예외 캡쳐
             throw new ErrorDomain(ErrorCode.APPLE_LOGIN_INVALID_TOKEN);
         }
     }
