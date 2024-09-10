@@ -29,17 +29,18 @@ public class UserPersistenceAdapter {
         return UserMapper.toDomain(savedEntity);
     }
 
-    public Optional<UserDomain> findById(String id){
-        UserEntity userEntity = userRepository.findById(id).get();
-        return Optional.ofNullable(UserMapper.toDomain(userEntity));
-    }
-    public Optional<UserDomain> findByKakaoId(String kakaoId){
-        UserEntity userEntity = userRepository.findByKakaoId(kakaoId).get();
+    public Optional<UserDomain> findById(String id) {
+        UserEntity userEntity = userRepository.findById(id).orElse(null);
         return Optional.ofNullable(UserMapper.toDomain(userEntity));
     }
 
-    public Optional<UserDomain> findByAppleId(String appleId){
-        UserEntity userEntity = userRepository.findByAppleId(appleId).get();
+    public Optional<UserDomain> findByKakaoId(String kakaoId) {
+        UserEntity userEntity = userRepository.findByKakaoId(kakaoId).orElse(null);
+        return Optional.ofNullable(UserMapper.toDomain(userEntity));
+    }
+
+    public Optional<UserDomain> findByAppleId(String appleId) {
+        UserEntity userEntity = userRepository.findByAppleId(appleId).orElse(null);
         return Optional.ofNullable(UserMapper.toDomain(userEntity));
     }
 

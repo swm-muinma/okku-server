@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -42,10 +44,20 @@ public class UserController {
     }
 
     // Withdraw user account
-    @GetMapping("/withdraw")
-    public ResponseEntity<Void> withdrawAccount(@AuthenticationPrincipal UserDetails userDetails) {
+    @GetMapping("/pre-withdraw")
+    public ResponseEntity<String> withdrawCheck(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        userService.withdrawAccount(userId);
+        String res = userService.checkAccountSocial(userId);
+        return ResponseEntity.ok(res);
+    }
+    @GetMapping("/withdraw/{platform}")
+    public ResponseEntity<Void> withdrawAccount(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable String platform,
+            @RequestParam String code) {
+        String userId = userDetails.getUsername();
+        userService.withdrawAccount(userId,platform,code);
         return ResponseEntity.ok().build();
     }
+
 }

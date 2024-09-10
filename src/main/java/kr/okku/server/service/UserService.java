@@ -1,5 +1,7 @@
 package kr.okku.server.service;
 
+import kr.okku.server.adapters.oauth.apple.AppleClientAdapter;
+import kr.okku.server.adapters.oauth.apple.AppleOauthAdapter;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
@@ -8,10 +10,12 @@ import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.CartDomain;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.UserDomain;
+import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.enums.FormEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,21 +25,20 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserPersistenceAdapter userPersistenceAdapter;
+    private final UserPersistenceAdapter userPersistenceAdapter;
 
-    @Autowired
-    private PickPersistenceAdapter pickPersistenceAdapter;
+    private final PickPersistenceAdapter pickPersistenceAdapter;
 
-    @Autowired
-    private CartPersistenceAdapter cartPersistenceAdapter;
+    private final CartPersistenceAdapter cartPersistenceAdapter;
+    private final AppleOauthAdapter appleOauthAdapter;
 
     @Autowired
     public UserService(CartPersistenceAdapter cartPersistenceAdapter, PickPersistenceAdapter pickPersistenceAdapter,
-                       UserPersistenceAdapter userPersistenceAdapter) {
+                       UserPersistenceAdapter userPersistenceAdapter, AppleOauthAdapter appleOauthAdapter) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
+        this.appleOauthAdapter = appleOauthAdapter;
     }
 
     // Retrieve user profile by user ID
@@ -67,7 +70,11 @@ public class UserService {
 
     // Withdraw user account
     @Transactional
-    public boolean withdrawAccount(String userId) {
+    public boolean withdrawAccount(String userId,String platform, String code) {
+        if(platform=="apple"){
+            AppleTokenResponseDto authToken = appleOauthAdapter.getAppleAuthToken(code);
+            appleOauthAdapter.revoke(authToken);
+        }
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
         List<String> pickIds = picks.stream().map(PickDomain::getId).collect(Collectors.toList());
 
@@ -82,6 +89,14 @@ public class UserService {
 
         userPersistenceAdapter.deleteById(userId);
         return true;
+    }
+
+    public String checkAccountSocial(String userId){
+        UserDomain user = userPersistenceAdapter.findById(userId).get();
+        if(user.getAppleId()!=null && user.getAppleId()!=""){
+            return "apple";
+        }
+        return "kakao";
     }
 
     @Transactional
