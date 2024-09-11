@@ -106,7 +106,7 @@
             List<CommentDto> comments = IntStream.range(0, reviewIds.size())
                     .mapToObj(index -> {
                         if (index < reviews.size()) {
-                            ReviewDetailDomain review = reviews.get(index); // 인덱스를 사용하여 리뷰를 가져옴
+                            ReviewDetailDomain review = reviews.get(Integer.parseInt(reviewIds.get(index))); // 인덱스를 사용하여 리뷰를 가져옴
                             return new CommentDto(
                                     review.getGender() != null ? review.getGender() : "",
                                     review.getHeight(),
