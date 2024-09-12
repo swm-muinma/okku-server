@@ -10,7 +10,6 @@ import kr.okku.server.dto.controller.PageInfoResponseDTO;
 import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
-import kr.okku.server.enums.PlatformInfo;
 import kr.okku.server.mapper.PickMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,11 +21,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 @Service
 public class PickService {
@@ -34,7 +30,6 @@ public class PickService {
     private final CartPersistenceAdapter cartPersistenceAdapter;
     private final ScraperAdapter scraperAdapter;
     private final UserPersistenceAdapter userPersistenceAdapter;
-
     private final ItemPersistenceAdapter itemPersistenceAdapter;
 
 
