@@ -33,28 +33,22 @@ public class CartService {
 
     }
 
-    // Method to fetch carts associated with a user with pagination
     public MyCartsResponseDto getMyCarts(String userId) {
-        // Fetch carts associated with the user
         List<CartDomain> cartDomains = cartPersistenceAdapter.findByUserId(userId);
 
         if (cartDomains == null) {
             throw new ErrorDomain(ErrorCode.CART_NOT_EXIST);
         }
 
-        // Map cart data and pick information
         var resCart = cartDomains.stream().map(cart -> {
-            // Fetch pick information for each cart
             List<String> pickIds = cart.getPickItemIds();
             var picks = pickPersistenceAdapter.findByIdIn(pickIds);
 
-            // Collect up to 3 pick images
             List<String> pickImages = picks.stream()
                     .map(pick -> pick.getImage())
                     .limit(3)
                     .collect(Collectors.toList());
 
-            // Create response object for each cart
             return new CartDto(
                     cart.getId(),
                     cart.getName(),
@@ -68,28 +62,19 @@ public class CartService {
         return responseDto;
     }
 
-    // Method to delete a cart owned by the user
     @Transactional
     public String deleteCart(String userId, String cartId) {
-        // Fetch cart details
         CartDomain cartInfo = cartPersistenceAdapter.findById(cartId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
-
-        // Check if the user is the owner of the cart
         if (!cartInfo.getUserId().equals(userId)) {
             throw new ErrorDomain(ErrorCode.NOT_OWNER);
         }
-
-        // Delete the cart
         cartPersistenceAdapter.deleteById(cartId);
-
         return cartId;
     }
 
-    // Method to create a new cart
     @Transactional
     public CartDomain createCart(String userId, String name, List<String> pickIds) {
-        // Validate cart name
         if (name == null || name.isEmpty()) {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
         }
@@ -97,7 +82,6 @@ public class CartService {
         if(pickIds==null){
             pickIds = new ArrayList<>();
         }
-        // Create the cart
         CartDomain cart =  CartDomain.builder()
                 .pickItemIds(pickIds)
                 .userId(userId)

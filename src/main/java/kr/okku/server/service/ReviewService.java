@@ -90,34 +90,17 @@
 
 
         private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
-    //        List<CommentDto> comments = reviewIds.stream()
-    //                .flatMap(reviewId -> reviews.stream()
-    //                        .filter(review -> review.getId().equals(reviewId))
-    //                        .findFirst()
-    //                        .stream()) // Optional을 스트림으로 변환하여, 값이 없으면 빈 스트림이 되도록 처리
-    //                .map(review -> new CommentDto(
-    //                        review.getGender() != null ? review.getGender() : "",
-    //                        review.getHeight(),
-    //                        review.getWeight(),
-    //                        review.getContent(),
-    //                        review.getImageUrl() != null ? review.getImageUrl() : ""
-    //                ))
-    //                .collect(Collectors.toList());
             List<CommentDto> comments = IntStream.range(0, reviewIds.size())
+                    .filter(index -> index < reviews.size()) // Filter to avoid index out of range
                     .mapToObj(index -> {
-                        if (index < reviews.size()) {
-                            ReviewDetailDomain review = reviews.get(Integer.parseInt(reviewIds.get(index))); // 인덱스를 사용하여 리뷰를 가져옴
-                            return new CommentDto(
-                                    review.getGender() != null ? review.getGender() : "",
-                                    review.getHeight(),
-                                    review.getWeight(),
-                                    review.getContent(),
-                                    review.getImageUrl() != null ? review.getImageUrl() : ""
-                            );
-                        } else {
-                            // 인덱스가 reviews 리스트의 크기를 초과하면 null 또는 빈 CommentDto 반환
-                            return new CommentDto("", 0, 0, "", "");
-                        }
+                        ReviewDetailDomain review = reviews.get(Integer.parseInt(reviewIds.get(index)));
+                        return new CommentDto(
+                                review.getGender() != null ? review.getGender() : "",
+                                review.getHeight(),
+                                review.getWeight(),
+                                review.getContent(),
+                                review.getImageUrl() != null ? review.getImageUrl() : ""
+                        );
                     })
                     .collect(Collectors.toList());
 
