@@ -8,16 +8,28 @@ import lombok.Data;
 @Builder
 public class UserDomain {
     private String id;
-    private String name;
-    private String image;
-    private Integer height;
-    private Integer weight;
-    private FormEnum form;
-    private Boolean isPremium;
+
+    @Builder.Default
+    private String name = "아기 오리";
+
+    @Builder.Default
+    private String image = "";
+
+    @Builder.Default
+    private Integer height = 160;  // 기본값을 170으로 설정
+
+    @Builder.Default
+    private Integer weight = 50;   // 기본값을 65로 설정
+
+    @Builder.Default
+    private FormEnum form = FormEnum.NORMAL;  // 기본값을 FormEnum의 특정 값으로 설정
+
+    @Builder.Default
+    private Boolean isPremium = false;
+
     private String kakaoId;
     private String appleId;
 }
-
 
 
 
