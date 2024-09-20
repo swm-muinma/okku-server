@@ -268,7 +268,7 @@ public class Oauth2Service {
         String kakaoId = userResponse.get("id").toString();
 
         boolean isNewUser = false;
-        UserDomain user = userPersistenceAdapter.findByKakaoId(kakaoId).get();
+        UserDomain user = userPersistenceAdapter.findByKakaoId(kakaoId).orElse(null);
         if (user == null) {
             String nickname = (String) ((Map<String, Object>) userResponse.get("kakao_account")).get("nickname");
             user = UserDomain.builder()
