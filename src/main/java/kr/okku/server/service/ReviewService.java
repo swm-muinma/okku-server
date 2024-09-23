@@ -13,10 +13,7 @@
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
 
-    import java.util.ArrayList;
-    import java.util.Collections;
-    import java.util.List;
-    import java.util.Optional;
+    import java.util.*;
     import java.util.stream.Collectors;
     import java.util.stream.IntStream;
 
@@ -91,21 +88,29 @@
 
         private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
             List<CommentDto> comments = IntStream.range(0, reviewIds.size())
-                    .filter(index -> index < reviews.size()) // Filter to avoid index out of range
                     .mapToObj(index -> {
-                        ReviewDetailDomain review = reviews.get(Integer.parseInt(reviewIds.get(index)));
-                        return new CommentDto(
-                                review.getGender() != null ? review.getGender() : "",
-                                review.getHeight(),
-                                review.getWeight(),
-                                review.getContent(),
-                                review.getImageUrl() != null ? review.getImageUrl() : ""
-                        );
+                        try {
+                            if (index < reviews.size()) {
+                                ReviewDetailDomain review = reviews.get(Integer.parseInt(reviewIds.get(index)));
+                                return new CommentDto(
+                                        review.getGender() != null ? review.getGender() : "",
+                                        review.getHeight(),
+                                        review.getWeight(),
+                                        review.getContent(),
+                                        review.getImageUrl() != null ? review.getImageUrl() : ""
+                                );
+                            }
+                        } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                            return null;
+                        }
+                        return null;
                     })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             return new ReviewSectionDto(description, comments.size(), comments);
         }
+
 
         public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url) {
             // ReviewInsightDomain 생성 로직
