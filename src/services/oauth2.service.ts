@@ -64,7 +64,7 @@ export class Oauth2Service {
   }> {
     const keyPath = process.env.AUTH_KEY_PATH;
     if (!keyPath) {
-      throw new Error("Environment variable AUTH_KEY_PATH is not set");
+      throw new Error("Environment variable  is not set");
     }
     const privateKey = fs.readFileSync(keyPath, "utf8");
     const appleAuth = new AppleAuth(appleConfig, privateKey, "text");

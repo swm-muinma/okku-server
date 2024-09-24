@@ -7,6 +7,7 @@ import {
   UserPersistenceMapper,
 } from "../model/user.model";
 import { FormEnum } from "@src/enum/form.enum";
+import { Types } from "mongoose";
 
 class UserRepository {
   /**
@@ -148,6 +149,25 @@ class UserRepository {
     } catch (error) {
       console.error("Error updating user:", error);
       throw new ErrorDomain("Error updating user", 500);
+    }
+  }
+
+  /**
+   * Delete carts by user ID.
+   * @param userId - The user ID to delete carts for.
+   * @returns A promise that resolves to an array of CartDomain of deleted carts or null.
+   */
+  public async delete(userId: string): Promise<string | null> {
+    const objectId = new Types.ObjectId(userId);
+    try {
+      const entity = await UserModel.deleteOne({
+        _id: objectId,
+      }).exec();
+      if (entity.deletedCount == 0) return null;
+      return userId;
+    } catch (error) {
+      console.error("Error deleting carts by userId:", error);
+      throw new ErrorDomain("Error deleting carts by userId", 500);
     }
   }
 }

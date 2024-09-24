@@ -209,6 +209,32 @@ class PickRepository {
 
     return true;
   }
+
+  public async findByUserIdWithoutPage(userId: string): Promise<PickDomain[]> {
+    try {
+      // Get total count of picks
+      const totalDataCnt = await PickModel.countDocuments({
+        user_id: userId,
+      }).exec();
+
+      // Get paginated picks
+      const picks = await PickModel.find({
+        user_id: userId,
+      }).exec();
+
+      if (!picks.length) {
+        return [];
+      }
+
+      // Map to domain models
+      const pickDomains = picks.map(PickPersistenceMapper.toDomain);
+
+      return pickDomains;
+    } catch (error) {
+      console.error("Error finding picks by user ID and cart ID:", error);
+      throw new ErrorDomain("Error finding picks by user ID and cart ID", 500);
+    }
+  }
 }
 
 export { PickRepository };
