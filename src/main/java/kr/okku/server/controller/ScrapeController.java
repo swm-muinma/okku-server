@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/scrape")
 public class ScrapeController {
@@ -28,10 +27,12 @@ public class ScrapeController {
         String userAgentString = httpRequest.getHeader("User-Agent");
 
         try {
-            System.out.println("call getItem Without login");
+            System.out.printf("Scrape request received from IP: %s, User-Agent: %s%n", ip, userAgentString);
             var result = reviewService.getItemInfoWithoutLogin(request.getUrl(), request.getOkkuId());
+            System.out.println("Request successful - Scrape item: " + request.getUrl());
             return ResponseEntity.ok(result);
         } catch (Exception e) {
+            System.err.printf("Request failed - Scrape item: %s, Error: %s%n", request.getUrl(), e.getMessage());
             return ResponseEntity.status(500).body(e.getMessage());
         }
     }

@@ -20,32 +20,40 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 @RestController
 @RequestMapping("/carts")
 public class CartController {
 
     private final CartService cartService;
+
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
+
     @GetMapping
-    public ResponseEntity<MyCartsResponseDto> getMyCarts(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<MyCartsResponseDto> getMyCarts(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        MyCartsResponseDto carts = cartService.getMyCarts(userId);
-        return ResponseEntity.ok(carts);
+        try {
+            MyCartsResponseDto carts = cartService.getMyCarts(userId);
+            System.out.printf("Request successful - Get carts for userId: %s%n", userId);
+            return ResponseEntity.ok(carts);
+        } catch (Exception e) {
+            System.err.printf("Request failed - Get carts for userId: %s, Error: %s%n", userId, e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCart(
-            @PathVariable String id,
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+    public ResponseEntity<Void> deleteCart(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        cartService.deleteCart(userId, id);
-        return ResponseEntity.ok().build();
+        try {
+            cartService.deleteCart(userId, id);
+            System.out.printf("Request successful - Deleted cart with id: %s for userId: %s%n", id, userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.printf("Request failed - Delete cart with id: %s for userId: %s, Error: %s%n", id, userId, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @PostMapping
@@ -54,8 +62,14 @@ public class CartController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userId = userDetails.getUsername();
-        CartDomain savedCart = cartService.createCart(userId, request.getName(), request.getPickIds());
-        CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
-        return ResponseEntity.ok(response);
+        try {
+            CartDomain savedCart = cartService.createCart(userId, request.getName(), request.getPickIds());
+            CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
+            System.out.printf("Request successful - Created cart for userId: %s with name: %s%n", userId, request.getName());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.printf("Request failed - Create cart for userId: %s, Error: %s%n", userId, e.getMessage());
+            return ResponseEntity.status(500).body(null);
+        }
     }
 }

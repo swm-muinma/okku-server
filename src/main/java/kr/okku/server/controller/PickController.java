@@ -15,14 +15,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-
 @RestController
 @RequestMapping("/picks")
 public class PickController {
 
     private final PickService pickService;
-
     private final ReviewService reviewService;
 
     public PickController(PickService pickService, ReviewService reviewService) {
@@ -36,7 +33,14 @@ public class PickController {
             @RequestBody NewPickRequest request
     ) {
         String userId = userDetails.getUsername();
-        return ResponseEntity.ok(pickService.createPick(userId, request.getUrl()));
+        try {
+            PickDomain pick = pickService.createPick(userId, request.getUrl());
+            System.out.printf("Request successful - UserId: %s, New Pick URL: %s%n", userId, request.getUrl());
+            return ResponseEntity.ok(pick);
+        } catch (Exception e) {
+            System.err.printf("Request failed - UserId: %s, New Pick URL: %s, Error: %s%n", userId, request.getUrl(), e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @PostMapping("/delete")
@@ -45,8 +49,14 @@ public class PickController {
             @RequestBody DeletePicksRequest request
     ) {
         String userId = userDetails.getUsername();
-        pickService.deletePicks(userId, request.getPickIds(), request.getCartId(), request.isDeletePermenant());
-        return ResponseEntity.ok().build();
+        try {
+            pickService.deletePicks(userId, request.getPickIds(), request.getCartId(), request.isDeletePermenant());
+            System.out.printf("Request successful - UserId: %s, Deleted Picks: %s%n", userId, request.getPickIds());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.printf("Request failed - UserId: %s, Deleted Picks: %s, Error: %s%n", userId, request.getPickIds(), e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("")
@@ -57,15 +67,28 @@ public class PickController {
             @RequestParam(defaultValue = "10") int size
     ) {
         String userId = userDetails.getUsername();
-        System.out.println(userId);
-        return ResponseEntity.ok(pickService.getMyPicks(userId, cartId, page, size));
+        try {
+            UserPicksResponseDTO response = pickService.getMyPicks(userId, cartId, page, size);
+            System.out.printf("Request successful - UserId: %s, CartId: %s, Page: %d, Size: %d%n", userId, cartId, page, size);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.printf("Request failed - UserId: %s, CartId: %s, Error: %s%n", userId, cartId, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @GetMapping("/reviews")
     public ResponseEntity<ProductReviewDto> getReviews(
             @RequestParam String pickId
     ) {
-        return ResponseEntity.ok(reviewService.getReviews(pickId));
+        try {
+            ProductReviewDto reviews = reviewService.getReviews(pickId);
+            System.out.printf("Request successful - PickId: %s%n", pickId);
+            return ResponseEntity.ok(reviews);
+        } catch (Exception e) {
+            System.err.printf("Request failed - PickId: %s, Error: %s%n", pickId, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
     @PatchMapping("")
@@ -74,7 +97,13 @@ public class PickController {
             @RequestBody MovePicksRequest request
     ) {
         String userId = userDetails.getUsername();
-        pickService.movePicks(userId, request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
-        return ResponseEntity.ok().build();
+        try {
+            pickService.movePicks(userId, request.getPickIds(), request.getSourceCartId(), request.getDestinationCartId(), request.isDeleteFromOrigin());
+            System.out.printf("Request successful - UserId: %s, Moved Picks: %s%n", userId, request.getPickIds());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            System.err.printf("Request failed - UserId: %s, Moved Picks: %s, Error: %s%n", userId, request.getPickIds(), e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 }

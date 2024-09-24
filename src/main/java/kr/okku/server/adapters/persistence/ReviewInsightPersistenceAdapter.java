@@ -23,7 +23,6 @@ public class ReviewInsightPersistenceAdapter {
     public Optional<ReviewInsightDomain> findByProductPkAndPlatform(String productPk, String platform) {
         // Repository에서 데이터를 조회하여 리스트로 받음
         List<ReviewInsightEntity> reviewInsightEntities = reviewInsightRepository.findAllByProductPkAndPlatform(productPk, platform);
-        System.out.println(reviewInsightEntities);
 
         // 리스트가 비어있지 않다면 첫 번째 요소를 맵핑하여 Optional로 감싸고, 비어있다면 Optional.empty() 반환
         return reviewInsightEntities.isEmpty()

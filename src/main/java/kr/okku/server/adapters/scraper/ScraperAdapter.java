@@ -1,9 +1,10 @@
 package kr.okku.server.adapters.scraper;
 
+import io.sentry.Sentry;
 import kr.okku.server.domain.ScrapedDataDomain;
 import kr.okku.server.dto.adapter.ScraperResponseDto;
-import kr.okku.server.exception.ErrorCode;
-import kr.okku.server.exception.ErrorDomain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public class ScraperAdapter {
+
+    private static final Logger logger = LoggerFactory.getLogger(ScraperAdapter.class);
 
     private final RestTemplate restTemplate;
     @Value("${spring.msa.scraper.uri}")
@@ -25,6 +28,10 @@ public class ScraperAdapter {
     public Optional<ScrapedDataDomain> scrape(String url) {
         try {
             ScraperResponseDto response = restTemplate.postForObject(scraperUrl + "/scrap", new ScrapeRequest(url), ScraperResponseDto.class);
+
+            // Logging the successful request
+            System.out.printf("Scraping successful for URL: %s\n", url);
+
             return Optional.ofNullable(ScrapedDataDomain.builder()
                     .price(response.getPrice())
                     .image(response.getImg_url())
@@ -34,10 +41,15 @@ public class ScraperAdapter {
                     .url(response.getUrl())
                     .build());
         } catch (Exception e) {
+            System.err.printf("Failed to scrape data for URL: %s. Error: %s\n", url, e.getMessage());
+            Sentry.withScope(scope -> {
+                scope.setExtra("url", url);
+                scope.setExtra("error_message", e.getMessage());
+                Sentry.captureException(e);
+            });
             return Optional.ofNullable(null);
         }
     }
-
 
     // Inner class for request body
     static class ScrapeRequest {

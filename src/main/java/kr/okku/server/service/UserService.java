@@ -93,7 +93,6 @@ public class UserService {
 
     public String checkAccountSocial(String userId){
         UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
-        System.out.println(user);
 //        if(user.getAppleId()!=null && user.getAppleId()!=""){
         if (user != null && user.getAppleId() != null && !user.getAppleId().isEmpty()) {
             return "apple";
