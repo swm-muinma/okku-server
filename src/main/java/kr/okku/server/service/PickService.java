@@ -148,7 +148,6 @@ public class PickService {
             pageInfo = PickMapper.convertToPageInfoDTO(pickPage);
         } else {
             Page<PickDomain> pickPage = pickPersistenceAdapter.findByUserId(userId, pageable);
-            System.out.println(pickPage);
             cartDTO = new PickCartResponseDTO();
             cartDTO.setName("__all__");
             cartDTO.setHost(new PickCartHostResponseDTO(userId, "testUser"));
