@@ -65,7 +65,6 @@ public class JwtTokenProvider {
 
     // 토큰에서 사용자 아이디 추출
     public String getUserIdFromAccessToken(String token) {
-        System.out.println("d");
         return Jwts.parser().setSigningKey(accessSecretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
