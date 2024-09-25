@@ -2,11 +2,19 @@ package kr.okku.server.adapters.scraper;
 
 import io.sentry.Sentry;
 import kr.okku.server.domain.ScrapedDataDomain;
+import kr.okku.server.dto.adapter.FittingResponseDto;
+import kr.okku.server.dto.adapter.ScraperRequestDto;
 import kr.okku.server.dto.adapter.ScraperResponseDto;
+import kr.okku.server.dto.controller.review.ScrapeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -27,7 +35,7 @@ public class ScraperAdapter {
 
     public Optional<ScrapedDataDomain> scrape(String url) {
         try {
-            ScraperResponseDto response = restTemplate.postForObject(scraperUrl + "/scrap", new ScrapeRequest(url), ScraperResponseDto.class);
+            ScraperResponseDto response = restTemplate.postForObject(scraperUrl + "/scrap", new ScraperRequestDto(url), ScraperResponseDto.class);
 
             // Logging the successful request
             System.out.printf("Scraping successful for URL: %s\n", url);
@@ -51,20 +59,38 @@ public class ScraperAdapter {
         }
     }
 
-    // Inner class for request body
-    static class ScrapeRequest {
-        private String path;
+    public boolean fitting(String userId, String clothesClass, byte[] itemImage, byte[] userImage) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-        public ScrapeRequest(String path) {
-            this.path = path;
-        }
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("user_pk", userId);
+            body.add("clothes_class", clothesClass);
+            body.add("human_img", userImage);
+            body.add("clothes_img", itemImage);
 
-        public String getPath() {
-            return path;
-        }
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        public void setPath(String path) {
-            this.path = path;
+            RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+
+            ResponseEntity<FittingResponseDto> response = restTemplate.exchange(
+                    scraperUrl + "/fitting",
+                    HttpMethod.POST,
+                    requestEntity,
+                    FittingResponseDto.class
+            );
+
+            // Log the response time or perform any further processing
+            System.out.printf("Fitting successful with response time: %.2f ms\n", response.getBody().getResponseTime());
+
+            return true;
+        } catch (Exception e) {
+            Sentry.withScope(scope -> {
+                scope.setExtra("error_message", e.getMessage());
+                Sentry.captureException(e);
+            });
+            return false;
         }
     }
 }
