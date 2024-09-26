@@ -1,17 +1,15 @@
 package kr.okku.server.controller;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.okku.server.domain.UserDomain;
+import kr.okku.server.dto.controller.user.SetFcmTokenRequestDto;
+import kr.okku.server.dto.controller.user.SetFcmTokenResponseDto;
 import kr.okku.server.dto.controller.user.UpdateProfileRequest;
 import kr.okku.server.dto.controller.user.UserResponse;
-import kr.okku.server.service.PickService;
 import kr.okku.server.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -48,6 +46,21 @@ public class UserController {
             UserDomain updatedUser = userService.updateProfile(userId, request.getName(), request.getHeight(), request.getWeight(), request.getForm());
             UserResponse response = new UserResponse(updatedUser.getId(), updatedUser.getName(), updatedUser.getHeight(), updatedUser.getWeight(), updatedUser.getForm());
             System.out.printf("Request successful - UserId: %s, Updated Name: %s%n", userId, request.getName());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PatchMapping("/fcmtoken")
+    public ResponseEntity<SetFcmTokenResponseDto> addFcmToken(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody SetFcmTokenRequestDto request
+    ) {
+        String userId = userDetails.getUsername();
+        try {
+            SetFcmTokenResponseDto response = userService.addFcmToken(userId, request.getFcmToken());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
