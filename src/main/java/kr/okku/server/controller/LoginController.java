@@ -1,6 +1,7 @@
 package kr.okku.server.controller;
 
 import kr.okku.server.domain.ReviewInsightDomain;
+import kr.okku.server.dto.controller.refresh.RefreshRequestDto;
 import kr.okku.server.dto.controller.refresh.TokenResponse;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.enums.RoleEnum;
@@ -68,7 +69,7 @@ public class LoginController {
         }
     }
 
-    @GetMapping("/test/{userId}")
+    @GetMapping("/test/token/{userId}")
     public String test(@PathVariable String userId) {
         try {
             List<String> roles = new ArrayList<>();
@@ -107,7 +108,7 @@ public class LoginController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequestDto refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
         try {
             if (refreshToken == null) {
@@ -119,18 +120,6 @@ public class LoginController {
         } catch (Exception e) {
             System.err.printf("Request failed - Refresh token: %s, Error: %s%n", refreshToken, e.getMessage());
             return ResponseEntity.status(500).body(null);
-        }
-    }
-
-    public static class RefreshRequest {
-        private String refreshToken;
-
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-
-        public void setRefreshToken(String refreshToken) {
-            this.refreshToken = refreshToken;
         }
     }
 }
