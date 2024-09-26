@@ -81,7 +81,6 @@ public class ScraperAdapter {
                     FittingResponseDto.class
             );
 
-            // Log the response time or perform any further processing
             System.out.printf("Fitting successful with response time: %.2f ms\n", response.getBody().getResponseTime());
 
             return true;

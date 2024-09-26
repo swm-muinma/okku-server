@@ -34,14 +34,15 @@
             this.scraperAdapter = scraperAdapter1;
         }
 
-        public boolean fitting(String userId, MultipartFile userImage, String pickId) {
+        public boolean fitting(String userId, MultipartFile userImage, String pickId, String part) {
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
                 throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST);
             }
             String itemImageUrl = pick.getImage();
             byte[] itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
-            scraperAdapter.fitting(userId,"upper_body",itemImage,convertMultipartFileToBytes(userImage));
+            part = part!=null ? part : "upper_body";
+            scraperAdapter.fitting(userId,part,itemImage,convertMultipartFileToBytes(userImage));
 
             return true;
         }

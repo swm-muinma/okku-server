@@ -69,7 +69,7 @@ public class LoginController {
         }
     }
 
-    @GetMapping("/test/{userId}")
+    @GetMapping("/test/token/{userId}")
     public String test(@PathVariable String userId) {
         try {
             List<String> roles = new ArrayList<>();

@@ -1,4 +1,5 @@
 package kr.okku.server.controller;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.okku.server.domain.UserDomain;
 import kr.okku.server.dto.controller.user.UpdateProfileRequest;
 import kr.okku.server.dto.controller.user.UserResponse;
