@@ -1,5 +1,6 @@
 package kr.okku.server.adapters.persistence.repository.user;
 
+import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewSummaryEntity;
 import kr.okku.server.enums.FormEnum;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -28,7 +29,8 @@ public class UserEntity {
     private String kakaoId;
     @Field("apple_id")
     private String appleId;
-
+    @Field("fcm_token")
+    private String[] fcmToken;
     @Field("created_at")
     @CreatedDate
     private Date createdAt;

@@ -2,6 +2,9 @@ package kr.okku.server.mapper;
 import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.domain.UserDomain;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class UserMapper {
 
     // UserEntity <-> UserDomain
@@ -19,6 +22,7 @@ public class UserMapper {
                 .isPremium(userEntity.getIsPremium())
                 .kakaoId(userEntity.getKakaoId())
                 .appleId(userEntity.getAppleId())
+                .fcmToken(Arrays.stream(userEntity.getFcmToken()).toList())
                 .build();
     }
 
@@ -36,6 +40,7 @@ public class UserMapper {
         userEntity.setIsPremium(userDomain.getIsPremium());
         userEntity.setKakaoId(userDomain.getKakaoId());
         userEntity.setAppleId(userDomain.getAppleId());
+        userEntity.setFcmToken(userDomain.getFcmToken().toArray(new String[0]));
         return userEntity;
     }
 }

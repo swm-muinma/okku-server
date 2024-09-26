@@ -4,6 +4,9 @@ import kr.okku.server.enums.FormEnum;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 public class UserDomain {
@@ -27,8 +30,17 @@ public class UserDomain {
     @Builder.Default
     private Boolean isPremium = false;
 
+    @Builder.Default
+    private List<String> fcmToken= new ArrayList<>();
+
     private String kakaoId;
     private String appleId;
+
+    public void addFcmToken(String token) {
+        if (!fcmToken.contains(token)) {
+            this.fcmToken.add(token);
+        }
+    }
 }
 
 

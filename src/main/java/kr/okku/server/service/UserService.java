@@ -1,21 +1,19 @@
 package kr.okku.server.service;
 
-import kr.okku.server.adapters.oauth.apple.AppleClientAdapter;
 import kr.okku.server.adapters.oauth.apple.AppleOauthAdapter;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
-import kr.okku.server.adapters.persistence.repository.user.UserRepository;
-import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.CartDomain;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.UserDomain;
+import kr.okku.server.dto.controller.user.SetFcmTokenRequestDto;
+import kr.okku.server.dto.controller.user.SetFcmTokenResponseDto;
 import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.enums.FormEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,6 +64,18 @@ public class UserService {
                 .build();
         UserDomain updatedUser = userPersistenceAdapter.save(user);
         return updatedUser;
+    }
+
+    @Transactional
+    public SetFcmTokenResponseDto addFcmToken(String userId, String fcmTokens) {
+
+        UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+        if(user==null){
+            throw new ErrorDomain(ErrorCode.USER_NOT_FOUND);
+        }
+        user.addFcmToken(fcmTokens);
+        UserDomain updatedUser = userPersistenceAdapter.save(user);
+        return new SetFcmTokenResponseDto(updatedUser.getFcmToken());
     }
 
     // Withdraw user account
