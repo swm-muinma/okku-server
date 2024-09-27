@@ -8,6 +8,7 @@ ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
 # Build the application using Gradle
+RUN chmod +x gradlew
 RUN ./gradlew clean build --no-daemon --stacktrace --info -Dorg.gradle.vfs.watch=false
 
 # Uncomment if using Maven instead
