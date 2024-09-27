@@ -41,8 +41,8 @@
             byte[] itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : "upper_body";
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,convertMultipartFileToBytes(userImage));
-
-            pick.setFittingImage(fittingResponse.getFile_key());
+            String fittingImageUrl = "https://vton-result.s3.ap-northeast-2.amazonaws.com/"+fittingResponse.getFile_key();
+            pick.setFittingImage(fittingImageUrl);
             pickPersistenceAdapter.save(pick);
 
             return true;
