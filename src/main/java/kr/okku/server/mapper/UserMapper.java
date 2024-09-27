@@ -4,6 +4,9 @@ import kr.okku.server.domain.UserDomain;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class UserMapper {
 
@@ -22,7 +25,10 @@ public class UserMapper {
                 .isPremium(userEntity.getIsPremium())
                 .kakaoId(userEntity.getKakaoId())
                 .appleId(userEntity.getAppleId())
-                .fcmToken(Arrays.stream(userEntity.getFcmToken()).toList())
+                .fcmToken(Optional.ofNullable(userEntity.getFcmToken())
+                        .map(Arrays::stream)
+                        .orElseGet(Stream::empty)
+                        .toList())
                 .build();
     }
 
@@ -40,7 +46,9 @@ public class UserMapper {
         userEntity.setIsPremium(userDomain.getIsPremium());
         userEntity.setKakaoId(userDomain.getKakaoId());
         userEntity.setAppleId(userDomain.getAppleId());
-        userEntity.setFcmToken(userDomain.getFcmToken().toArray(new String[0]));
+        userEntity.setFcmToken(Optional.ofNullable(userDomain.getFcmToken())
+                .orElse(Collections.emptyList())
+                .toArray(new String[0]));
         return userEntity;
     }
 }

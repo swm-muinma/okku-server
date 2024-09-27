@@ -106,4 +106,7 @@ public class PickController {
             return ResponseEntity.status(500).build();
         }
     }
+
+//    @GetMapping("fitting")
+//    public ResponseEntity<>
 }
