@@ -7,6 +7,7 @@
     import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.PickDomain;
+    import kr.okku.server.dto.adapter.FittingResponseDto;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,7 @@
 
         private final ImageFromUrlAdapter imageFromUrlAdapter;
         private final PickPersistenceAdapter pickPersistenceAdapter;
-
         private final ScraperAdapter scraperAdapter;
-
-        private final List<String> okkuIds = new ArrayList<>();
 
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
@@ -42,7 +40,10 @@
             String itemImageUrl = pick.getImage();
             byte[] itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : "upper_body";
-            scraperAdapter.fitting(userId,part,itemImage,convertMultipartFileToBytes(userImage));
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,convertMultipartFileToBytes(userImage));
+
+            pick.setFittingImage(fittingResponse.getFile_key());
+            pickPersistenceAdapter.save(pick);
 
             return true;
         }

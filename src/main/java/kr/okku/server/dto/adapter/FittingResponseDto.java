@@ -1,21 +1,9 @@
 package kr.okku.server.dto.adapter;
 
+import lombok.Data;
+
+@Data
 public class FittingResponseDto {
-    private double responseTime;
+    private String file_key;
 
-    // Getters and setters
-    public double getResponseTime() {
-        return responseTime;
-    }
-
-    public void setResponseTime(double responseTime) {
-        this.responseTime = responseTime;
-    }
-
-    @Override
-    public String toString() {
-        return "FittingResponseDto{" +
-                "responseTime=" + responseTime +
-                '}';
-    }
 }
