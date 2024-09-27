@@ -47,7 +47,7 @@ public class LoginController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             System.err.printf("Request failed - Kakao token: %s, Error: %s%n", token, e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            throw e;
         }
     }
 
@@ -65,7 +65,7 @@ public class LoginController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             System.err.printf("Request failed - Apple token: %s, Error: %s%n", token, e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+            throw e;
         }
     }
 

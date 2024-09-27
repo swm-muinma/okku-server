@@ -31,6 +31,9 @@ public class PickEntity {
 
     private String pk;
 
+    @Field("fitting_image")
+    private String fittingImage;
+
     @Field("created_at")
     @CreatedDate
     private Date createdAt;

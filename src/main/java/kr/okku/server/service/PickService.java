@@ -31,8 +31,6 @@ public class PickService {
     private final ScraperAdapter scraperAdapter;
     private final UserPersistenceAdapter userPersistenceAdapter;
     private final ItemPersistenceAdapter itemPersistenceAdapter;
-
-
     private final Utils utils;
 
     @Autowired

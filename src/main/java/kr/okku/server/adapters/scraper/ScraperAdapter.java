@@ -59,7 +59,7 @@ public class ScraperAdapter {
         }
     }
 
-    public boolean fitting(String userId, String clothesClass, byte[] itemImage, byte[] userImage) {
+    public FittingResponseDto fitting(String userId, String clothesClass, byte[] itemImage, byte[] userImage) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -81,15 +81,15 @@ public class ScraperAdapter {
                     FittingResponseDto.class
             );
 
-            System.out.printf("Fitting successful with response time: %.2f ms\n", response.getBody().getResponseTime());
+            System.out.printf("Fitting successful with response time: %.2f ms\n", response.getBody().getFile_key());
 
-            return true;
+            return response.getBody();
         } catch (Exception e) {
             Sentry.withScope(scope -> {
                 scope.setExtra("error_message", e.getMessage());
                 Sentry.captureException(e);
             });
-            return false;
+            return null;
         }
     }
 }
