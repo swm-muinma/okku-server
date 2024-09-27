@@ -2,10 +2,7 @@ package kr.okku.server.controller;
 
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.ReviewDomain;
-import kr.okku.server.dto.controller.pick.DeletePicksRequest;
-import kr.okku.server.dto.controller.pick.MovePicksRequest;
-import kr.okku.server.dto.controller.pick.NewPickRequest;
-import kr.okku.server.dto.controller.pick.UserPicksResponseDTO;
+import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.service.PickService;
 import kr.okku.server.service.ReviewService;
@@ -107,6 +104,18 @@ public class PickController {
         }
     }
 
-//    @GetMapping("fitting")
-//    public ResponseEntity<>
+    @GetMapping("fitting")
+    public ResponseEntity<PickFittingResponseDto> getFitting(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam String pickId
+    ){
+        try {
+            PickFittingResponseDto reviews = pickService.getFitting(pickId);
+            System.out.printf("Request successful - PickId: %s%n", pickId);
+            return ResponseEntity.ok(reviews);
+        } catch (Exception e) {
+            System.err.printf("Request failed - PickId: %s, Error: %s%n", pickId, e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

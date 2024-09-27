@@ -278,4 +278,16 @@ public class PickService {
         }
     }
 
+    public PickFittingResponseDto getFitting(String pickId){
+        PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
+        if(pick==null){
+            throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST);
+        }
+        PickPlatformResponseDTO pickPlatformResponse = new PickPlatformResponseDTO();
+        pickPlatformResponse.setName(pick.getPlatform().getName());
+        pickPlatformResponse.setUrl(pick.getPlatform().getUrl());
+        pickPlatformResponse.setImage(pick.getPlatform().getImage());
+        return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,pick.getFittingImage());
+    }
+
 }
