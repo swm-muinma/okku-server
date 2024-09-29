@@ -51,17 +51,6 @@ public class ScraperAdapter {
 
     public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, MultipartFile userImage) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("user_pk", userId);
-            body.add("clothes_class", clothesClass);
-            body.add("human_img", userImage);
-            body.add("clothes_img", itemImage);
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
             FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass, userImage, itemImage);
 
             System.out.printf("Fitting successful with response time: %.2f ms\n", response.getFile_key());
