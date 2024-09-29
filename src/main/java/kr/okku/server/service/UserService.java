@@ -24,12 +24,9 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserPersistenceAdapter userPersistenceAdapter;
-
     private final PickPersistenceAdapter pickPersistenceAdapter;
-
     private final CartPersistenceAdapter cartPersistenceAdapter;
     private final AppleOauthAdapter appleOauthAdapter;
-
     @Autowired
     public UserService(CartPersistenceAdapter cartPersistenceAdapter, PickPersistenceAdapter pickPersistenceAdapter,
                        UserPersistenceAdapter userPersistenceAdapter, AppleOauthAdapter appleOauthAdapter) {
@@ -39,7 +36,6 @@ public class UserService {
         this.appleOauthAdapter = appleOauthAdapter;
     }
 
-    // Retrieve user profile by user ID
     public UserDomain getProfile(String userId) {
         UserDomain user = userPersistenceAdapter.findById(userId).get();
         if (user == null) {
@@ -48,13 +44,11 @@ public class UserService {
         return user;
     }
 
-    // Update user profile
     @Transactional
     public UserDomain updateProfile(String id, String name, Integer height, Integer weight, FormEnum form) {
         if (form != null) {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
         }
-
         UserDomain user = UserDomain.builder()
                 .name(name)
                 .id(id)
@@ -78,7 +72,6 @@ public class UserService {
         return new SetFcmTokenResponseDto(updatedUser.getFcmToken());
     }
 
-    // Withdraw user account
     @Transactional
     public boolean withdrawAccount(String userId,String platform, String code) {
         if(platform=="apple"){
@@ -96,14 +89,12 @@ public class UserService {
                 cartPersistenceAdapter.deleteById(cart.getId());
             }
         });
-
         userPersistenceAdapter.deleteById(userId);
         return true;
     }
 
     public String checkAccountSocial(String userId){
         UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
-//        if(user.getAppleId()!=null && user.getAppleId()!=""){
         if (user != null && user.getAppleId() != null && !user.getAppleId().isEmpty()) {
             return "apple";
         }

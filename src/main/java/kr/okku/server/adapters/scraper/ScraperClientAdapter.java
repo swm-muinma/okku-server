@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
-@FeignClient(name = "scraper", url = "${spring.msa.scraper.uri}")
+@FeignClient(name = "scraper", url = "${spring.msa.scraper.uri}", configuration = FeignClient.class)
 public interface ScraperClientAdapter {
 
     @PostMapping(value = "/scrap", consumes = MediaType.APPLICATION_JSON_VALUE)
