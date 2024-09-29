@@ -5,7 +5,6 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.*;
-import kr.okku.server.adapters.oauth.apple.AppleClientAdapter;
 import kr.okku.server.adapters.oauth.apple.AppleOauthAdapter;
 import kr.okku.server.adapters.persistence.RefreshPersistenceAdapter;
 import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
@@ -18,8 +17,6 @@ import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.security.JwtTokenProvider;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -30,20 +27,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-import org.bouncycastle.openssl.PEMParser;
 
 @Service
 public class Oauth2Service {
@@ -53,18 +44,16 @@ public class Oauth2Service {
     private final RefreshPersistenceAdapter refreshPersistenceAdapter;
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final AppleClientAdapter appleClientAdapter;
     private final AppleTokenParser appleTokenParser;
 
     private final AppleOauthAdapter appleOauthAdapter;
 
     @Autowired
     public Oauth2Service(RefreshPersistenceAdapter refreshPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter,
-                         JwtTokenProvider jwtTokenProvider, AppleClientAdapter appleClientAdapter, AppleTokenParser appleTokenParser, AppleOauthAdapter appleOauthAdapter) {
+                         JwtTokenProvider jwtTokenProvider, AppleTokenParser appleTokenParser, AppleOauthAdapter appleOauthAdapter) {
         this.refreshPersistenceAdapter = refreshPersistenceAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.appleClientAdapter = appleClientAdapter;
         this.appleTokenParser = appleTokenParser;
         this.appleOauthAdapter = appleOauthAdapter;
     }
@@ -156,7 +145,7 @@ public class Oauth2Service {
     public Map<String, Object> appleLoginWithToken(String authorizationCode, String recommend) {
                 AppleTokenResponseDto authToken = appleOauthAdapter.getAppleAuthToken(authorizationCode);
                 Map<String, String> parseData = appleTokenParser.parseHeader(authToken.idToken());
-                ApplePublicKeys applePublicKeys = appleClientAdapter.getApplePublicKeys();
+                ApplePublicKeys applePublicKeys = appleOauthAdapter.getPublicKey();
                 PublicKey validPublicKey = generate(parseData, applePublicKeys);
                 Claims clames = extractClaims(authToken.idToken(), validPublicKey);
                 String appleId = clames.get("sub").toString();
@@ -166,7 +155,7 @@ public class Oauth2Service {
     private Map<String, Object> handleAppleLogin(String authorizationCode) {
         AppleTokenResponseDto authToken = appleOauthAdapter.getAppleAuthToken(authorizationCode);
         Map<String, String> parseData = appleTokenParser.parseHeader(authToken.idToken());
-        ApplePublicKeys applePublicKeys = appleClientAdapter.getApplePublicKeys();
+        ApplePublicKeys applePublicKeys = appleOauthAdapter.getPublicKey();
         PublicKey validPublicKey = generate(parseData,applePublicKeys);
         Claims clames = extractClaims(authToken.idToken(),validPublicKey);
         String appleId = clames.get("sub").toString();
