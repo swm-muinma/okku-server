@@ -10,7 +10,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @Component
@@ -22,7 +26,7 @@ public class ImageFromUrlAdapter {
         this.restTemplate = restTemplate;
     }
 
-    public MultipartFile imageFromUrl(String imageUrl)  {
+    public MultipartFile imageFromUrl(String imageUrl) {
         try {
             // 이미지 데이터를 byte[]로 받음
             ResponseEntity<byte[]> response = restTemplate.exchange(
@@ -35,16 +39,22 @@ public class ImageFromUrlAdapter {
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 byte[] imageBytes = response.getBody();
 
-                // 파일 이름 및 ContentType은 응답 헤더에서 가져오거나 임의로 설정 가능
-                String fileName = "downloaded_image.jpg"; // 필요에 따라 설정
-                String contentType = response.getHeaders().getContentType() != null
-                        ? response.getHeaders().getContentType().toString()
-                        : "image/jpeg"; // 기본적으로 jpeg로 설정
+                // 이미지 변환을 위해 BufferedImage로 변환
+                BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+
+                // JPEG로 변환
+                ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream();
+                ImageIO.write(originalImage, "jpg", jpegOutputStream);
+                byte[] jpegBytes = jpegOutputStream.toByteArray();
+
+                // 파일 이름 및 ContentType 설정
+                String fileName = "downloaded_image.jpg"; // JPEG 파일 이름
+                String contentType = "image/jpeg"; // JPEG Content Type
 
                 // byte[]를 MultipartFile로 변환
-                return new MockMultipartFile(fileName, fileName, contentType, new ByteArrayInputStream(imageBytes));
+                return new MockMultipartFile(fileName, fileName, contentType, new ByteArrayInputStream(jpegBytes));
             }
-        } catch (Exception e){
+        } catch (IOException e) {
             System.out.println(e);
             throw new ErrorDomain(ErrorCode.IMAGE_CONVERTER_ERROR);
         }

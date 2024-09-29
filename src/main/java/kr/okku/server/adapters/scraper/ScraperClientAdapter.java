@@ -20,8 +20,8 @@ public interface ScraperClientAdapter {
 
     @PostMapping(value = "/fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     FittingResponseDto fitting(
-            @RequestPart("user_pk") String userId,
-            @RequestPart("clothes_class") String clothesClass,
+            @RequestParam("user_pk") String userId,
+            @RequestParam("clothes_class") String clothesClass,
             @RequestPart("human_img") MultipartFile userImage,
             @RequestPart("clothes_img") MultipartFile itemImage
     );
