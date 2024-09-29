@@ -18,6 +18,7 @@ public enum ErrorCode {
     PICK_IDS_REQUIRED("pickIds is required", 400),
     MUST_LOGIN("must login", 402),
     SCRAPER_ERROR("scraper error", 500),
+    IMAGE_CONVERTER_ERROR("Not Convert pick image", 500),
     REFRESH_INVALID("Not Valid refreshToken", 400),
     DUPLICATED_PICK("Duplicated pick", 400),
     APPLE_LOGIN_TOKEN_HEADER_MAPPING("Parsing Header Error : 토큰의 헤더를 매핑하는 데 실패했습니다", 500),

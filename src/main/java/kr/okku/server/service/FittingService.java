@@ -26,10 +26,10 @@
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
                               ImageFromUrlAdapter imageFromUrlAdapter,
-                              PickPersistenceAdapter pickPersistenceAdapter,  ScraperAdapter scraperAdapter1) {
+                              PickPersistenceAdapter pickPersistenceAdapter) {
             this.imageFromUrlAdapter = imageFromUrlAdapter;
             this.pickPersistenceAdapter = pickPersistenceAdapter;
-            this.scraperAdapter = scraperAdapter1;
+            this.scraperAdapter = scraperAdapter;
         }
 
         public boolean fitting(String userId, MultipartFile userImage, String pickId, String part) {
@@ -38,9 +38,9 @@
                 throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST);
             }
             String itemImageUrl = pick.getImage();
-            byte[] itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
+            MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : "upper_body";
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,convertMultipartFileToBytes(userImage));
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage);
             String fittingImageUrl = "https://vton-result.s3.ap-northeast-2.amazonaws.com/"+fittingResponse.getFile_key();
             pick.setFittingImage(fittingImageUrl);
             pickPersistenceAdapter.save(pick);
