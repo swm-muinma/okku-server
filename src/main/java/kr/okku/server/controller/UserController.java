@@ -59,6 +59,7 @@ public class UserController {
             @RequestBody SetFcmTokenRequestDto request
     ) {
         String userId = userDetails.getUsername();
+        System.out.println(request);
         try {
             SetFcmTokenResponseDto response = userService.addFcmToken(userId, request.getFcmToken());
             return ResponseEntity.ok(response);

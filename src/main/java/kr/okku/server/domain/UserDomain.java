@@ -37,14 +37,11 @@ public class UserDomain {
     private String appleId;
 
     public void addFcmToken(String token) {
-        // fcmToken이 null인 경우 새 리스트를 생성
-        if (fcmToken == null) {
-            fcmToken = new ArrayList<>();
-        }
+        List<String> newFcmToken = new ArrayList<>(this.fcmToken);
+        if (!this.fcmToken.contains(token)) {
+            newFcmToken.add(token);
+            this.fcmToken = newFcmToken;
 
-        // 중복된 토큰 추가 방지
-        if (!fcmToken.contains(token)) {
-            this.fcmToken.add(token);
         }
     }
 }
