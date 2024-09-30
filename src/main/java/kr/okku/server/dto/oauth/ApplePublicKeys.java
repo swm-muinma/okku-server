@@ -17,6 +17,6 @@ public record ApplePublicKeys(
         return keys.stream()
                 .filter(key -> key.isSameAlg(alg) && key.isSameKid(kid))
                 .findFirst()
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED));
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED,null));
     }
 }

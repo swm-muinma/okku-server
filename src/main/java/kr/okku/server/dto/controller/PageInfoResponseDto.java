@@ -3,7 +3,7 @@ package kr.okku.server.dto.controller;
 import lombok.Data;
 
 @Data
-public class PageInfoResponseDTO {
+public class PageInfoResponseDto extends BasicRequestDto{
     private int totalDataCnt;
     private int totalPages;
     private boolean isLastPage;

@@ -93,20 +93,20 @@ public class Oauth2Service {
 
 
     // Retrieve the redirect URL for the platform
-    public String getRedirect(String platform) {
-        if ("apple".equalsIgnoreCase(platform)) {
-            return String.format(
-                    "https://appleid.apple.com/auth/authorize?client_id=%s&response_type=code&redirect_uri=%s",
-                    appleClientId, appleRedirectUri
-            );
-        }
-
-        if ("kakao".equalsIgnoreCase(platform)) {
-            return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
-                    kakaoClientId, kakaoRedirectUri);
-        }
-        throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
-    }
+//    public String getRedirect(String platform) {
+//        if ("apple".equalsIgnoreCase(platform)) {
+//            return String.format(
+//                    "https://appleid.apple.com/auth/authorize?client_id=%s&response_type=code&redirect_uri=%s",
+//                    appleClientId, appleRedirectUri
+//            );
+//        }
+//
+//        if ("kakao".equalsIgnoreCase(platform)) {
+//            return String.format("https://kauth.kakao.com/oauth/authorize?client_id=%s&redirect_uri=%s&response_type=code",
+//                    kakaoClientId, kakaoRedirectUri);
+//        }
+//        throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+//    }
 
     private static final String SIGN_ALGORITHM_HEADER = "alg";
     private static final String KEY_ID_HEADER = "kid";
@@ -138,7 +138,7 @@ public class Oauth2Service {
             // 생성한 KeyFactory와 PublicKeySpec으로 RSAPublicKey 생성
             return keyFactory.generatePublic(rsaPublicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
-            throw new ErrorDomain(ErrorCode.RSA_ERROR);
+            throw new ErrorDomain(ErrorCode.RSA_ERROR, null);
         }
     }
 
@@ -215,7 +215,7 @@ public class Oauth2Service {
         if ("kakao".equalsIgnoreCase(platform)) {
             return handleKakaoLogin(authorizationCode);
         }
-        throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+        throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
     }
 
     // Handle Kakao login logic

@@ -8,6 +8,7 @@ import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.CartDomain;
 import kr.okku.server.dto.controller.cart.CartDto;
+import kr.okku.server.dto.controller.cart.CreateCartRequestDto;
 import kr.okku.server.dto.controller.cart.MyCartsResponseDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
@@ -37,7 +38,7 @@ public class CartService {
         List<CartDomain> cartDomains = cartPersistenceAdapter.findByUserId(userId);
 
         if (cartDomains == null) {
-            throw new ErrorDomain(ErrorCode.CART_NOT_EXIST);
+            throw new ErrorDomain(ErrorCode.CART_NOT_EXIST,null);
         }
 
         var resCart = cartDomains.stream().map(cart -> {
@@ -65,18 +66,20 @@ public class CartService {
     @Transactional
     public String deleteCart(String userId, String cartId) {
         CartDomain cartInfo = cartPersistenceAdapter.findById(cartId)
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST));
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,null));
         if (!cartInfo.getUserId().equals(userId)) {
-            throw new ErrorDomain(ErrorCode.NOT_OWNER);
+            throw new ErrorDomain(ErrorCode.NOT_OWNER,null);
         }
         cartPersistenceAdapter.deleteById(cartId);
         return cartId;
     }
 
     @Transactional
-    public CartDomain createCart(String userId, String name, List<String> pickIds) {
+    public CartDomain createCart(String userId, CreateCartRequestDto requestDto) {
+        String name = requestDto.getName();
+        List<String> pickIds = requestDto.getPickIds();
         if (name == null || name.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+            throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
         }
         Integer size = 0;
         if(pickIds==null){
@@ -93,6 +96,6 @@ public class CartService {
         if (savedCart != null) {
             return savedCart;
         }
-        throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+        throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
     }
 }

@@ -39,7 +39,7 @@
 
         public ScrapedDataDomain getItemInfoWithoutLogin(String url, String okkuId) {
             if (okkuIds.contains(okkuId)) {
-                throw new ErrorDomain(ErrorCode.MUST_LOGIN);
+                throw new ErrorDomain(ErrorCode.MUST_LOGIN,null);
             }
 
             Optional<ScrapedDataDomain> scrapedData = scraperAdapter.scrape(url);
@@ -57,7 +57,7 @@
         @Transactional
         public ProductReviewDto getReviewsWithoutLogin(String productPk, String platform, String okkuId) {
             if (okkuIds.contains(okkuId)) {
-                throw new ErrorDomain(ErrorCode.MUST_LOGIN);
+                throw new ErrorDomain(ErrorCode.MUST_LOGIN,null);
             }
 
             // 로그인 없이 사용할 때는 pick과 관련된 데이터는 없으므로 null을 전달

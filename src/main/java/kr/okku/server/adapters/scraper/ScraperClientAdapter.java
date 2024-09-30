@@ -15,13 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 @FeignClient(name = "scraper", url = "${spring.msa.scraper.uri}")
 public interface ScraperClientAdapter {
 
-    @PostMapping(value = "/scrap", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/v1/scrap", consumes = MediaType.APPLICATION_JSON_VALUE)
     ScraperResponseDto scrape(@RequestBody ScraperRequestDto scraperRequestDto);
 
-    @PostMapping(value = "/fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v2/fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     FittingResponseDto fitting(
             @RequestParam("user_pk") String userId,
             @RequestParam("clothes_class") String clothesClass,
+            @RequestParam("fcm_token") String fcmToken,
             @RequestPart("human_img") MultipartFile userImage,
             @RequestPart("clothes_img") MultipartFile itemImage
     );
