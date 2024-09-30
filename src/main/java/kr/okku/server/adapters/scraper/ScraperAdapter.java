@@ -49,9 +49,9 @@ public class ScraperAdapter {
         }
     }
 
-    public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, MultipartFile userImage) {
+    public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, MultipartFile userImage, String fcmToken) {
         try {
-            FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass, userImage, itemImage);
+            FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken, userImage, itemImage);
 
             System.out.printf("Fitting successful with response time: %.2f ms\n", response.getFile_key());
 
