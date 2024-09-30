@@ -6,7 +6,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 public class SetFcmTokenRequestDto {
     private String fcmToken;
 }
