@@ -24,15 +24,10 @@ public class UserController {
     @GetMapping
     public ResponseEntity<UserResponseDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        try {
             UserDomain user = userService.getProfile(userId);
             UserResponseDto response = new UserResponseDto(user.getId(), user.getName(), user.getHeight(), user.getWeight(), user.getForm());
             System.out.printf("Request successful - UserId: %s, Name: %s%n", userId, user.getName());
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
     }
 
     // Update user profile
@@ -42,15 +37,10 @@ public class UserController {
             @RequestBody UpdateProfileRequestDto request
     ) {
         String userId = userDetails.getUsername();
-        try {
             UserDomain updatedUser = userService.updateProfile(userId, request);
             UserResponseDto response = new UserResponseDto(updatedUser.getId(), updatedUser.getName(), updatedUser.getHeight(), updatedUser.getWeight(), updatedUser.getForm());
             System.out.printf("Request successful - UserId: %s, Updated Name: %s%n", userId, request.getName());
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
     }
 
     @PatchMapping("/fcmtoken")

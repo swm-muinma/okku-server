@@ -37,17 +37,12 @@ public class LoginController {
         String token = request.get("token");
         String recommend = request.get("recommend");
 
-        try {
             if (token == null) {
                 throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
             Map<String, Object> result = oauth2Service.kakaoLoginWithToken(token, recommend);
             System.out.printf("Request successful - Kakao token: %s%n", token);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - Kakao token: %s, Error: %s%n", token, e.getMessage());
-            throw e;
-        }
     }
 
     @PostMapping("/app/apple")
@@ -55,43 +50,28 @@ public class LoginController {
         String token = request.get("token");
         String recommend = request.get("recommend");
 
-        try {
             if (token == null) {
                 throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
             Map<String, Object> result = oauth2Service.appleLoginWithToken(token, recommend);
             System.out.printf("Request successful - Apple token: %s%n", token);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - Apple token: %s, Error: %s%n", token, e.getMessage());
-            throw e;
-        }
     }
 
     @GetMapping("/test/token/{userId}")
     public String test(@PathVariable String userId) {
-        try {
             List<String> roles = new ArrayList<>();
             roles.add(RoleEnum.USER.getValue());
             String accessToken = jwtTokenProvider.createAccessToken(userId, roles);
             System.out.printf("Request successful - Test access token for userId: %s%n", userId);
             return accessToken;
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
-            return "Error generating token";
-        }
     }
 
     @GetMapping("/review-test")
     public ProductReviewDto reviewTest() {
-        try {
             ProductReviewDto result = reviewService.getReviewsWithoutLogin("140062026", "zigzag", "sada");
             System.out.println("Request successful - Review test");
             return result;
-        } catch (Exception e) {
-            System.err.printf("Request failed - Review test, Error: %s%n", e.getMessage());
-            return null;
-        }
     }
 
     @GetMapping("/oauth2/code/{platform}")
