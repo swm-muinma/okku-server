@@ -60,27 +60,19 @@ public class UserController {
     ) {
         String userId = userDetails.getUsername();
         System.out.println(request);
-        try {
             SetFcmTokenResponseDto response = userService.addFcmToken(userId, request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     // Withdraw user account
     @GetMapping("/pre-withdraw")
     public ResponseEntity<String> withdrawCheck(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        try {
             String res = userService.checkAccountSocial(userId);
             System.out.printf("Request successful - UserId: %s, Pre-withdraw check passed%n", userId);
             return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Error: %s%n", userId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     @GetMapping("/withdraw/{platform}")
@@ -90,13 +82,9 @@ public class UserController {
             @RequestParam String code
     ) {
         String userId = userDetails.getUsername();
-        try {
             userService.withdrawAccount(userId, platform, code);
             System.out.printf("Request successful - UserId: %s, Platform: %s%n", userId, platform);
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Platform: %s, Error: %s%n", userId, platform, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 }

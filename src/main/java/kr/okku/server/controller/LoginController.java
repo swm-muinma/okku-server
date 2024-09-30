@@ -96,29 +96,21 @@ public class LoginController {
 
     @GetMapping("/oauth2/code/{platform}")
     public ResponseEntity<Map<String, Object>> oauth2Login(@PathVariable String platform, @RequestParam String code) {
-        try {
             Map<String, Object> result = oauth2Service.oauth2Login(platform, code);
             System.out.printf("Request successful - OAuth2 login with platform: %s, Code: %s%n", platform, code);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - OAuth2 login with platform: %s, Code: %s, Error: %s%n", platform, code, e.getMessage());
-            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
-        }
+
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDto> refresh(@RequestBody RefreshRequestDto refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        try {
             if (refreshToken == null) {
                 throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
             TokenResponseDto result = refreshService.updateRefresh(refreshToken);
             System.out.printf("Request successful - Refresh token: %s%n", refreshToken);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - Refresh token: %s, Error: %s%n", refreshToken, e.getMessage());
-            return ResponseEntity.status(500).body(null);
-        }
+
     }
 }

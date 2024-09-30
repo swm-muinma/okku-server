@@ -28,14 +28,10 @@ public class PickController {
             @RequestBody NewPickRequestDto request
     ) {
         String userId = userDetails.getUsername();
-        try {
             PickDomain pick = pickService.createPick(userId, request);
             System.out.printf("Request successful - UserId: %s, New Pick URL: %s%n", userId, request.getUrl());
             return ResponseEntity.ok(pick);
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, New Pick URL: %s, Error: %s%n", userId, request.getUrl(), e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     @PostMapping("/delete")
@@ -44,14 +40,10 @@ public class PickController {
             @RequestBody DeletePicksRequestDto request
     ) {
         String userId = userDetails.getUsername();
-        try {
             pickService.deletePicks(userId, request);
             System.out.printf("Request successful - UserId: %s, Deleted Picks: %s%n", userId, request.getPickIds());
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Deleted Picks: %s, Error: %s%n", userId, request.getPickIds(), e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     @GetMapping("")
@@ -75,14 +67,10 @@ public class PickController {
     public ResponseEntity<ProductReviewDto> getReviews(
             @RequestParam String pickId
     ) {
-        try {
             ProductReviewDto reviews = reviewService.getReviews(pickId);
             System.out.printf("Request successful - PickId: %s%n", pickId);
             return ResponseEntity.ok(reviews);
-        } catch (Exception e) {
-            System.err.printf("Request failed - PickId: %s, Error: %s%n", pickId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     @PatchMapping("")
@@ -91,14 +79,10 @@ public class PickController {
             @RequestBody MovePicksRequestDto request
     ) {
         String userId = userDetails.getUsername();
-        try {
             pickService.movePicks(userId, request);
             System.out.printf("Request successful - UserId: %s, Moved Picks: %s%n", userId, request.getPickIds());
             return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            System.err.printf("Request failed - UserId: %s, Moved Picks: %s, Error: %s%n", userId, request.getPickIds(), e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 
     @GetMapping("fitting")
@@ -106,13 +90,9 @@ public class PickController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String pickId
     ){
-        try {
             PickFittingResponseDto reviews = pickService.getFitting(pickId);
             System.out.printf("Request successful - PickId: %s%n", pickId);
             return ResponseEntity.ok(reviews);
-        } catch (Exception e) {
-            System.err.printf("Request failed - PickId: %s, Error: %s%n", pickId, e.getMessage());
-            return ResponseEntity.status(500).build();
-        }
+
     }
 }
