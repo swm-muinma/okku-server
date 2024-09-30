@@ -69,7 +69,7 @@ public class UserService {
         }
         user.addFcmToken(fcmTokens);
         UserDomain updatedUser = userPersistenceAdapter.save(user);
-        return new SetFcmTokenResponseDto(updatedUser.getFcmToken());
+        return new SetFcmTokenResponseDto(updatedUser.getFcmTokensForArray());
     }
 
     @Transactional

@@ -4,8 +4,8 @@ import kr.okku.server.enums.FormEnum;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Data
 @Builder
@@ -19,29 +19,39 @@ public class UserDomain {
     private String image = "";
 
     @Builder.Default
-    private Integer height = 160;  // 기본값을 160으로 설정
+    private Integer height = 160;
 
     @Builder.Default
-    private Integer weight = 50;   // 기본값을 50으로 설정
+    private Integer weight = 50;
 
     @Builder.Default
-    private FormEnum form = FormEnum.NORMAL;  // 기본값을 FormEnum의 특정 값으로 설정
+    private FormEnum form = FormEnum.NORMAL;
 
     @Builder.Default
     private Boolean isPremium = false;
 
     @Builder.Default
-    private List<String> fcmToken = new ArrayList<>(); // 기본값을 빈 리스트로 설정
+    private Set<String> fcmToken = new HashSet<String>();
+
 
     private String kakaoId;
     private String appleId;
 
     public void addFcmToken(String token) {
-        List<String> newFcmToken = new ArrayList<>(this.fcmToken);
-        if (!this.fcmToken.contains(token)) {
-            newFcmToken.add(token);
-            this.fcmToken = newFcmToken;
+        fcmToken.add(token);
+    }
 
-        }
+    public String[] getFcmTokensForList(){
+        List<String> temp = new ArrayList<>(fcmToken);
+        return Optional.ofNullable(temp)
+                .orElse(Collections.emptyList())
+                .toArray(new String[0]);
+    }
+
+    public List<String> getFcmTokensForArray(){
+        List<String> temp = new ArrayList<>(fcmToken);
+        return List.of(Optional.ofNullable(temp)
+                .orElse(Collections.emptyList())
+                .toArray(new String[0]));
     }
 }
