@@ -3,9 +3,9 @@ import kr.okku.server.adapters.persistence.repository.pick.PickEntity;
 import kr.okku.server.adapters.persistence.repository.pick.PlatformEntity;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.PlatformDomain;
-import kr.okku.server.dto.controller.PageInfoResponseDTO;
-import kr.okku.server.dto.controller.pick.PickItemResponseDTO;
-import kr.okku.server.dto.controller.pick.PickPlatformResponseDTO;
+import kr.okku.server.dto.controller.PageInfoResponseDto;
+import kr.okku.server.dto.controller.pick.PickItemResponseDto;
+import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
 import org.springframework.data.domain.Page;
 
 public class PickMapper {
@@ -71,15 +71,15 @@ public class PickMapper {
         return platformEntity;
     }
 
-    public static PickItemResponseDTO convertToPickDTO(PickDomain pickDomain) {
-        PickItemResponseDTO dto = new PickItemResponseDTO();
+    public static PickItemResponseDto convertToPickDTO(PickDomain pickDomain) {
+        PickItemResponseDto dto = new PickItemResponseDto();
         dto.setId(pickDomain.getId());
         dto.setName(pickDomain.getName());
         dto.setPrice(pickDomain.getPrice());
         dto.setImage(pickDomain.getImage());
         dto.setUrl(pickDomain.getUrl());
 
-        PickPlatformResponseDTO platformDTO = new PickPlatformResponseDTO();
+        PickPlatformResponseDto platformDTO = new PickPlatformResponseDto();
         platformDTO.setName(pickDomain.getPlatform().getName());
         platformDTO.setImage(pickDomain.getPlatform().getImage());
         platformDTO.setUrl(pickDomain.getPlatform().getUrl());
@@ -88,8 +88,8 @@ public class PickMapper {
         return dto;
     }
 
-    public static PageInfoResponseDTO convertToPageInfoDTO(Page<PickDomain> page) {
-        PageInfoResponseDTO pageInfo = new PageInfoResponseDTO();
+    public static PageInfoResponseDto convertToPageInfoDTO(Page<PickDomain> page) {
+        PageInfoResponseDto pageInfo = new PageInfoResponseDto();
         pageInfo.setTotalDataCnt((int) page.getTotalElements());
         pageInfo.setTotalPages(page.getTotalPages());
         pageInfo.setLastPage(page.isLast());

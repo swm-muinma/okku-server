@@ -33,7 +33,6 @@ public class UserDomain {
     @Builder.Default
     private Set<String> fcmToken = new HashSet<String>();
 
-
     private String kakaoId;
     private String appleId;
 

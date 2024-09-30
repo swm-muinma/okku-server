@@ -8,6 +8,7 @@
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
+    import kr.okku.server.dto.controller.fitting.FittingRequestDto;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,13 @@
             this.scraperAdapter = scraperAdapter;
         }
 
-        public boolean fitting(String userId, MultipartFile userImage, String pickId, String part) {
+        public boolean fitting(String userId, FittingRequestDto requestDto) {
+            MultipartFile userImage = requestDto.getImage();
+            String pickId = requestDto.getPickId();
+            String part = requestDto.getPart();
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
-                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST);
+                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
             }
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
@@ -48,11 +52,4 @@
             return true;
         }
 
-        private byte[] convertMultipartFileToBytes(MultipartFile file) {
-            try{
-                return file.getBytes();
-            }catch (Exception e){
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
-            }
-        }
     }

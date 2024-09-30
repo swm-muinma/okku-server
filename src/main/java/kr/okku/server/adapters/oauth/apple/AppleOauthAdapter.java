@@ -90,7 +90,7 @@ public class AppleOauthAdapter {
             PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
             return converter.getPrivateKey(object);
         }catch (Exception e){
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED);
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED,null);
         }
     }
 }

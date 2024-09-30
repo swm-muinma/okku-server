@@ -25,17 +25,9 @@ public class FittingController {
     public ResponseEntity<?> getItemInfoWithoutLogin(
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute FittingRequestDto requestDto) {
-        MultipartFile image = requestDto.getImage();
-        String pickId = requestDto.getPickId();
-        String part = requestDto.getPart();
-        try {
             String userId = userDetails.getUsername();
-            var result = fittingService.fitting(userId, image,pickId,part);
-            System.out.println("Request successful - Fitting with pickId: " + pickId);
+            var result = fittingService.fitting(userId, requestDto);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - Fitting with pickId: %s, Error: %s%n", pickId, e.getMessage());
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
+
     }
 }

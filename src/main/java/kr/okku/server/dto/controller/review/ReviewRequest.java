@@ -1,6 +1,8 @@
 package kr.okku.server.dto.controller.review;
 
-public class ReviewRequest {
+import kr.okku.server.dto.controller.BasicRequestDto;
+
+public class ReviewRequest extends BasicRequestDto {
     private String productPk;
     private String platform;
     private String okkuId;

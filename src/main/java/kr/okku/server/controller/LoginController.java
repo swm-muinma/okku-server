@@ -1,8 +1,7 @@
 package kr.okku.server.controller;
 
-import kr.okku.server.domain.ReviewInsightDomain;
 import kr.okku.server.dto.controller.refresh.RefreshRequestDto;
-import kr.okku.server.dto.controller.refresh.TokenResponse;
+import kr.okku.server.dto.controller.refresh.TokenResponseDto;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.enums.RoleEnum;
 import kr.okku.server.exception.ErrorCode;
@@ -40,7 +39,7 @@ public class LoginController {
 
         try {
             if (token == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
             Map<String, Object> result = oauth2Service.kakaoLoginWithToken(token, recommend);
             System.out.printf("Request successful - Kakao token: %s%n", token);
@@ -58,7 +57,7 @@ public class LoginController {
 
         try {
             if (token == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
             Map<String, Object> result = oauth2Service.appleLoginWithToken(token, recommend);
             System.out.printf("Request successful - Apple token: %s%n", token);
@@ -108,13 +107,13 @@ public class LoginController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequestDto refreshRequest) {
+    public ResponseEntity<TokenResponseDto> refresh(@RequestBody RefreshRequestDto refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
         try {
             if (refreshToken == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
             }
-            TokenResponse result = refreshService.updateRefresh(refreshToken);
+            TokenResponseDto result = refreshService.updateRefresh(refreshToken);
             System.out.printf("Request successful - Refresh token: %s%n", refreshToken);
             return ResponseEntity.ok(result);
         } catch (Exception e) {

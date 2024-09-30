@@ -1,6 +1,8 @@
 package kr.okku.server.dto.controller.review;
 
-public class ScrapeRequest {
+import kr.okku.server.dto.controller.BasicRequestDto;
+
+public class ScrapeRequest extends BasicRequestDto {
     private String url;
     private String okkuId;
 

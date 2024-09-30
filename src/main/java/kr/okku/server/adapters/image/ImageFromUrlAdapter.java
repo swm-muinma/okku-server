@@ -56,8 +56,8 @@ public class ImageFromUrlAdapter {
             }
         } catch (IOException e) {
             System.out.println(e);
-            throw new ErrorDomain(ErrorCode.IMAGE_CONVERTER_ERROR);
+            throw new ErrorDomain(ErrorCode.IMAGE_CONVERTER_ERROR,null);
         }
-        throw new ErrorDomain(ErrorCode.IMAGE_CONVERTER_ERROR);
+        throw new ErrorDomain(ErrorCode.IMAGE_CONVERTER_ERROR,null);
     }
 }
