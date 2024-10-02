@@ -8,9 +8,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class PickDto  extends BasicRequestDto {
     private String id;
-    private String name;
-    private int price;
     private String image;
+    private int price;
+    private String name;
     private String url;
     private PickPlatformResponseDto platform;
 }
