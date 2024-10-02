@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @FeignClient(name = "scraper", url = "${spring.msa.scraper.uri}")
 public interface ScraperClientAdapter {
 
-    @PostMapping(value = "/v1/scrap", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/v2/scrap", consumes = MediaType.APPLICATION_JSON_VALUE)
     ScraperResponseDto scrape(@RequestBody ScraperRequestDto scraperRequestDto);
 
     @PostMapping(value = "/v2/fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

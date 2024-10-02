@@ -8,4 +8,5 @@ import lombok.Data;
 public class ProductReviewDto extends BasicRequestDto {
     private PickDto pick;
     private ReviewsDto reviews;
+    private String platform;
 }
