@@ -166,6 +166,7 @@
                             url
                     ))
                     .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
+                    .platform(platform)
                     .build();
         }
 
@@ -181,6 +182,7 @@
                             url
                     ))
                     .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
+                    .platform("")
                     .build();
         }
 
