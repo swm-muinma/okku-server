@@ -5,6 +5,7 @@
     import kr.okku.server.adapters.persistence.ReviewPersistenceAdapter;
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.*;
+    import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
     import kr.okku.server.dto.controller.review.*;
     import kr.okku.server.enums.ReviewStatusEnum;
     import kr.okku.server.exception.ErrorCode;
@@ -156,14 +157,16 @@
                     .map(positive -> createReviewSectionDTO(positive.getDescription(), positive.getReviewIds(), reviews, platform))
                     .collect(Collectors.toList());
 
-            // ProductReviewDto 생성
+            PickPlatformResponseDto platformInfo = new PickPlatformResponseDto();
+            platformInfo.setName(platform);
             return ProductReviewDto.builder()
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
                             image,
-                            name,
                             price,
-                            url
+                            name,
+                            url,
+                            platformInfo
                     ))
                     .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
                     .platform(platform)
@@ -177,9 +180,10 @@
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
                             image,
-                            name,
                             price,
-                            url
+                            name,
+                            url,
+                            new PickPlatformResponseDto()
                     ))
                     .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
                     .platform("")
