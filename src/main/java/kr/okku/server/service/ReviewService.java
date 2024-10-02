@@ -97,7 +97,8 @@
                                         review.getHeight(),
                                         review.getWeight(),
                                         review.getContent(),
-                                        review.getImageUrl() != null ? review.getImageUrl() : ""
+                                        review.getImageUrl() != null ? review.getImageUrl() : new ArrayList<>(),
+                                        review.getRating()
                                 );
                             }
                         } catch (IndexOutOfBoundsException | NumberFormatException e) {

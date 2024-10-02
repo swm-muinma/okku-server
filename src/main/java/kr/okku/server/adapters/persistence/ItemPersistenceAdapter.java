@@ -49,7 +49,6 @@ public class ItemPersistenceAdapter {
             item.setPrice(price);
             item.setImage(image);
             item.setUrl(url);
-
             itemRepository.save(item);
 
             return true;
