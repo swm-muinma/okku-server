@@ -233,9 +233,7 @@ public class PickService {
 
         List<String> mutablePickIds = new ArrayList<>(cart.getPickItemIds() != null ? cart.getPickItemIds() : new ArrayList<>());
 
-        mutablePickIds.addAll(pickIds);
-
-        cart.setPickItemIds(mutablePickIds);
+        cart.addPicks(mutablePickIds);
 
         // Save the updated cart
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);

@@ -23,4 +23,14 @@ public class CartDomain {
         this.pickItemIds = modifiablePickItemIds;
         this.pickNum = modifiablePickItemIds.size();
     }
+
+    public void addPicks(List<String> pickIds){
+        List<String> modifiablePickItemIds = new ArrayList<>(this.pickItemIds);
+        List<String> pickIdForAdd = pickIds.stream()
+                .filter(pickId -> !modifiablePickItemIds.contains(pickId))
+                .toList();
+        modifiablePickItemIds.addAll(pickIdForAdd);
+        this.pickItemIds = modifiablePickItemIds;
+        this.pickNum = modifiablePickItemIds.size();
+    }
 }
