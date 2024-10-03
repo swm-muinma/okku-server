@@ -48,14 +48,14 @@ public class CartController {
     }
 
     @PatchMapping
-    public ResponseEntity<RenameCartResponseDto> renameCart(
-            @RequestBody RenameCartRequestDto request,
+    public ResponseEntity<MyCartsResponseDto> updateCarts(
+            @RequestBody UpdateCartsRequestDto request,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userId = userDetails.getUsername();
-        CartDomain savedCart = cartService.renameCart(userId, request);
-        RenameCartResponseDto response = new RenameCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
+        MyCartsResponseDto savedCart = cartService.updateCarts(userId, request);
         System.out.printf("Request successful - Rename cart for userId: %s%n", userId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(savedCart);
     }
+
 }

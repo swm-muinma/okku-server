@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class RenameCartResponseDto extends BasicRequestDto {
+public class UpdateCartsResponseDto extends BasicRequestDto {
     private String id;
     private String name;
     private List<String> pickIds;

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RenameCartRequestDto extends BasicRequestDto {
-    private String cartId;
-    private String newName;
+public class UpdateCartRequestDto extends BasicRequestDto {
+    private String id;
+    private String name;
 }

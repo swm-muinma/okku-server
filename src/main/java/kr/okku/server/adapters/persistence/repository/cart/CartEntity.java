@@ -31,6 +31,9 @@ public class CartEntity {
     @CreatedDate
     private Date createdAt;
 
+    @Field("order_index") // Add order field
+    private int orderIndex;
+
     @Field("updated_at")
     @LastModifiedDate
     private Date updatedAt;
