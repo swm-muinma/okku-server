@@ -18,6 +18,7 @@ public class CartMapper {
                 .name(cartEntity.getName())
                 .pickNum(cartEntity.getPickNum())
                 .pickItemIds(Arrays.stream(cartEntity.getPickItemIds()).toList())
+                .orderIndex(cartEntity.getOrderIndex())
                 .build();
     }
 
@@ -31,6 +32,7 @@ public class CartMapper {
         cartEntity.setName(cartDomain.getName());
         cartEntity.setPickNum(cartDomain.getPickNum());
         cartEntity.setPickItemIds(cartDomain.getPickItemIds().toArray(new String[0]));
+        cartEntity.setOrderIndex(cartDomain.getOrderIndex());
         return cartEntity;
     }
 

@@ -41,7 +41,7 @@ public class CartPersistenceAdapter {
     }
 
     public List<CartDomain> findByUserId(String userId){
-        return  cartRepository.findByUserId(userId)
+        return  cartRepository.findByUserIdOrderByOrderIndexAsc(userId)
                 .stream()
                 .map(CartMapper::toDomain)
                 .collect(Collectors.toList());
