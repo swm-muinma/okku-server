@@ -10,6 +10,7 @@ import kr.okku.server.domain.CartDomain;
 import kr.okku.server.dto.controller.cart.CartDto;
 import kr.okku.server.dto.controller.cart.CreateCartRequestDto;
 import kr.okku.server.dto.controller.cart.MyCartsResponseDto;
+import kr.okku.server.dto.controller.cart.RenameCartRequestDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,5 +98,18 @@ public class CartService {
             return savedCart;
         }
         throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
+    }
+
+    public CartDomain renameCart(String userId, RenameCartRequestDto requestDto){
+        CartDomain cart = cartPersistenceAdapter.findById(requestDto.getCartId()).orElse(null);
+        if(cart==null){
+            throw new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto);
+        }
+        if(cart.getUserId()!=userId){
+            throw new ErrorDomain(ErrorCode.NOT_OWNER,requestDto);
+        }
+        cart.setName(requestDto.getNewName());
+        CartDomain savedCart = cartPersistenceAdapter.save(cart);
+        return savedCart;
     }
 }
