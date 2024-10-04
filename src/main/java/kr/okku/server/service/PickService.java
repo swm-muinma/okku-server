@@ -57,7 +57,7 @@ public class PickService {
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
         ScrapedDataDomain scrapedData;
 
-        if(scrapedCachData.isEmpty()){
+        if(scrapedCachData.isEmpty() || scrapedCachData.get().getPrice()==0){
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(url);
 
             scrapedData = scrapedRawData.orElseGet(() -> {
