@@ -25,8 +25,8 @@ public class ScraperAdapter {
     }
     public Optional<ScrapedDataDomain> scrape(String url) {
         try {
-            ScraperRequestDto scraperRequestDto = new ScraperRequestDto(url);
-
+            ScraperRequestDto scraperRequestDto = new ScraperRequestDto();
+            scraperRequestDto.setPath(url);
             ScraperResponseDto response = scraperClientAdapter.scrape(scraperRequestDto);
 
             // Logging the successful request
@@ -44,10 +44,8 @@ public class ScraperAdapter {
                     .fittingPart(response.getFitting_part())
                     .build());
         } catch (Exception e) {
-            ScraperRequestDto scraperRequestDto = new ScraperRequestDto(url);
             Sentry.withScope(scope -> {
                 scope.setExtra("url", url);
-                scope.setExtra("encoded", scraperRequestDto.toString());
                 scope.setExtra("error_message", e.getMessage());
                 Sentry.captureException(e);
             });
