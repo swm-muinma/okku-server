@@ -11,9 +11,4 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ImportAutoConfiguration({FeignAutoConfiguration.class, Http2ClientFeignConfiguration.class})
 public class FeignClientConfig {
-
-    @Bean
-    public Encoder feignFormEncoder() {
-        return new SpringFormEncoder();
-    }
 }
