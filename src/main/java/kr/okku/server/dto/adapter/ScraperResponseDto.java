@@ -15,4 +15,5 @@ public class ScraperResponseDto {
     private String img_url;
     private String category;
     private String brand;
+    private String fitting_part;
 }

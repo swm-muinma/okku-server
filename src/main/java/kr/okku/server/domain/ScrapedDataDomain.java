@@ -21,6 +21,7 @@ public class ScrapedDataDomain {
     private String platform;
     private String brand;
     private String category;
+    private String fittingPart;
 
     // ScrapedDataDomain을 설정하는 메서드
     public static ScrapedDataDomain fromDocument(Document document, String url) {

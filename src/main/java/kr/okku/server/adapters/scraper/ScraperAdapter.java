@@ -39,6 +39,7 @@ public class ScraperAdapter {
                     .url(response.getUrl())
                     .brand(response.getBrand())
                     .category(response.getCategory())
+                    .fittingPart(response.getFitting_part())
                     .build());
         } catch (Exception e) {
             System.err.printf("Failed to scrape data for URL: %s. Error: %s\n", url, e.getMessage());
