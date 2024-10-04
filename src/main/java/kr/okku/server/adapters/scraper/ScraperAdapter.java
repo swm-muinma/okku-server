@@ -25,8 +25,7 @@ public class ScraperAdapter {
     }
     public Optional<ScrapedDataDomain> scrape(String url) {
         try {
-            ScraperRequestDto scraperRequestDto = new ScraperRequestDto();
-            scraperRequestDto.setPath(url);
+            ScraperRequestDto scraperRequestDto = new ScraperRequestDto(url);
             ScraperResponseDto response = scraperClientAdapter.scrape(scraperRequestDto);
 
             // Logging the successful request

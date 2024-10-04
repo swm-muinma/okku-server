@@ -13,6 +13,7 @@ import org.jsoup.nodes.Element;
 @Data
 @Builder
 public class ScrapedDataDomain {
+    private String id;
     private String name;
     private int price;
     private String image;
