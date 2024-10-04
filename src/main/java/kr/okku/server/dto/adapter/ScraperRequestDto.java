@@ -1,6 +1,9 @@
 package kr.okku.server.dto.adapter;
 
-public class ScraperRequestDto{
+import java.io.Serializable;
+
+public class ScraperRequestDto implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String path;
 
     public ScraperRequestDto(String path) {
