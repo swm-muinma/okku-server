@@ -56,7 +56,6 @@ public class ScraperAdapter {
         try {
             FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken, userImage, itemImage);
 
-            System.out.printf("Fitting successful with response time: %.2f ms\n", response.getFile_key());
 
             return response;
         } catch (Exception e) {
