@@ -42,7 +42,6 @@ public class ScraperAdapter {
                     .fittingPart(response.getFitting_part())
                     .build());
         } catch (Exception e) {
-            System.err.printf("Failed to scrape data for URL: %s. Error: %s\n", url, e.getMessage());
             Sentry.withScope(scope -> {
                 scope.setExtra("url", url);
                 scope.setExtra("error_message", e.getMessage());
