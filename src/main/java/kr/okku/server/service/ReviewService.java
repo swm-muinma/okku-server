@@ -47,26 +47,22 @@
 
             return scrapedData.get();
         }
-        // 해당 서비스 내 공통 로직을 처리하는 private 메서드
         private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
                                                      String image, String name, Integer price, String url) {
             Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
             return createProductReviewDto(reviews, platform, pick, image, name, price, url);
         }
 
-        // 로그인 없이 리뷰를 가져오는 메서드
         @Transactional
         public ProductReviewDto getReviewsWithoutLogin(String productPk, String platform, String okkuId) {
             if (okkuIds.contains(okkuId)) {
                 throw new ErrorDomain(ErrorCode.MUST_LOGIN,null);
             }
 
-            // 로그인 없이 사용할 때는 pick과 관련된 데이터는 없으므로 null을 전달
             okkuIds.add(okkuId);
             return getReviewsByProduct(productPk, platform, null, "", "", 0, "url");
         }
 
-        // 로그인 후 리뷰를 가져오는 메서드
         public ProductReviewDto getReviews(String pickId) {
             Optional<PickDomain> pickOptional = pickPersistenceAdapter.findById(pickId);
             if (pickOptional.isEmpty()) {
@@ -74,7 +70,6 @@
             }
 
             PickDomain pick = pickOptional.get();
-            // pick 객체의 정보로 DTO 생성
             return getReviewsByProduct(
                     pick.getPk(),
                     pick.getPlatform().getName(),
@@ -85,8 +80,7 @@
                     pick.getUrl()
             );
         }
-
-
+        
         private ReviewSectionDto createReviewSectionDTO(String description, List<String> reviewIds, List<ReviewDetailDomain> reviews, String platform) {
             List<CommentDto> comments = IntStream.range(0, reviewIds.size())
                     .mapToObj(index -> {
@@ -113,20 +107,15 @@
             return new ReviewSectionDto(description, comments.size(), comments);
         }
 
-
         public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url) {
-            // ReviewInsightDomain 생성 로직
             ReviewInsightDomain insight;
             boolean isInsightEmpty = true;
             if (optionalReviewDomain.isEmpty()) {
-                // Optional이 비어있을 경우 빈 ReviewInsightDomain 생성
                 insight = createEmptyReviewInsightDomain();
             } else {
                 ReviewDomain reviewDomain = optionalReviewDomain.get();
                 if (reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
-                    // 정상적으로 리뷰가 완료되었고 리뷰 목록이 존재할 경우
                     Optional<ReviewInsightDomain> optionalInsight = reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
-
 
                     if(optionalInsight.isEmpty()){
                         insight = createEmptyReviewInsightDomain();
@@ -135,20 +124,17 @@
                         isInsightEmpty = false;
                     }
                 } else {
-                    // 리뷰가 완료되지 않았거나 리뷰 목록이 없을 경우 빈 ReviewInsightDomain 생성
                     insight = createEmptyReviewInsightDomain();
                 }
             }
-            // 만약 insight가 비어있는 경우라면, toDto 호출 없이 빈 ProductReviewDto를 반환할 수도 있음
+
             if (isInsightEmpty) {
                 return createEmptyProductReviewDto(pick, image, name, price, url);
             }
 
-            // toDto 로직 통합
             ReviewDomain review = optionalReviewDomain.orElse(null);
             List<ReviewDetailDomain> reviews = review != null ? review.getReviews() : Collections.emptyList();
 
-            // cons와 pros의 ReviewSectionDTO 생성
             List<ReviewSectionDto> cons = insight.getCautions().stream()
                     .map(caution -> createReviewSectionDTO(caution.getDescription(), caution.getReviewIds(), reviews, platform))
                     .collect(Collectors.toList());
@@ -159,7 +145,7 @@
 
             PickPlatformResponseDto platformInfo = new PickPlatformResponseDto();
             platformInfo.setName(platform);
-            double ratingAvg = this.calculateAverageRating(review.getReviews());
+            double ratingAvg = review.calculateAverageRating();
             return ProductReviewDto.builder()
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
@@ -175,8 +161,6 @@
                     .build();
         }
 
-
-        // 만약 빈 ProductReviewDto 생성 로직이 필요하다면 이 메서드를 이용할 수 있음
         private ProductReviewDto createEmptyProductReviewDto(PickDomain pick, String image, String name, Integer price, String url) {
             return ProductReviewDto.builder()
                     .pick(new PickDto(
@@ -188,7 +172,7 @@
                             new PickPlatformResponseDto()
                     ))
                     .ratingAvg(0)
-                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList(),"리뷰를 분석중입니다...","리뷰를 분석중입니다..."))
+                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList(),"",""))
                     .platform("")
                     .build();
         }
@@ -213,31 +197,4 @@
                     .build();
         }
 
-        private static double calculateAverageRating(List<ReviewDetailDomain> reviews) {
-            // 빈 리스트일 경우 0.0 반환
-            if (reviews == null || reviews.isEmpty()) {
-                return 0.0;
-            }
-
-            // 총합과 유효한 rating의 개수를 저장할 변수
-            int sum = 0;
-            int count = 0;
-
-            // 리뷰 리스트를 순회하면서 rating 값을 합산
-            for (ReviewDetailDomain review : reviews) {
-                // rating이 null이 아닌 경우에만 계산
-                if (review.getRating() != null) {
-                    sum += review.getRating();
-                    count++;
-                }
-            }
-
-            // 유효한 rating이 없으면 0.0 반환
-            if (count == 0) {
-                return 0.0;
-            }
-
-            // 평균 계산
-            return (double) sum / count;
-        }
     }
