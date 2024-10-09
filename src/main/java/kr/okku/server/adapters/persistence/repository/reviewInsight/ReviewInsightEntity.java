@@ -25,6 +25,15 @@ public class ReviewInsightEntity {
 
     private ReviewSummaryEntity[] positives;
 
+    @Field("n_summary")
+    private String consSummary;
+
+    @Field("p_summary")
+    private String prosSummary;
+
+    @Field("review_len")
+    private Integer reviewLen;
+
     @Field("created_at")
     @CreatedDate
     private Date createdAt;

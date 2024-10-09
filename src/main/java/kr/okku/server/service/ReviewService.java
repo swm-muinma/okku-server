@@ -168,7 +168,7 @@
                             url,
                             platformInfo
                     ))
-                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
+                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros, Optional.ofNullable(insight.getConsSummary()).orElse(""),Optional.ofNullable(insight.getProsSummary()).orElse("")))
                     .platform(platform)
                     .build();
         }
@@ -185,7 +185,7 @@
                             url,
                             new PickPlatformResponseDto()
                     ))
-                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
+                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList(),"리뷰를 분석중입니다...","리뷰를 분석중입니다..."))
                     .platform("")
                     .build();
         }

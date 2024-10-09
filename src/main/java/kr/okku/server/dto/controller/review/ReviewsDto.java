@@ -11,4 +11,6 @@ public class ReviewsDto extends BasicRequestDto {
     private ReviewStatusEnum reviewStatus;
     private List<ReviewSectionDto> cons;
     private List<ReviewSectionDto> pros;
+    private String consSummary;
+    private String prosSummary;
 }
