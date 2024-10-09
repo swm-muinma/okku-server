@@ -13,4 +13,7 @@ public class ReviewInsightDomain {
     private String productPk;
     private List<ReviewSummaryDomain> cautions;
     private List<ReviewSummaryDomain> positives;
+    private String consSummary;
+    private String prosSummary;
+    private Integer reviewLen;
 }

@@ -30,11 +30,11 @@ public class AppleTokenParser {
             return objectMapper.readValue(decodedHeader, Map.class);
 
         } catch (JsonMappingException e) {
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER_MAPPING);
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER_MAPPING, null);
         } catch (JsonProcessingException e) {
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER);
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_TOKEN_HEADER,null);
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_INVALID_TOKEN);
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_INVALID_TOKEN,null);
         }
     }
 }

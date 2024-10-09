@@ -1,8 +1,12 @@
 package kr.okku.server.adapters.oauth.apple;
 
+import kr.okku.server.config.FeignClientConfig;
 import kr.okku.server.dto.oauth.ApplePublicKeys;
 import kr.okku.server.dto.oauth.AppleTokenResponseDto;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

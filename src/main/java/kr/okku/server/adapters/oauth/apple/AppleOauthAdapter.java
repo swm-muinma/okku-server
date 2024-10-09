@@ -2,12 +2,15 @@ package kr.okku.server.adapters.oauth.apple;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import kr.okku.server.dto.oauth.ApplePublicKeys;
 import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +61,10 @@ public class AppleOauthAdapter {
         String clientSecret = createClientSecret();
         appleClientAdapter.appleRevoke(appleClientId,clientSecret,authToken.accessToken());
     }
+
+    public ApplePublicKeys getPublicKey(){
+        return appleClientAdapter.getApplePublicKeys();
+    }
     private String createClientSecret() {
         Date expirationDate = Date.from(LocalDateTime.now().plusDays(30).atZone(ZoneId.systemDefault()).toInstant());
         Map<String, Object> jwtHeader = new HashMap<>();
@@ -83,7 +90,7 @@ public class AppleOauthAdapter {
             PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
             return converter.getPrivateKey(object);
         }catch (Exception e){
-            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED);
+            throw new ErrorDomain(ErrorCode.APPLE_LOGIN_FAILED,null);
         }
     }
 }

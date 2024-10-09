@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UserMapper {
@@ -28,7 +29,7 @@ public class UserMapper {
                 .fcmToken(Optional.ofNullable(userEntity.getFcmToken())
                         .map(Arrays::stream)
                         .orElseGet(Stream::empty)
-                        .toList())
+                        .collect(Collectors.toSet()))
                 .build();
     }
 
@@ -46,9 +47,7 @@ public class UserMapper {
         userEntity.setIsPremium(userDomain.getIsPremium());
         userEntity.setKakaoId(userDomain.getKakaoId());
         userEntity.setAppleId(userDomain.getAppleId());
-        userEntity.setFcmToken(Optional.ofNullable(userDomain.getFcmToken())
-                .orElse(Collections.emptyList())
-                .toArray(new String[0]));
+        userEntity.setFcmToken(userDomain.getFcmTokensForList());
         return userEntity;
     }
 }

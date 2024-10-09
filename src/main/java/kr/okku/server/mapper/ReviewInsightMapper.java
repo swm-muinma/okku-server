@@ -20,20 +20,10 @@ public class ReviewInsightMapper {
                 .productPk(reviewInsightEntity.getProductPk())
                 .cautions(Arrays.stream(toDomain(reviewInsightEntity.getCautions())).toList())
                 .positives(Arrays.stream(toDomain(reviewInsightEntity.getPositives())).toList())
+                .prosSummary(reviewInsightEntity.getProsSummary())
+                .consSummary(reviewInsightEntity.getConsSummary())
+                .reviewLen(reviewInsightEntity.getReviewLen())
                 .build();
-    }
-
-    public static ReviewInsightEntity toEntity(ReviewInsightDomain reviewInsightDomain) {
-        if (reviewInsightDomain == null) {
-            return null;
-        }
-        ReviewInsightEntity reviewInsightEntity = new ReviewInsightEntity();
-        reviewInsightEntity.setId(reviewInsightDomain.getId());
-        reviewInsightEntity.setPlatform(reviewInsightDomain.getPlatform());
-        reviewInsightEntity.setProductPk(reviewInsightDomain.getProductPk());
-        reviewInsightEntity.setCautions(toEntity(reviewInsightDomain.getCautions().toArray(new ReviewSummaryDomain[0])));
-        reviewInsightEntity.setPositives(toEntity(reviewInsightDomain.getPositives().toArray(new ReviewSummaryDomain[0])));
-        return reviewInsightEntity;
     }
 
     // ReviewSummaryEntity <-> ReviewSummaryDomain

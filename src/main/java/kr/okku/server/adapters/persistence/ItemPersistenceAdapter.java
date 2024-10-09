@@ -30,6 +30,7 @@ public class ItemPersistenceAdapter {
     public Optional<ScrapedDataDomain> findByUrl(String url) {
         return itemRepository.findByUrl(url)
                 .map(item -> ScrapedDataDomain.builder()
+                        .id(item.getId())
                         .url(url)
                         .name(item.getName())
                         .image(item.getImage())
@@ -49,7 +50,6 @@ public class ItemPersistenceAdapter {
             item.setPrice(price);
             item.setImage(image);
             item.setUrl(url);
-
             itemRepository.save(item);
 
             return true;

@@ -73,7 +73,7 @@ public class ReviewMapper {
                 .topSize(reviewDetailEntity.getTopSize())
                 .bottomSize(reviewDetailEntity.getBottomSize())
                 .content(reviewDetailEntity.getContent())
-                .imageUrl(reviewDetailEntity.getImageUrl())
+                .imageUrl(reviewDetailEntity.getImageUrls())
                 .build();
     }
 
@@ -92,7 +92,7 @@ public class ReviewMapper {
         reviewDetailEntity.setTopSize(reviewDetailDomain.getTopSize());
         reviewDetailEntity.setBottomSize(reviewDetailDomain.getBottomSize());
         reviewDetailEntity.setContent(reviewDetailDomain.getContent());
-        reviewDetailEntity.setImageUrl(reviewDetailDomain.getImageUrl());
+        reviewDetailEntity.setImageUrls(reviewDetailDomain.getImageUrl());
         return reviewDetailEntity;
     }
 }

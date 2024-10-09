@@ -5,6 +5,7 @@
     import kr.okku.server.adapters.persistence.ReviewPersistenceAdapter;
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.*;
+    import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
     import kr.okku.server.dto.controller.review.*;
     import kr.okku.server.enums.ReviewStatusEnum;
     import kr.okku.server.exception.ErrorCode;
@@ -39,7 +40,7 @@
 
         public ScrapedDataDomain getItemInfoWithoutLogin(String url, String okkuId) {
             if (okkuIds.contains(okkuId)) {
-                throw new ErrorDomain(ErrorCode.MUST_LOGIN);
+                throw new ErrorDomain(ErrorCode.MUST_LOGIN,null);
             }
 
             Optional<ScrapedDataDomain> scrapedData = scraperAdapter.scrape(url);
@@ -57,7 +58,7 @@
         @Transactional
         public ProductReviewDto getReviewsWithoutLogin(String productPk, String platform, String okkuId) {
             if (okkuIds.contains(okkuId)) {
-                throw new ErrorDomain(ErrorCode.MUST_LOGIN);
+                throw new ErrorDomain(ErrorCode.MUST_LOGIN,null);
             }
 
             // 로그인 없이 사용할 때는 pick과 관련된 데이터는 없으므로 null을 전달
@@ -97,7 +98,8 @@
                                         review.getHeight(),
                                         review.getWeight(),
                                         review.getContent(),
-                                        review.getImageUrl() != null ? review.getImageUrl() : ""
+                                        review.getImageUrl() != null ? review.getImageUrl() : new ArrayList<>(),
+                                        review.getRating()
                                 );
                             }
                         } catch (IndexOutOfBoundsException | NumberFormatException e) {
@@ -155,16 +157,21 @@
                     .map(positive -> createReviewSectionDTO(positive.getDescription(), positive.getReviewIds(), reviews, platform))
                     .collect(Collectors.toList());
 
-            // ProductReviewDto 생성
+            PickPlatformResponseDto platformInfo = new PickPlatformResponseDto();
+            platformInfo.setName(platform);
+            double ratingAvg = this.calculateAverageRating(review.getReviews());
             return ProductReviewDto.builder()
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
                             image,
-                            name,
                             price,
-                            url
+                            name,
+                            url,
+                            platformInfo
                     ))
-                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
+                    .ratingAvg(ratingAvg)
+                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros, Optional.ofNullable(insight.getConsSummary()).orElse(""),Optional.ofNullable(insight.getProsSummary()).orElse("")))
+                    .platform(platform)
                     .build();
         }
 
@@ -175,11 +182,14 @@
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
                             image,
-                            name,
                             price,
-                            url
+                            name,
+                            url,
+                            new PickPlatformResponseDto()
                     ))
-                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
+                    .ratingAvg(0)
+                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList(),"리뷰를 분석중입니다...","리뷰를 분석중입니다..."))
+                    .platform("")
                     .build();
         }
 
@@ -201,5 +211,33 @@
                     .cautions(Collections.emptyList())
                     .positives(Collections.emptyList())
                     .build();
+        }
+
+        private static double calculateAverageRating(List<ReviewDetailDomain> reviews) {
+            // 빈 리스트일 경우 0.0 반환
+            if (reviews == null || reviews.isEmpty()) {
+                return 0.0;
+            }
+
+            // 총합과 유효한 rating의 개수를 저장할 변수
+            int sum = 0;
+            int count = 0;
+
+            // 리뷰 리스트를 순회하면서 rating 값을 합산
+            for (ReviewDetailDomain review : reviews) {
+                // rating이 null이 아닌 경우에만 계산
+                if (review.getRating() != null) {
+                    sum += review.getRating();
+                    count++;
+                }
+            }
+
+            // 유효한 rating이 없으면 0.0 반환
+            if (count == 0) {
+                return 0.0;
+            }
+
+            // 평균 계산
+            return (double) sum / count;
         }
     }

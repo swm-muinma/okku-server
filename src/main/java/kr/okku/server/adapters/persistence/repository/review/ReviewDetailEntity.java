@@ -3,11 +3,13 @@ package kr.okku.server.adapters.persistence.repository.review;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.List;
+
 @Data
 public class ReviewDetailEntity {
 
     @Field("rating")
-    private String rating;
+    private Integer rating;
 
     @Field("gender")
     private String gender;
@@ -19,10 +21,10 @@ public class ReviewDetailEntity {
     private String criterion;
 
     @Field("height")
-    private Integer height;
+    private String height;
 
     @Field("weight")
-    private Integer weight;
+    private String weight;
 
     @Field("top_size")
     private String topSize;
@@ -39,6 +41,6 @@ public class ReviewDetailEntity {
     @Field("foot_size")
     private String footSize;
 
-    @Field("image_url")
-    private String imageUrl;
+    @Field("image_urls")
+    private List<String> imageUrls;
 }

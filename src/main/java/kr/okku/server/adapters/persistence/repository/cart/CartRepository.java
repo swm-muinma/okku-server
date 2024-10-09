@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface CartRepository extends MongoRepository<CartEntity, String> {
-    List<CartEntity> findByUserId(String userId);
+    List<CartEntity> findByUserIdOrderByOrderIndexAsc(String userId);
 
     Optional<CartEntity> findById(String id);
 

@@ -13,4 +13,7 @@ public class ScraperResponseDto {
     private String name;
     private Integer price;
     private String img_url;
+    private String brand;
+    private String category;
+    private String fitting_part;
 }

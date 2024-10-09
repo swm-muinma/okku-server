@@ -13,12 +13,16 @@ import org.jsoup.nodes.Element;
 @Data
 @Builder
 public class ScrapedDataDomain {
+    private String id;
     private String name;
     private int price;
     private String image;
     private String url;
     private String productPk;
     private String platform;
+    private String brand;
+    private String category;
+    private String fittingPart;
 
     // ScrapedDataDomain을 설정하는 메서드
     public static ScrapedDataDomain fromDocument(Document document, String url) {

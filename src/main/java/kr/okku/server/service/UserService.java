@@ -9,6 +9,7 @@ import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.UserDomain;
 import kr.okku.server.dto.controller.user.SetFcmTokenRequestDto;
 import kr.okku.server.dto.controller.user.SetFcmTokenResponseDto;
+import kr.okku.server.dto.controller.user.UpdateProfileRequestDto;
 import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.enums.FormEnum;
 import kr.okku.server.exception.ErrorCode;
@@ -24,12 +25,9 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserPersistenceAdapter userPersistenceAdapter;
-
     private final PickPersistenceAdapter pickPersistenceAdapter;
-
     private final CartPersistenceAdapter cartPersistenceAdapter;
     private final AppleOauthAdapter appleOauthAdapter;
-
     @Autowired
     public UserService(CartPersistenceAdapter cartPersistenceAdapter, PickPersistenceAdapter pickPersistenceAdapter,
                        UserPersistenceAdapter userPersistenceAdapter, AppleOauthAdapter appleOauthAdapter) {
@@ -39,22 +37,23 @@ public class UserService {
         this.appleOauthAdapter = appleOauthAdapter;
     }
 
-    // Retrieve user profile by user ID
     public UserDomain getProfile(String userId) {
         UserDomain user = userPersistenceAdapter.findById(userId).get();
         if (user == null) {
-            throw new ErrorDomain(ErrorCode.USER_NOT_FOUND);
+            throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,null);
         }
         return user;
     }
 
-    // Update user profile
     @Transactional
-    public UserDomain updateProfile(String id, String name, Integer height, Integer weight, FormEnum form) {
+    public UserDomain updateProfile(String id, UpdateProfileRequestDto requestDto) {
+        String name=requestDto.getName();
+        Integer height=requestDto.getHeight();
+        Integer weight=requestDto.getWeight();
+        FormEnum form =requestDto.getForm();
         if (form != null) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+            throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
         }
-
         UserDomain user = UserDomain.builder()
                 .name(name)
                 .id(id)
@@ -67,18 +66,18 @@ public class UserService {
     }
 
     @Transactional
-    public SetFcmTokenResponseDto addFcmToken(String userId, String fcmTokens) {
+    public SetFcmTokenResponseDto addFcmToken(String userId, SetFcmTokenRequestDto requestDto) {
 
+        String fcmTokens = requestDto.getFcmToken();
         UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
         if(user==null){
-            throw new ErrorDomain(ErrorCode.USER_NOT_FOUND);
+            throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
         }
         user.addFcmToken(fcmTokens);
         UserDomain updatedUser = userPersistenceAdapter.save(user);
-        return new SetFcmTokenResponseDto(updatedUser.getFcmToken());
+        return new SetFcmTokenResponseDto(updatedUser.getFcmTokensForArray());
     }
 
-    // Withdraw user account
     @Transactional
     public boolean withdrawAccount(String userId,String platform, String code) {
         if(platform=="apple"){
@@ -96,14 +95,12 @@ public class UserService {
                 cartPersistenceAdapter.deleteById(cart.getId());
             }
         });
-
         userPersistenceAdapter.deleteById(userId);
         return true;
     }
 
     public String checkAccountSocial(String userId){
         UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
-//        if(user.getAppleId()!=null && user.getAppleId()!=""){
         if (user != null && user.getAppleId() != null && !user.getAppleId().isEmpty()) {
             return "apple";
         }

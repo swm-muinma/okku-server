@@ -41,7 +41,7 @@ public class PickDomain {
     }
     public void validatePickName() {
         if (name == null || name.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS);
+            throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
         }
     }
 }

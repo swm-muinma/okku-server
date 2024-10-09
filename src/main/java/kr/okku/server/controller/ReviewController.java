@@ -26,15 +26,10 @@ public class ReviewController {
         }
         String userAgentString = httpRequest.getHeader("User-Agent");
 
-        try {
             var result = reviewService.getReviewsWithoutLogin(request.getProductPk(), request.getPlatform(), request.getOkkuId());
             System.out.printf("Request successful - ProductPk: %s, Platform: %s, OkkuId: %s",
                     request.getProductPk(), request.getPlatform(), request.getOkkuId());
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            System.err.printf("Request failed - ProductPk: %s, Platform: %s, OkkuId: %s, Error: %s%n",
-                    request.getProductPk(), request.getPlatform(), request.getOkkuId(), e.getMessage());
-            return ResponseEntity.status(500).body(e.getMessage());
-        }
+
     }
 }

@@ -1,20 +1,13 @@
 package kr.okku.server.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import kr.okku.server.adapters.persistence.RefreshPersistenceAdapter;
-import kr.okku.server.adapters.persistence.repository.refresh.RefreshRepository;
-import kr.okku.server.dto.controller.refresh.TokenResponse;
-import kr.okku.server.enums.RoleEnum;
+import kr.okku.server.dto.controller.refresh.TokenResponseDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.security.JwtTokenProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,10 +21,10 @@ public class RefreshService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public TokenResponse updateRefresh(String refreshToken) {
+    public TokenResponseDto updateRefresh(String refreshToken) {
         boolean isExist = refreshPersistenceAdapter.isExist(refreshToken);
         if (!isExist) {
-            throw new ErrorDomain(ErrorCode.REFRESH_INVALID);
+            throw new ErrorDomain(ErrorCode.REFRESH_INVALID,null);
         }
 
         try {
@@ -43,10 +36,10 @@ public class RefreshService {
             String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
             refreshPersistenceAdapter.update(refreshToken,newRefreshToken);
 
-            return new TokenResponse(newAccessToken, newRefreshToken);
+            return new TokenResponseDto(newAccessToken, newRefreshToken);
 
         } catch (Exception e) {
-            throw new ErrorDomain(ErrorCode.REFRESH_INVALID);
+            throw new ErrorDomain(ErrorCode.REFRESH_INVALID,null);
         }
     }
 }
