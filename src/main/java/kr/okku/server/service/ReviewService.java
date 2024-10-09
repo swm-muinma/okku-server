@@ -159,6 +159,7 @@
 
             PickPlatformResponseDto platformInfo = new PickPlatformResponseDto();
             platformInfo.setName(platform);
+            double ratingAvg = this.calculateAverageRating(review.getReviews());
             return ProductReviewDto.builder()
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,
@@ -168,7 +169,8 @@
                             url,
                             platformInfo
                     ))
-                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros))
+                    .ratingAvg(ratingAvg)
+                    .reviews(new ReviewsDto(getReviewStatus(review), cons, pros, Optional.ofNullable(insight.getConsSummary()).orElse(""),Optional.ofNullable(insight.getProsSummary()).orElse("")))
                     .platform(platform)
                     .build();
         }
@@ -185,7 +187,8 @@
                             url,
                             new PickPlatformResponseDto()
                     ))
-                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList()))
+                    .ratingAvg(0)
+                    .reviews(new ReviewsDto(ReviewStatusEnum.PROCESSING, Collections.emptyList(), Collections.emptyList(),"리뷰를 분석중입니다...","리뷰를 분석중입니다..."))
                     .platform("")
                     .build();
         }
@@ -208,5 +211,33 @@
                     .cautions(Collections.emptyList())
                     .positives(Collections.emptyList())
                     .build();
+        }
+
+        private static double calculateAverageRating(List<ReviewDetailDomain> reviews) {
+            // 빈 리스트일 경우 0.0 반환
+            if (reviews == null || reviews.isEmpty()) {
+                return 0.0;
+            }
+
+            // 총합과 유효한 rating의 개수를 저장할 변수
+            int sum = 0;
+            int count = 0;
+
+            // 리뷰 리스트를 순회하면서 rating 값을 합산
+            for (ReviewDetailDomain review : reviews) {
+                // rating이 null이 아닌 경우에만 계산
+                if (review.getRating() != null) {
+                    sum += review.getRating();
+                    count++;
+                }
+            }
+
+            // 유효한 rating이 없으면 0.0 반환
+            if (count == 0) {
+                return 0.0;
+            }
+
+            // 평균 계산
+            return (double) sum / count;
         }
     }
