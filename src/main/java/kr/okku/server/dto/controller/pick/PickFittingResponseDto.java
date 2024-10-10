@@ -5,6 +5,8 @@ import kr.okku.server.dto.controller.BasicRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 public class PickFittingResponseDto extends BasicRequestDto {
@@ -14,5 +16,5 @@ public class PickFittingResponseDto extends BasicRequestDto {
     private String image;
     private String url;
     private PickPlatformResponseDto platform;
-    private String fittingImage;
+    private List<String> fittingImages;
 }

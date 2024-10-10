@@ -1,7 +1,9 @@
 package kr.okku.server.adapters.persistence.repository.pick;
 import lombok.Data;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -31,8 +33,8 @@ public class PickEntity {
 
     private String pk;
 
-    @Field("fitting_image")
-    private String fittingImage;
+    @Field("fitting_images")
+    private List<String> fittingImages;
 
     @Field("created_at")
     @CreatedDate
@@ -41,4 +43,8 @@ public class PickEntity {
     @Field("updated_at")
     @LastModifiedDate
     private Date updatedAt;
+
+    public List<String> getFittingImages() {
+        return this.fittingImages == null ? Collections.emptyList() : this.fittingImages;
+    }
 }
