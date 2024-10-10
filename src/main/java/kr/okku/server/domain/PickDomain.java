@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +48,10 @@ public class PickDomain {
     }
 
     public void addFittingImage(String image){
-        fittingImages.add(image);
+
+        List<String> modifiableFittingImages = new ArrayList<>(this.fittingImages);
+        modifiableFittingImages.add(image);
+        this.fittingImages = modifiableFittingImages;
     }
+
 }
