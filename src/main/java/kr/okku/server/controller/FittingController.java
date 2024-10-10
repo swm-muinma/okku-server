@@ -26,6 +26,8 @@ public class FittingController {
             @AuthenticationPrincipal UserDetails userDetails,
             @ModelAttribute FittingRequestDto requestDto) {
             String userId = userDetails.getUsername();
+        System.out.println("fitting");
+        System.out.println(requestDto);
             var result = fittingService.fitting(userId, requestDto);
             return ResponseEntity.ok(result);
 

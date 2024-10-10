@@ -37,6 +37,7 @@
             MultipartFile userImage = requestDto.getImage();
             String pickId = requestDto.getPickId();
             String part = requestDto.getPart();
+            System.out.println("before userPersistenceAdapter.findById");
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
@@ -44,14 +45,17 @@
             }
 
             String fcmToken = user.getFcmTokensForList()[0];
-
+            System.out.println("before pickPersistenceAdapter.findById");
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
                 throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
             }
 
             String itemImageUrl = pick.getImage();
+            System.out.println("before imageFromUrl");
+            System.out.println(itemImageUrl);
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
+            System.out.println("after imageFromUrl");
             part = part!=null ? part : "upper_body";
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken);
             System.out.println("getFittingResponse");
