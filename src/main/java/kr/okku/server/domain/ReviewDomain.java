@@ -1,5 +1,6 @@
 package kr.okku.server.domain;
 
+import kr.okku.server.enums.ReviewStatusEnum;
 import lombok.Builder;
 import lombok.Data;
 
@@ -34,5 +35,15 @@ public class ReviewDomain {
         }
 
         return (double) sum / count;
+    }
+
+    public ReviewStatusEnum getReviewStatus(){
+        if(this.reviews != null && this.reviews.size()!=0  && this.isDoneScrapeReviews){
+            return ReviewStatusEnum.DONE;
+        }
+        if(this.isDoneScrapeReviews){
+            return ReviewStatusEnum.REVIEW_NOT_EXIST;
+        }
+        return ReviewStatusEnum.PROCESSING;
     }
 }

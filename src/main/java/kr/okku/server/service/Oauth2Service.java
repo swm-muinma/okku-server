@@ -149,7 +149,10 @@ public class Oauth2Service {
                 PublicKey validPublicKey = generate(parseData, applePublicKeys);
                 Claims clames = extractClaims(authToken.idToken(), validPublicKey);
                 String appleId = clames.get("sub").toString();
-                return processingAppleLogin(appleId, recommend, "아기 오리");
+                String email = clames.get("email").toString();
+                String emailPrefix = email.substring(0, email.indexOf("@"));
+        System.out.println(emailPrefix);
+                return processingAppleLogin(appleId, recommend, emailPrefix);
     }
 
     private Map<String, Object> handleAppleLogin(String authorizationCode) {
@@ -255,11 +258,11 @@ public class Oauth2Service {
         }
 
         String kakaoId = userResponse.get("id").toString();
-
         boolean isNewUser = false;
         UserDomain user = userPersistenceAdapter.findByKakaoId(kakaoId).orElse(null);
         if (user == null) {
-            String nickname = (String) ((Map<String, Object>) userResponse.get("kakao_account")).get("nickname");
+            String nickname = (String) ((Map<String, Object>) userResponse.get("properties")).get("nickname");
+            System.out.println(nickname);
             user = UserDomain.builder()
                     .name(nickname)
                     .build();
