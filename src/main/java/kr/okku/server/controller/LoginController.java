@@ -67,13 +67,6 @@ public class LoginController {
             return accessToken;
     }
 
-    @GetMapping("/review-test")
-    public ProductReviewDto reviewTest() {
-            ProductReviewDto result = reviewService.getReviewsWithoutLogin("140062026", "zigzag", "sada");
-            System.out.println("Request successful - Review test");
-            return result;
-    }
-
     @GetMapping("/oauth2/code/{platform}")
     public ResponseEntity<Map<String, Object>> oauth2Login(@PathVariable String platform, @RequestParam String code) {
             Map<String, Object> result = oauth2Service.oauth2Login(platform, code);
