@@ -54,8 +54,15 @@ public class ScraperAdapter {
 
     public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, MultipartFile userImage, String fcmToken) {
         try {
+            System.out.println("itemImage");
+            System.out.println(itemImage);
+            System.out.println("userImage");
+            System.out.println(userImage);
+            System.out.println("fcmToken");
+            System.out.println(fcmToken);
             FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken, userImage, itemImage);
-
+            System.out.println("response");
+            System.out.println(response);
             return response;
         } catch (Exception e) {
             Sentry.withScope(scope -> {
