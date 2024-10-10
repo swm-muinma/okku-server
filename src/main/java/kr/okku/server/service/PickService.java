@@ -215,7 +215,6 @@ public class PickService {
 
     @Transactional
     List<String> moveCart(List<String> pickIds, String sourceCartId, String destinationCartId, MovePicksRequestDto requestDto) {
-            // Add picks to the target cart
             List<String> addedPicks = this.addToCart(pickIds, destinationCartId,requestDto);
             if (addedPicks == null || addedPicks.isEmpty()) {
                 throw new ErrorDomain(ErrorCode.DUPLICATED_PICK,requestDto);
@@ -228,59 +227,44 @@ public class PickService {
 
     @Transactional
     public List<String> addToCart(List<String> pickIds, String cartId, BasicRequestDto requestDto) {
-        checkPickIdExist(pickIds, requestDto); // Custom method to check if pickIds exist
+        checkPickIdExist(pickIds, requestDto);
 
-        // Retrieve the cart from the repository
         CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
 
         List<String> mutablePickIds = new ArrayList<>(cart.getPickItemIds() != null ? cart.getPickItemIds() : new ArrayList<>());
 
         cart.addPicks(mutablePickIds);
 
-        // Save the updated cart
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
 
-        // Return the pick IDs if the cart was updated, otherwise return null
         return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
     }
     @Transactional
     public List<String> deleteFromCart(List<String> pickIds, String cartId,BasicRequestDto requestDto) {
-        // Check if pickIds exist (this is a custom method, assumed to be implemented)
         checkPickIdExist(pickIds,requestDto);
 
-        // Retrieve the cart from the repository
         CartDomain cart = cartPersistenceAdapter.findById(cartId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
 
-        // Remove pick IDs from the cart
        cart.deletePicks(pickIds);
 
-        // Save the updated cart
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
 
-        // Return the pick IDs if any were removed, otherwise return null
         return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
     }
 
     @Transactional
     public List<String> deletePickFromAllCart(List<String> pickIds) {
-            // Retrieve all carts containing the pick IDs
             List<CartDomain> carts = cartPersistenceAdapter.findByPickItemIdsIn(pickIds);
-            // Check if any carts were found
             if (carts.isEmpty()) {
-                return null; // No carts found with the given pick IDs
             }
 
-            // Process each cart
             for (CartDomain cart : carts) {
-                // Remove the pick IDs from each cart
                 cart.deletePicks(pickIds);
 
-                // Save the updated cart
                 cartPersistenceAdapter.save(cart);
             }
 
-            // Return the pick IDs if any carts were updated, otherwise return null
             return pickIds;
     }
 
