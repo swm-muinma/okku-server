@@ -55,7 +55,7 @@
             part = part!=null ? part : "upper_body";
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken);
             String fittingImageUrl = "https://vton-result.s3.ap-northeast-2.amazonaws.com/"+fittingResponse.getFile_key();
-            pick.setFittingImage(fittingImageUrl);
+            pick.addFittingImage(fittingImageUrl);
             pickPersistenceAdapter.save(pick);
 
             return true;

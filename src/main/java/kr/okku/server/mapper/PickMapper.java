@@ -24,7 +24,7 @@ public class PickMapper {
                 .image(pickEntity.getImage())
                 .platform(toDomain(pickEntity.getPlatform())) // PlatformEntity to PlatformDomain
                 .pk(pickEntity.getPk())
-                .fittingImage(pickEntity.getFittingImage())
+                .fittingImages(pickEntity.getFittingImages())
                 .build();
     }
 
@@ -42,7 +42,7 @@ public class PickMapper {
         pickEntity.setImage(pickDomain.getImage());
         pickEntity.setPlatform(toEntity(pickDomain.getPlatform())); // PlatformDomain to PlatformEntity
         pickEntity.setPk(pickDomain.getPk());
-        pickEntity.setFittingImage(pickDomain.getFittingImage());
+        pickEntity.setFittingImages(pickDomain.getFittingImages());
         // createdAt, updatedAt은 변환 대상에서 제외
         return pickEntity;
     }

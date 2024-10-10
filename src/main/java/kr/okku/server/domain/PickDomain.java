@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,7 +19,7 @@ public class PickDomain {
     private String name;
     private int price;
     private String image;
-    private String fittingImage;
+    private List<String> fittingImages;
     private PlatformDomain platform;
     private String pk;
 
@@ -43,5 +44,9 @@ public class PickDomain {
         if (name == null || name.isEmpty()) {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
         }
+    }
+
+    public void addFittingImage(String image){
+        fittingImages.add(image);
     }
 }

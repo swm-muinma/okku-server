@@ -284,7 +284,7 @@ public class PickService {
         pickPlatformResponse.setName(pick.getPlatform().getName());
         pickPlatformResponse.setUrl(pick.getPlatform().getUrl());
         pickPlatformResponse.setImage(pick.getPlatform().getImage());
-        return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,pick.getFittingImage());
+        return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,pick.getFittingImages());
     }
 
 }

@@ -56,7 +56,6 @@ public class ScraperAdapter {
         try {
             FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken, userImage, itemImage);
 
-
             return response;
         } catch (Exception e) {
             Sentry.withScope(scope -> {
