@@ -50,6 +50,7 @@
                 userImage = requestDto.getImage();
                 String userImageUrl = s3Client.upload(userImage);
                 user.addUserImage(userImageUrl);
+                userPersistenceAdapter.save(user);
             }
             if(!requestDto.isNewImage()){
                 userImage = imageFromUrlAdapter.imageFromUrl(requestDto.getImageForUrl());
