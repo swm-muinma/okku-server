@@ -39,7 +39,7 @@
         }
 
         public boolean fitting(String userId, FittingRequestDto requestDto) {
-            MultipartFile userImage = new MockMultipartFile("", (byte[]) null);
+            MultipartFile userImage = new MockMultipartFile("dummy", (byte[]) null);
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
