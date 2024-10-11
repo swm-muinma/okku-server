@@ -16,5 +16,8 @@ public class PickFittingResponseDto extends BasicRequestDto {
     private String image;
     private String url;
     private PickPlatformResponseDto platform;
-    private List<String> fittingImages;
+    private List<FittingInfo> fittingInfos;
+
 }
+
+

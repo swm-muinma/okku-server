@@ -8,6 +8,9 @@ import kr.okku.server.dto.controller.pick.PickItemResponseDto;
 import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 public class PickMapper {
 
     // Entity -> Domain
@@ -24,7 +27,10 @@ public class PickMapper {
                 .image(pickEntity.getImage())
                 .platform(toDomain(pickEntity.getPlatform())) // PlatformEntity to PlatformDomain
                 .pk(pickEntity.getPk())
-                .fittingImages(pickEntity.getFittingImages())
+                .fittingList(pickEntity.getFittingList())
+                .brand(Optional.ofNullable(pickEntity.getBrand()).orElse(""))
+                .category(Optional.ofNullable(pickEntity.getCategory()).orElse(""))
+                .fittingPart(Optional.ofNullable(pickEntity.getFittingPart()).orElse("upper_body"))
                 .build();
     }
 
@@ -42,8 +48,9 @@ public class PickMapper {
         pickEntity.setImage(pickDomain.getImage());
         pickEntity.setPlatform(toEntity(pickDomain.getPlatform())); // PlatformDomain to PlatformEntity
         pickEntity.setPk(pickDomain.getPk());
-        pickEntity.setFittingImages(pickDomain.getFittingImages());
-        // createdAt, updatedAt은 변환 대상에서 제외
+        pickEntity.setFittingList(pickDomain.getFittingList());
+        pickEntity.setBrand(pickDomain.getBrand());
+        pickEntity.setCategory(pickDomain.getCategory());
         return pickEntity;
     }
 
