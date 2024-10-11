@@ -1,6 +1,5 @@
-package kr.okku.server.adapters.persistence.repository.item;
+package kr.okku.server.adapters.persistence.repository.fitting;
 
-import kr.okku.server.adapters.persistence.repository.pick.PlatformEntity;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -12,29 +11,25 @@ import java.util.Date;
 
 @Data
 @Document(collection = "items")
-public class ItemEntity {
+public class FittingEntity {
 
     @Id
     private String id;
 
-    private String url;
+    @Field("clothes_pk")
+    private String clothesPk;
 
-    private String name;
+    @Field("clothes_platform")
+    private String clothesPlatform;
 
-    private int price;
+    @Field("user_pk")
+    private String userPk;
 
-    private String image;
+    private String status;
 
-    private String platform;
+    @Field("img_url")
+    private String imgUrl;
 
-    private String pk;
-
-    private String brand;
-
-    private String category;
-
-    @Field("fitting_part")
-    private String fittingPart;
 
     @Field("created_at")
     @CreatedDate

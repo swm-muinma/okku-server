@@ -21,9 +21,12 @@ public class PickDomain {
     private int price;
     private String image;
 
-    private List<String> fittingImages;
+    private List<String> fittingList;
     private PlatformDomain platform;
     private String pk;
+    private String brand;
+    private String category;
+    private String fittingPart;
 
     public static class PickDomainBuilder {
         // 빌더 내부에 추가적인 초기화 메서드 구현
@@ -48,11 +51,11 @@ public class PickDomain {
         }
     }
 
-    public void addFittingImage(String image){
+    public void addFittingList(String image){
 
-        List<String> modifiableFittingImages = new ArrayList<>(this.fittingImages);
-        modifiableFittingImages.add(image);
-        this.fittingImages = modifiableFittingImages;
+        List<String> modifiableFittingList = new ArrayList<>(this.fittingList);
+        modifiableFittingList.add(image);
+        this.fittingList = modifiableFittingList;
     }
 
 }

@@ -33,8 +33,15 @@ public class PickEntity {
 
     private String pk;
 
-    @Field("fitting_images")
-    private List<String> fittingImages;
+    private String brand;
+
+    private String category;
+
+    @Field("fitting_part")
+    private String fittingPart;
+
+    @Field("fitting_list")
+    private List<String> fittingList;
 
     @Field("created_at")
     @CreatedDate
@@ -44,7 +51,7 @@ public class PickEntity {
     @LastModifiedDate
     private Date updatedAt;
 
-    public List<String> getFittingImages() {
-        return this.fittingImages == null ? Collections.emptyList() : this.fittingImages;
+    public List<String> getFittingList() {
+        return this.fittingList == null ? Collections.emptyList() : this.fittingList;
     }
 }

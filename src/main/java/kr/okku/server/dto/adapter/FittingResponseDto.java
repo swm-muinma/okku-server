@@ -4,6 +4,5 @@ import lombok.Data;
 
 @Data
 public class FittingResponseDto {
-    private String file_key;
-
+    private String id;
 }
