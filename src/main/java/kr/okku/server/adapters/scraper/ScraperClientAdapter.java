@@ -25,7 +25,7 @@ public interface ScraperClientAdapter {
             @RequestParam("clothes_class") String clothesClass,
             @RequestParam("fcm_token") String fcmToken,
             @RequestParam("clothes_pk") String clothesPk,
-            @RequestParam("clohtes_platform") String clohtesPlatform,
+            @RequestParam("clothes_platform") String clohtesPlatform,
             @RequestPart("human_img") MultipartFile userImage,
             @RequestPart("clothes_img") MultipartFile itemImage
     );
