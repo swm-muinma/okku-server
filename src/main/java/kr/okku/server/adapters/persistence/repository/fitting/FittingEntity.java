@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Date;
 
 @Data
-@Document(collection = "items")
+@Document(collection = "results")
 public class FittingEntity {
 
     @Id

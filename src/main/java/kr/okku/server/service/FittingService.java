@@ -21,7 +21,6 @@
 
         private final ImageFromUrlAdapter imageFromUrlAdapter;
         private final PickPersistenceAdapter pickPersistenceAdapter;
-
         private final UserPersistenceAdapter userPersistenceAdapter;
         private final ScraperAdapter scraperAdapter;
 
