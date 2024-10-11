@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,14 +21,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@RequiredArgsConstructor
 @Component
 public class S3Client {
 
     private final AmazonS3 amazonS3;
 
-    @Value("${cloud.aws.s3.bucketName}")
+
+    @Value("${aws.s3.bucket-name}")
     private String bucketName;
+
+    public S3Client(AmazonS3 amazonS3) {
+        this.amazonS3 = amazonS3;
+    }
 
     public String upload(MultipartFile image) {
         if(image.isEmpty() || Objects.isNull(image.getOriginalFilename())){
