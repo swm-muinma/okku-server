@@ -1,5 +1,6 @@
 package kr.okku.server.adapters.scraper;
 
+import kr.okku.server.config.FeignClientConfig;
 import kr.okku.server.dto.adapter.FittingResponseDto;
 import kr.okku.server.dto.adapter.ScraperRequestDto;
 import kr.okku.server.dto.adapter.ScraperResponseDto;
