@@ -291,7 +291,7 @@ public class PickService {
             info.setImage(el.getImgUrl());
             info.setStatus(el.getStatus());
             return info;
-        });
+        }).collect(Collectors.toList());
 
         return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,fittingInfos);
     }
