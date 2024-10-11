@@ -30,6 +30,6 @@ public class FittingController {
         System.out.println(requestDto);
             var result = fittingService.fitting(userId, requestDto);
             return ResponseEntity.ok(result);
-
     }
+
 }
