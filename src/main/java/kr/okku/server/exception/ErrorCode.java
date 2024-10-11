@@ -1,5 +1,11 @@
 package kr.okku.server.exception;
 public enum ErrorCode {
+    IO_EXCEPTION_ON_IMAGE_DELETE("io exception on image delete",500),
+    PUT_OBJECT_EXCEPTION("put object exception",500),
+    INVALID_FILE_EXTENTION("invalid file exteion",404),
+    NO_FILE_EXTENTION("no file extention on s3",404),
+    IO_EXCEPTION_ON_IMAGE_UPLOAD("io exception on s3",404),
+    EMPTY_FILE_EXCEPTION("empty file in s3",404),
     MUST_INVITE("must invite", 402),
     DOMAIN_INVALID("domain invalid", 400),
     USER_NOT_FOUND("User not found", 404),

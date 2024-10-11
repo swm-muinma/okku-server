@@ -10,6 +10,7 @@ import kr.okku.server.domain.UserDomain;
 import kr.okku.server.dto.controller.user.SetFcmTokenRequestDto;
 import kr.okku.server.dto.controller.user.SetFcmTokenResponseDto;
 import kr.okku.server.dto.controller.user.UpdateProfileRequestDto;
+import kr.okku.server.dto.controller.user.UserImagesResponseDto;
 import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import kr.okku.server.enums.FormEnum;
 import kr.okku.server.exception.ErrorCode;
@@ -43,6 +44,13 @@ public class UserService {
             throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,null);
         }
         return user;
+    }
+
+    public UserImagesResponseDto getUserImages(String userId){
+        UserDomain user = userPersistenceAdapter.findById(userId).get();
+        UserImagesResponseDto responseDto = new UserImagesResponseDto();
+        responseDto.setImages(user.getUserImages());
+        return responseDto;
     }
 
     @Transactional

@@ -20,6 +20,7 @@ public class PickDomain {
     private String name;
     private int price;
     private String image;
+
     private List<String> fittingImages;
     private PlatformDomain platform;
     private String pk;

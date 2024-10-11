@@ -1,6 +1,7 @@
     package kr.okku.server.service;
 
     import kr.okku.server.adapters.image.ImageFromUrlAdapter;
+    import kr.okku.server.adapters.objectStorage.S3Client;
     import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
     import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
     import kr.okku.server.adapters.scraper.ScraperAdapter;
@@ -11,6 +12,7 @@
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.mock.web.MockMultipartFile;
     import org.springframework.stereotype.Service;
     import org.springframework.web.multipart.MultipartFile;
 
@@ -23,26 +25,39 @@
         private final UserPersistenceAdapter userPersistenceAdapter;
         private final ScraperAdapter scraperAdapter;
 
+        private final S3Client s3Client;
+
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
                               ImageFromUrlAdapter imageFromUrlAdapter,
-                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter) {
+                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, S3Client s3Client) {
             this.imageFromUrlAdapter = imageFromUrlAdapter;
             this.pickPersistenceAdapter = pickPersistenceAdapter;
             this.scraperAdapter = scraperAdapter;
             this.userPersistenceAdapter = userPersistenceAdapter;
+            this.s3Client = s3Client;
         }
 
         public boolean fitting(String userId, FittingRequestDto requestDto) {
-            MultipartFile userImage = requestDto.getImage();
-            String pickId = requestDto.getPickId();
-            String part = requestDto.getPart();
-            System.out.println("before userPersistenceAdapter.findById");
+            MultipartFile userImage = new MockMultipartFile("", (byte[]) null);
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
                 throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
             }
+
+            if (requestDto.isNewImage()) {
+                userImage = requestDto.getImage();
+                String userImageUrl = s3Client.upload(userImage);
+                user.addUserImage(userImageUrl);
+            }
+            if(!requestDto.isNewImage()){
+                userImage = imageFromUrlAdapter.imageFromUrl(requestDto.getImageForUrl());
+            }
+
+            String pickId = requestDto.getPickId();
+            String part = requestDto.getPart();
+            System.out.println("before userPersistenceAdapter.findById");
 
             String fcmToken = user.getFcmTokensForList()[0];
             System.out.println("before pickPersistenceAdapter.findById");
