@@ -69,8 +69,7 @@
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,pick.getPk(),pick.getPlatform().getName());
-            String fittingId = "https://vton-result.s3.ap-northeast-2.amazonaws.com/"+fittingResponse.getId();
-            pick.addFittingList(fittingId);
+            pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
             return true;
