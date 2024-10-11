@@ -13,7 +13,7 @@ public class UserDomain {
     private String id;
 
     @Builder.Default
-    private String name = "아기 오리";
+    private String name = "";
 
     @Builder.Default
     private String image = "";
@@ -29,6 +29,8 @@ public class UserDomain {
 
     @Builder.Default
     private Boolean isPremium = false;
+
+    private List<String> userImages;
 
     @Builder.Default
     private Set<String> fcmToken = new HashSet<String>();
@@ -52,5 +54,12 @@ public class UserDomain {
         return List.of(Optional.ofNullable(temp)
                 .orElse(Collections.emptyList())
                 .toArray(new String[0]));
+    }
+
+    public void addUserImage(String image){
+
+        List<String> modifiableUserImages = new ArrayList<>(this.userImages);
+        modifiableUserImages.add(image);
+        this.userImages = modifiableUserImages;
     }
 }

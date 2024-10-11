@@ -3,6 +3,7 @@ import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.domain.UserDomain;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -30,6 +31,7 @@ public class UserMapper {
                         .map(Arrays::stream)
                         .orElseGet(Stream::empty)
                         .collect(Collectors.toSet()))
+                .userImages(Optional.ofNullable(userEntity.getUserImages()).orElse(new ArrayList<>()))
                 .build();
     }
 
@@ -48,6 +50,7 @@ public class UserMapper {
         userEntity.setKakaoId(userDomain.getKakaoId());
         userEntity.setAppleId(userDomain.getAppleId());
         userEntity.setFcmToken(userDomain.getFcmTokensForList());
+        userEntity.setUserImages(userDomain.getUserImages());
         return userEntity;
     }
 }

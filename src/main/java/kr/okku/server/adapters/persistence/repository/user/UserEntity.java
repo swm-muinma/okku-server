@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Document(collection = "users")
@@ -31,6 +32,8 @@ public class UserEntity {
     private String appleId;
     @Field("fcm_token")
     private String[] fcmToken;
+    @Field("user_images")
+    private List<String> userImages;
     @Field("created_at")
     @CreatedDate
     private Date createdAt;
