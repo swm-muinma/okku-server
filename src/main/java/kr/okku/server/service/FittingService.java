@@ -46,13 +46,13 @@
                 throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
             }
 
-            if (requestDto.isNewImage()) {
+            if (!requestDto.getIsNewImage().equals("false")) {
                 userImage = requestDto.getImage();
                 String userImageUrl = s3Client.upload(userImage);
                 user.addUserImage(userImageUrl);
                 userPersistenceAdapter.save(user);
             }
-            if(!requestDto.isNewImage()){
+            if(requestDto.getIsNewImage().equals("false")){
                 userImage = imageFromUrlAdapter.imageFromUrl(requestDto.getImageForUrl());
             }
 
