@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface FittingRepository extends MongoRepository<FittingEntity, String> {
 
     List<FittingEntity> findByIdInOrderByCreatedAtDesc(List<String> ids);
+
+    List<FittingEntity> findByUserPkOrderByCreatedAtDesc(String userPk);
 }

@@ -83,6 +83,5 @@ public class UserController {
             userService.withdrawAccount(userId, platform, code);
             System.out.printf("Request successful - UserId: %s, Platform: %s%n", userId, platform);
             return ResponseEntity.ok().build();
-
     }
 }

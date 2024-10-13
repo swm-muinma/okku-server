@@ -35,4 +35,11 @@ public class FittingPersistenceAdapter {
                 .map(FittingMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    public List<FittingDomain> findByIdUserId(String id) {
+        return fittingRepository.findByUserPkOrderByCreatedAtDesc(id)
+                .stream()
+                .map(FittingMapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }
