@@ -21,6 +21,9 @@
     import org.springframework.stereotype.Service;
     import org.springframework.web.multipart.MultipartFile;
 
+    import java.io.UnsupportedEncodingException;
+    import java.net.URLEncoder;
+    import java.nio.charset.StandardCharsets;
     import java.util.ArrayList;
     import java.util.Collections;
     import java.util.List;
@@ -105,7 +108,7 @@
 
 
         public boolean fitting(String userId, FittingRequestDto requestDto) {
-            MultipartFile userImage = new MockMultipartFile("dummy", (byte[]) null);
+            String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
@@ -113,15 +116,13 @@
             }
 
             if (!requestDto.getIsNewImage().equals("false")) {
-                userImage = requestDto.getImage();
-                String userImageUrl = s3Client.upload(userImage);
-                System.out.println(userImageUrl);
-                user.addUserImage(userImageUrl);
+                userImage = s3Client.upload(requestDto.getImage());
+                user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
-                userImage = imageFromUrlAdapter.imageFromUrl(userImageUrl);
+                System.out.println(userImage);
             }
             if(requestDto.getIsNewImage().equals("false")){
-                userImage = imageFromUrlAdapter.imageFromUrl(requestDto.getImageForUrl());
+                userImage = requestDto.getImageForUrl();
             }
 
             String pickId = requestDto.getPickId();
@@ -136,6 +137,9 @@
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
+            if(part==null || part == "" || part.length()==0 ){
+                part="upper_body";
+            }
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,pick.getPk(),pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);

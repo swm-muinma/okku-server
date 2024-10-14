@@ -2,6 +2,7 @@ package kr.okku.server.adapters.scraper;
 
 import io.sentry.Sentry;
 import kr.okku.server.domain.ScrapedDataDomain;
+import kr.okku.server.dto.adapter.FittingRequestDto;
 import kr.okku.server.dto.adapter.FittingResponseDto;
 import kr.okku.server.dto.adapter.ScraperRequestDto;
 import kr.okku.server.dto.adapter.ScraperResponseDto;
@@ -52,8 +53,9 @@ public class ScraperAdapter {
         }
     }
 
-    public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, MultipartFile userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
+    public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
         try {
+            System.out.printf("class = %s\n",clothesClass);
             FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
             return response;
         } catch (Exception e) {

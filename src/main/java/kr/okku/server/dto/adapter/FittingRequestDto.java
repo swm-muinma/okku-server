@@ -1,17 +1,17 @@
 package kr.okku.server.dto.adapter;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Data
+@AllArgsConstructor
 public class FittingRequestDto {
-    private String path;
+    private String user_id;
+    private String clothes_class;
+    private String fcm_token;
+    private String clothes_pk;
+    private String clothes_platform;
+    private String user_image;
 
-    public FittingRequestDto(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
 }
