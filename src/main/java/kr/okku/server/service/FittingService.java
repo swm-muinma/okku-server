@@ -115,6 +115,7 @@
             if (!requestDto.getIsNewImage().equals("false")) {
                 userImage = requestDto.getImage();
                 String userImageUrl = s3Client.upload(userImage);
+                System.out.println(userImageUrl);
                 user.addUserImage(userImageUrl);
                 userPersistenceAdapter.save(user);
                 userImage = imageFromUrlAdapter.imageFromUrl(userImageUrl);
