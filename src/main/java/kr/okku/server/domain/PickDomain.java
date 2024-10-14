@@ -7,7 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -18,9 +20,13 @@ public class PickDomain {
     private String name;
     private int price;
     private String image;
-    private String fittingImage;
+
+    private List<String> fittingList;
     private PlatformDomain platform;
     private String pk;
+    private String brand;
+    private String category;
+    private String fittingPart;
 
     public static class PickDomainBuilder {
         // 빌더 내부에 추가적인 초기화 메서드 구현
@@ -44,4 +50,12 @@ public class PickDomain {
             throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
         }
     }
+
+    public void addFittingList(String image){
+
+        List<String> modifiableFittingList = new ArrayList<>(this.fittingList);
+        modifiableFittingList.add(image);
+        this.fittingList = modifiableFittingList;
+    }
+
 }

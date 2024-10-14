@@ -1,10 +1,9 @@
 package kr.okku.server.adapters.scraper;
 
+import kr.okku.server.dto.adapter.FittingRequestDto;
 import kr.okku.server.dto.adapter.FittingResponseDto;
 import kr.okku.server.dto.adapter.ScraperRequestDto;
 import kr.okku.server.dto.adapter.ScraperResponseDto;
-import kr.okku.server.dto.oauth.ApplePublicKeys;
-import kr.okku.server.dto.oauth.AppleTokenResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -20,10 +19,12 @@ public interface ScraperClientAdapter {
 
     @PostMapping(value = "/v2/fitting", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     FittingResponseDto fitting(
-            @RequestParam("user_pk") String userId,
-            @RequestParam("clothes_class") String clothesClass,
-            @RequestParam("fcm_token") String fcmToken,
-            @RequestPart("human_img") MultipartFile userImage,
+            @RequestPart("user_pk") String userId,
+            @RequestPart("clothes_class") String clothesClass,
+            @RequestPart("fcm_token") String fcmToken,
+            @RequestPart("clothes_pk") String clothesPk,
+            @RequestPart("clothes_platform") String clothesPlatform,
+            @RequestPart("human_img_url") String userImage,  // 이미지 URL 또는 이미지 데이터를 처리
             @RequestPart("clothes_img") MultipartFile itemImage
     );
 }

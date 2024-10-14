@@ -1,9 +1,7 @@
 package kr.okku.server.controller;
 import kr.okku.server.domain.UserDomain;
-import kr.okku.server.dto.controller.user.SetFcmTokenRequestDto;
-import kr.okku.server.dto.controller.user.SetFcmTokenResponseDto;
-import kr.okku.server.dto.controller.user.UpdateProfileRequestDto;
-import kr.okku.server.dto.controller.user.UserResponseDto;
+import kr.okku.server.dto.controller.fitting.FittingRequestDto;
+import kr.okku.server.dto.controller.user.*;
 import kr.okku.server.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,6 +26,16 @@ public class UserController {
             UserResponseDto response = new UserResponseDto(user.getId(), user.getName(), user.getHeight(), user.getWeight(), user.getForm());
             System.out.printf("Request successful - UserId: %s, Name: %s%n", userId, user.getName());
             return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/images")
+    public ResponseEntity<UserImagesResponseDto> getCachingImage(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        System.out.println("get cacheing image");
+        UserImagesResponseDto result = userService.getUserImages(userId);
+        return ResponseEntity.ok(result);
     }
 
     // Update user profile
@@ -75,6 +83,5 @@ public class UserController {
             userService.withdrawAccount(userId, platform, code);
             System.out.printf("Request successful - UserId: %s, Platform: %s%n", userId, platform);
             return ResponseEntity.ok().build();
-
     }
 }

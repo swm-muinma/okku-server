@@ -1,9 +1,6 @@
 package kr.okku.server.service;
 
-import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
-import kr.okku.server.adapters.persistence.ItemPersistenceAdapter;
-import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
-import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
+import kr.okku.server.adapters.persistence.*;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
 import kr.okku.server.dto.controller.BasicRequestDto;
@@ -32,17 +29,19 @@ public class PickService {
     private final ScraperAdapter scraperAdapter;
     private final UserPersistenceAdapter userPersistenceAdapter;
     private final ItemPersistenceAdapter itemPersistenceAdapter;
+    private final FittingPersistenceAdapter fittingPersistenceAdapter;
     private final Utils utils;
 
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter,Utils utils
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, Utils utils
                      ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.scraperAdapter = scraperAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.itemPersistenceAdapter = itemPersistenceAdapter;
+        this.fittingPersistenceAdapter = fittingPersistenceAdapter;
         this.utils = utils;
     }
 
@@ -284,7 +283,17 @@ public class PickService {
         pickPlatformResponse.setName(pick.getPlatform().getName());
         pickPlatformResponse.setUrl(pick.getPlatform().getUrl());
         pickPlatformResponse.setImage(pick.getPlatform().getImage());
-        return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,pick.getFittingImage());
+
+        List<FittingDomain> fittingDomains = fittingPersistenceAdapter.findByIdIn(pick.getFittingList());
+
+        List<FittingInfo> fittingInfos = (List<FittingInfo>) fittingDomains.stream().map(el->{
+            FittingInfo info = new FittingInfo();
+            info.setImage(el.getImgUrl());
+            info.setStatus(el.getStatus());
+            return info;
+        }).collect(Collectors.toList());
+
+        return new PickFittingResponseDto(pick.getId(),pick.getName(),pick.getPrice(),pick.getImage(),pick.getUrl(),pickPlatformResponse,fittingInfos);
     }
 
 }
