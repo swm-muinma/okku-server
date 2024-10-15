@@ -29,7 +29,7 @@ public class UserMapper {
                 .appleId(userEntity.getAppleId())
                 .fcmToken(Optional.ofNullable(userEntity.getFcmToken())
                         .map(Arrays::stream)
-                        .orElseGet(Stream::empty)
+                        .orElseGet(() -> Stream.of("fcm_token_null")) // null일 경우 빈 문자열을 가진 Stream 반환
                         .collect(Collectors.toSet()))
                 .userImages(Optional.ofNullable(userEntity.getUserImages()).orElse(new ArrayList<>()))
                 .build();
