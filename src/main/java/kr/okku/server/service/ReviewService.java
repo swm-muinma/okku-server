@@ -40,12 +40,26 @@
             try {
                 Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
                 if (reviews.isEmpty()) {
-                    throw new ErrorDomain(ErrorCode.MAYBE_SCRAPER_WAITING, null);
+                    PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
+                    platformResponseDto.setName(pick.getName());
+                    ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                    PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                    return ProductReviewDto.builder()
+                            .pick(pickDto)
+                            .reviews(reviewsDto)
+                            .build();
                 }
 
                 return createProductReviewDto(reviews, platform, pick, image, name, price, url);
             }catch (Exception e){
-                throw new ErrorDomain(ErrorCode.MAYBE_SCRAPER_WAITING, null);
+                PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
+                platformResponseDto.setName(pick.getName());
+                ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                return ProductReviewDto.builder()
+                        .pick(pickDto)
+                        .reviews(reviewsDto)
+                        .build();
             }
         }
 
