@@ -1,5 +1,7 @@
 package kr.okku.server.exception;
 public enum ErrorCode {
+
+    MAYBE_SCRAPER_WAITING("maybe scraper waiting or down",500),
     IO_EXCEPTION_ON_IMAGE_DELETE("io exception on image delete",500),
     PUT_OBJECT_EXCEPTION("put object exception",500),
     INVALID_FILE_EXTENTION("invalid file exteion",404),
