@@ -39,7 +39,7 @@ public class RefreshService {
             return new TokenResponseDto(newAccessToken, newRefreshToken);
 
         } catch (Exception e) {
-            throw new ErrorDomain(ErrorCode.REFRESH_INVALID,null);
+            throw new ErrorDomain(ErrorCode.ERROR_ABOUT_JWT_WITHREFRESH,null);
         }
     }
 }

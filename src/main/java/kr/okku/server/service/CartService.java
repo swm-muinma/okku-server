@@ -66,7 +66,7 @@ public class CartService {
         CartDomain cartInfo = cartPersistenceAdapter.findById(cartId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,null));
         if (!cartInfo.getUserId().equals(userId)) {
-            throw new ErrorDomain(ErrorCode.NOT_OWNER,null);
+            throw new ErrorDomain(ErrorCode.NOT_CART_OWNER,null);
         }
         cartPersistenceAdapter.deleteById(cartId);
         return cartId;
@@ -78,7 +78,7 @@ public class CartService {
         List<String> pickIds = requestDto.getPickIds();
 
         if (name == null || name.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
+            throw new ErrorDomain(ErrorCode.NAME_IS_EMPTY,requestDto);
         }
         Integer size = 0;
         if(pickIds==null){
@@ -101,7 +101,7 @@ public class CartService {
         if (savedCart != null) {
             return savedCart;
         }
-        throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
+        throw new ErrorDomain(ErrorCode.DATABASE_ERROR_WITH_SAVE_CART,requestDto);
     }
 
 

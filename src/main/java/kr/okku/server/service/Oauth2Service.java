@@ -218,7 +218,7 @@ public class Oauth2Service {
         if ("kakao".equalsIgnoreCase(platform)) {
             return handleKakaoLogin(authorizationCode);
         }
-        throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
+        throw new ErrorDomain(ErrorCode.NOT_SUPPORTED_OAUTH_PLATFORM,null);
     }
 
     // Handle Kakao login logic
