@@ -38,7 +38,7 @@ public class LoginController {
         String recommend = request.get("recommend");
 
             if (token == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
+                throw new ErrorDomain(ErrorCode.TOKEN_IS_EMPTY,null);
             }
             Map<String, Object> result = oauth2Service.kakaoLoginWithToken(token, recommend);
             System.out.printf("Request successful - Kakao token: %s%n", token);
@@ -51,7 +51,7 @@ public class LoginController {
         String recommend = request.get("recommend");
 
             if (token == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
+                throw new ErrorDomain(ErrorCode.TOKEN_IS_EMPTY,null);
             }
             Map<String, Object> result = oauth2Service.appleLoginWithToken(token, recommend);
             System.out.printf("Request successful - Apple token: %s%n", token);
@@ -79,7 +79,7 @@ public class LoginController {
     public ResponseEntity<TokenResponseDto> refresh(@RequestBody RefreshRequestDto refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
             if (refreshToken == null) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,null);
+                throw new ErrorDomain(ErrorCode.REFRESHTOKEN_IS_EMPTY,null);
             }
             TokenResponseDto result = refreshService.updateRefresh(refreshToken);
             System.out.printf("Request successful - Refresh token: %s%n", refreshToken);

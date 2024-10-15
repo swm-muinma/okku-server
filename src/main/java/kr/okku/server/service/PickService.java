@@ -101,21 +101,21 @@ public class PickService {
 
         if (isDeletePermenant) {
             if (cartId != null && !cartId.isEmpty()) {
-                throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
+                throw new ErrorDomain(ErrorCode.CARTID_IS_EMPTY,requestDto);
             }
         }
         if (isDeletePermenant==false && (cartId == null || cartId.isEmpty())) {
-                throw new ErrorDomain(ErrorCode.INVALID_CARTID,requestDto);
+                throw new ErrorDomain(ErrorCode.IF_IS_DELETE_PERMENANT_IS_FALSE_THEN_CARTID_IS_REQUIRED,requestDto);
         }
 
         if (pickIds.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.INVALID_PICKIDS,requestDto);
+            throw new ErrorDomain(ErrorCode.PICKID_IS_EMPTY,requestDto);
         }
 
         List<PickDomain> picksInfo = pickPersistenceAdapter.findByIdIn(pickIds);
         picksInfo.forEach(el -> {
             if (!el.getUserId().equals(userId)) {
-                throw new ErrorDomain(ErrorCode.NOT_OWNER,requestDto);
+                throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,requestDto);
             }
         });
 
@@ -196,7 +196,7 @@ public class PickService {
             List<PickDomain> picksInfo = pickPersistenceAdapter.findByIdIn(pickIds);
             picksInfo.forEach(pick -> {
                 if (!pick.getUserId().equals(userId)) {
-                    throw new ErrorDomain(ErrorCode.NOT_OWNER,requestDto);
+                    throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,requestDto);
                 }
             });
             return Map.of(
