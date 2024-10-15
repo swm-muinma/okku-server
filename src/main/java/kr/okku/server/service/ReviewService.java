@@ -37,8 +37,16 @@
 
         private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
                                                      String image, String name, Integer price, String url) {
-            Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
-            return createProductReviewDto(reviews, platform, pick, image, name, price, url);
+            try {
+                Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
+                if (reviews.isEmpty()) {
+                    throw new ErrorDomain(ErrorCode.MAYBE_SCRAPER_WAITING, null);
+                }
+
+                return createProductReviewDto(reviews, platform, pick, image, name, price, url);
+            }catch (Exception e){
+                throw new ErrorDomain(ErrorCode.MAYBE_SCRAPER_WAITING, null);
+            }
         }
 
         public ProductReviewDto getReviews(String pickId) {
