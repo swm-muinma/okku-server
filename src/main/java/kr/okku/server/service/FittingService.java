@@ -140,7 +140,12 @@
             if(part==null || part == "" || part.length()==0 ){
                 part="upper_body";
             }
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,pick.getPk(),pick.getPlatform().getName());
+
+            String clothesPk = pick.getPk();
+            if(clothesPk==null || clothesPk==""){
+                clothesPk=pick.getId();
+            }
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 

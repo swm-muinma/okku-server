@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum ReviewStatusEnum {
     REVIEW_NOT_EXIST("REVIEW_NOT_EXIST"),
     DONE("DONE"),
-    PROCESSING("PROCESSING");
+    PROCESSING("PROCESSING"),
+    ERROR("ERROR");
 
     private final String value;
 

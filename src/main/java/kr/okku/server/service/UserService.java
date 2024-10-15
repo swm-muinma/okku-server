@@ -59,8 +59,8 @@ public class UserService {
         Integer height=requestDto.getHeight();
         Integer weight=requestDto.getWeight();
         FormEnum form =requestDto.getForm();
-        if (form != null) {
-            throw new ErrorDomain(ErrorCode.INVALID_PARAMS,requestDto);
+        if (form == null) {
+            throw new ErrorDomain(ErrorCode.FORM_IS_EMPTY,requestDto);
         }
         UserDomain user = UserDomain.builder()
                 .name(name)

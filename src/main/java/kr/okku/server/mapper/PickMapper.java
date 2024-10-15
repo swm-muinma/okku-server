@@ -51,6 +51,7 @@ public class PickMapper {
         pickEntity.setFittingList(pickDomain.getFittingList());
         pickEntity.setBrand(pickDomain.getBrand());
         pickEntity.setCategory(pickDomain.getCategory());
+        pickEntity.setFittingPart(pickDomain.getFittingPart());
         return pickEntity;
     }
 

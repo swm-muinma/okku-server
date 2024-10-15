@@ -37,8 +37,30 @@
 
         private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
                                                      String image, String name, Integer price, String url) {
-            Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
-            return createProductReviewDto(reviews, platform, pick, image, name, price, url);
+            try {
+                Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
+                if (reviews.isEmpty()) {
+                    PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
+                    platformResponseDto.setName(pick.getName());
+                    ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                    PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                    return ProductReviewDto.builder()
+                            .pick(pickDto)
+                            .reviews(reviewsDto)
+                            .build();
+                }
+
+                return createProductReviewDto(reviews, platform, pick, image, name, price, url);
+            }catch (Exception e){
+                PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
+                platformResponseDto.setName(pick.getName());
+                ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                return ProductReviewDto.builder()
+                        .pick(pickDto)
+                        .reviews(reviewsDto)
+                        .build();
+            }
         }
 
         public ProductReviewDto getReviews(String pickId) {
