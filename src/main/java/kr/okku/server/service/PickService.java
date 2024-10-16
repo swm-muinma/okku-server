@@ -188,8 +188,6 @@ public class PickService {
         if (!isDeleteFromOrigin) {
             List<String> movedPickIds = this.addToCart(pickIds, destinationCartId, requestDto);
             if (movedPickIds == null || movedPickIds.isEmpty()) {
-                System.out.println(movedPickIds);
-                System.out.printf("cartId : %s\n",destinationCartId);
                 throw new ErrorDomain(ErrorCode.ALREADY_EXIST_CART,requestDto);
             }
             if (pickIds.isEmpty()) {
@@ -232,9 +230,7 @@ public class PickService {
 
         CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
 
-        List<String> mutablePickIds = new ArrayList<>(cart.getPickItemIds() != null ? cart.getPickItemIds() : new ArrayList<>());
-
-        cart.addPicks(mutablePickIds);
+        cart.addPicks(pickIds);
 
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
 
