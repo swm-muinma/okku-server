@@ -13,7 +13,6 @@ public class CartDomain {
     private String userId;
     private String name;
     private int pickNum;
-
     private int orderIndex;
     private List<String> pickItemIds;
 
