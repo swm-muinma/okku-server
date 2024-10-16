@@ -236,7 +236,7 @@ public class PickService {
 
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
 
-        return updatedCart.getPickItemIds().containsAll(pickIds) ? pickIds : null;
+        return updatedCart.getPickItemIds();
     }
     @Transactional
     public List<String> deleteFromCart(List<String> pickIds, String cartId,BasicRequestDto requestDto) {
