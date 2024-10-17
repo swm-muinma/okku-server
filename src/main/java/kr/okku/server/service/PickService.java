@@ -227,12 +227,13 @@ public class PickService {
     @Transactional
     public List<String> addToCart(List<String> pickIds, String cartId, BasicRequestDto requestDto) {
         checkPickIdExist(pickIds, requestDto);
-
+        System.out.println(requestDto);
         CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
 
         cart.addPicks(pickIds);
 
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
+        System.out.println(updatedCart);
 
         return updatedCart.getPickItemIds();
     }
