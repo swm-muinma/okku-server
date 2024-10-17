@@ -47,6 +47,7 @@
                     return ProductReviewDto.builder()
                             .pick(pickDto)
                             .reviews(reviewsDto)
+                            .platform(platform)
                             .build();
                 }
 
@@ -59,6 +60,7 @@
                 return ProductReviewDto.builder()
                         .pick(pickDto)
                         .reviews(reviewsDto)
+                        .platform(platform)
                         .build();
             }
         }
