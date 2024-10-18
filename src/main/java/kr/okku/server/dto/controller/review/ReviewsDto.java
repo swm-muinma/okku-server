@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 @Builder
 public class ReviewsDto extends BasicRequestDto {
     @Builder.Default
-    private ReviewStatusEnum reviewStatus = ReviewStatusEnum.DONE;
+    private ReviewStatusEnum reviewStatus = ReviewStatusEnum.PROCESSING;
 
     @Builder.Default
     private List<ReviewSectionDto> cons = Collections.emptyList();
