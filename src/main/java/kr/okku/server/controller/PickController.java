@@ -31,7 +31,6 @@ public class PickController {
             PickDomain pick = pickService.createPick(userId, request);
             System.out.printf("Request successful - UserId: %s, New Pick URL: %s%n", userId, request.getUrl());
             return ResponseEntity.ok(pick);
-
     }
 
     @PostMapping("/delete")
