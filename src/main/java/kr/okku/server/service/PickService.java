@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,8 +47,20 @@ public class PickService {
         this.utils = utils;
     }
 
+    public static String extractValidUrl(String input) {
+        String urlPattern = "(https?://\\S+)(\\s|$)";
+        Pattern pattern = Pattern.compile(urlPattern);
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
+    }
     public PickDomain createPick(String userId, NewPickRequestDto requestDto) {
-        String url = requestDto.getUrl();
+        String url = extractValidUrl(requestDto.getUrl());
+        System.out.println(url);
         UserDomain user = userPersistenceAdapter.findById(userId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);

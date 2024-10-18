@@ -1,6 +1,7 @@
 package kr.okku.server.dto.controller.fitting;
 
 
+import kr.okku.server.enums.FittingStatusEnum;
 import lombok.Data;
 
 @Data
@@ -10,5 +11,5 @@ public class FittingResultDto {
     private String itemPlatform;
     private String pickId;
     private String fittingImage;
-    private String status;
+    private FittingStatusEnum status;
 }
