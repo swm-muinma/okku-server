@@ -1,5 +1,6 @@
 package kr.okku.server.adapters.persistence;
 
+import com.mongodb.lang.Nullable;
 import kr.okku.server.adapters.persistence.repository.pick.PickEntity;
 import kr.okku.server.adapters.persistence.repository.pick.PickRepository;
 import kr.okku.server.domain.PickDomain;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +30,14 @@ public class PickPersistenceAdapter {
         PickEntity pickEntity = PickMapper.toEntity(pickDomain);
         PickEntity savedEntity = pickRepository.save(pickEntity);
         return PickMapper.toDomain(savedEntity);
+    }
+
+    public Optional<Date> getCreatedAt(String pickId){
+        try {
+            return Optional.ofNullable(pickRepository.findById(pickId).get().getCreatedAt());
+        }catch (Exception e){
+            return Optional.ofNullable(null);
+        }
     }
 
     // 사용자 ID로 Pick 조회 (Pageable)

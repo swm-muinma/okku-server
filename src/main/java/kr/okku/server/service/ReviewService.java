@@ -14,6 +14,8 @@
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
 
+    import java.time.Duration;
+    import java.time.Instant;
     import java.util.*;
     import java.util.stream.Collectors;
     import java.util.stream.IntStream;
@@ -36,14 +38,18 @@
         }
 
         private ProductReviewDto getReviewsByProduct(String productPk, String platform, PickDomain pick,
-                                                     String image, String name, Integer price, String url) {
+                                                     String image, String name, Integer price, String url,Date createdAt) {
             try {
                 Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
                 if (reviews.isEmpty()) {
                     PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
-                    platformResponseDto.setName(pick.getName());
+                    platformResponseDto.setName(pick.getPlatform().getName());
                     ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                    if(createdAt!=null && this.isWithinThreeMinutes(createdAt)){
+                        reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
+                    }
                     PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                    System.out.println(pickDto);
                     return ProductReviewDto.builder()
                             .pick(pickDto)
                             .reviews(reviewsDto)
@@ -54,9 +60,13 @@
                 return createProductReviewDto(reviews, platform, pick, image, name, price, url);
             }catch (Exception e){
                 PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
-                platformResponseDto.setName(pick.getName());
+                platformResponseDto.setName(pick.getPlatform().getName());
                 ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                if(createdAt!=null && this.isWithinThreeMinutes(createdAt)){
+                    reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
+                }
                 PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                System.out.println(pickDto);
                 return ProductReviewDto.builder()
                         .pick(pickDto)
                         .reviews(reviewsDto)
@@ -65,6 +75,16 @@
             }
         }
 
+        private static boolean isWithinThreeMinutes(Date date) {
+            Instant now = Instant.now(); // 현재 시각
+            Instant targetTime = date.toInstant(); // Date를 Instant로 변환
+
+            // now와 targetTime 사이의 차이를 계산
+            Duration duration = Duration.between(targetTime, now);
+
+            // 차이가 3분(180초) 이하인지 확인
+            return duration.getSeconds() <= 180;
+        }
         public ProductReviewDto getReviews(String pickId) {
             Optional<PickDomain> pickOptional = pickPersistenceAdapter.findById(pickId);
             if (pickOptional.isEmpty()) {
@@ -72,6 +92,7 @@
             }
 
             PickDomain pick = pickOptional.get();
+            Date createdAt = pickPersistenceAdapter.getCreatedAt(pickId).orElse(null);
             return getReviewsByProduct(
                     pick.getPk(),
                     pick.getPlatform().getName(),
@@ -79,7 +100,8 @@
                     pick.getImage(),
                     pick.getName(),
                     pick.getPrice(),
-                    pick.getUrl()
+                    pick.getUrl(),
+                    createdAt
             );
         }
 
