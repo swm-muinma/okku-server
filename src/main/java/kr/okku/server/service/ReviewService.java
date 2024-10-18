@@ -41,9 +41,10 @@
                 Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
                 if (reviews.isEmpty()) {
                     PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
-                    platformResponseDto.setName(pick.getName());
+                    platformResponseDto.setName(pick.getPlatform().getName());
                     ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
                     PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                    System.out.println(pickDto);
                     return ProductReviewDto.builder()
                             .pick(pickDto)
                             .reviews(reviewsDto)
@@ -54,9 +55,10 @@
                 return createProductReviewDto(reviews, platform, pick, image, name, price, url);
             }catch (Exception e){
                 PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
-                platformResponseDto.setName(pick.getName());
+                platformResponseDto.setName(pick.getPlatform().getName());
                 ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
                 PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
+                System.out.println(pickDto);
                 return ProductReviewDto.builder()
                         .pick(pickDto)
                         .reviews(reviewsDto)
