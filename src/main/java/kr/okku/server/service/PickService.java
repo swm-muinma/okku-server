@@ -65,7 +65,7 @@ public class PickService {
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
 
-        utils.validatePickLimit(user,picks);
+//        utils.validatePickLimit(user,picks);
 
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
         ScrapedDataDomain scrapedData;
