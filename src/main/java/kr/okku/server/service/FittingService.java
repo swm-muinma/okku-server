@@ -145,6 +145,7 @@
             if(clothesPk==null || clothesPk==""){
                 clothesPk=pick.getId();
             }
+            System.out.printf("fcm token : %s\n",fcmToken);
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
