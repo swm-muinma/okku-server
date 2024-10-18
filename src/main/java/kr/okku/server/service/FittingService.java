@@ -106,7 +106,6 @@
             return result.orElse(null);
         }
 
-
         public boolean fitting(String userId, FittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
