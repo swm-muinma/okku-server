@@ -86,6 +86,7 @@ public class PickService {
                             .build();
                 }
             });
+
             if(scrapedData.getPrice()!=0) {
                 itemPersistenceAdapter.save(
                         url,
