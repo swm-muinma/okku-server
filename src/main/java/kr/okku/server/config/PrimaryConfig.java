@@ -23,6 +23,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
+import java.util.Collection;
 import java.util.Collections;
 
 @Configuration
@@ -50,8 +51,10 @@ public class PrimaryConfig {
     @Bean(name = "primaryMongoDBFactory")
     public MongoDatabaseFactory mongoDatabaseFactory(
             @Qualifier("primaryMongoClient") MongoClient mongoClient) {
+
         return new SimpleMongoClientDatabaseFactory(mongoClient, getDatabaseName());
     }
+
 
     @Primary
     @Bean(name = "primaryMongoTemplate")
