@@ -68,6 +68,7 @@
                     info.setPickId(pick.getId());
                     info.setItemImage(pick.getImage());
                     info.setItemPlatform(pick.getPlatform().getName());
+                    info.setId(fitting.getId());
                     fittingInfos.add(info);
                 });
             });
@@ -88,6 +89,7 @@
                     info.setItemName(pick.getName());
                     info.setPickId(pick.getId());
                     info.setItemImage(pick.getImage());
+                    info.setId(fitting.getId());
                     info.setItemPlatform(pick.getPlatform().getName());
                     fittingInfos.add(info);
                 });
