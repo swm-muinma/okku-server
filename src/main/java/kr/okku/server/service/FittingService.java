@@ -138,6 +138,9 @@
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
+            if(part=="others"){
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+            }
             if(part==null || part == "" || part.length()==0 ){
                 part="upper_body";
             }
