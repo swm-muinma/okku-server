@@ -68,9 +68,10 @@ public class PickService {
 //        utils.validatePickLimit(user,picks);
 
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
+
         ScrapedDataDomain scrapedData;
 
-        if(scrapedCachData.isEmpty()){
+        if(scrapedCachData.isEmpty()) {
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(url);
 
             scrapedData = scrapedRawData.orElseGet(() -> {
@@ -86,19 +87,35 @@ public class PickService {
                             .build();
                 }
             });
-
-            if(scrapedData.getPrice()!=0) {
-                itemPersistenceAdapter.save(
-                        url,
-                        scrapedData.getName(),
-                        scrapedData.getImage(),
-                        scrapedData.getPrice(),
-                        scrapedData.getProductPk(),
-                        scrapedData.getPlatform()
-                );
+            String platformName = scrapedData.getPlatform();
+            String productPk = scrapedData.getProductPk();
+            Optional<ScrapedDataDomain> scrapedCachDataByKey = itemPersistenceAdapter.findByPlatformAndProductpk(platformName,productPk);
+            if (scrapedData.getPrice() != 0) {
+                if (scrapedCachDataByKey.isEmpty()) {
+                    itemPersistenceAdapter.save(
+                            url,
+                            scrapedData.getName(),
+                            scrapedData.getImage(),
+                            scrapedData.getPrice(),
+                            scrapedData.getProductPk(),
+                            scrapedData.getPlatform(),
+                            1
+                    );
+            } else {
+                    Integer pickNum = itemPersistenceAdapter.getPickNum(platformName,productPk);
+                    itemPersistenceAdapter.update(
+                            scrapedData.getPlatform(),
+                            scrapedData.getProductPk(),
+                            pickNum+1);
             }
+        }
         }else{
             scrapedData=scrapedCachData.get();
+            Integer pickNum = itemPersistenceAdapter.getPickNum(scrapedData.getPlatform(),scrapedData.getProductPk());
+            itemPersistenceAdapter.update(
+                    scrapedData.getPlatform(),
+                    scrapedData.getProductPk(),
+                    pickNum+1);
         }
 
         PickDomain pick = PickDomain.builder()
