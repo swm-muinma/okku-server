@@ -59,7 +59,6 @@ public class LoginController {
             Map<String, Object> result = oauth2Service.oauth2Login(platform, code);
             System.out.printf("Request successful - OAuth2 login with platform: %s, Code: %s%n", platform, code);
             return ResponseEntity.ok(result);
-
     }
 
     @PostMapping("/refresh")

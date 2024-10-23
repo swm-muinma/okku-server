@@ -33,6 +33,9 @@ public class ItemEntity {
 
     private String category;
 
+    @Field("pick_num")
+    private Integer pickNum;
+
     @Field("fitting_part")
     private String fittingPart;
 
