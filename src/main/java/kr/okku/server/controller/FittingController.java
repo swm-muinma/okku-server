@@ -20,10 +20,10 @@ public class FittingController {
         this.fittingService = fittingService;
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping()
     public ResponseEntity<?> fitting(
             @AuthenticationPrincipal UserDetails userDetails,
-            @ModelAttribute FittingRequestDto requestDto) {
+            @RequestBody FittingRequestDto requestDto) {
             String userId = userDetails.getUsername();
         System.out.println("fitting");
         System.out.println(requestDto);
