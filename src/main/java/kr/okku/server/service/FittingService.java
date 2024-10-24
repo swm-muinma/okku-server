@@ -10,9 +10,7 @@
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.domain.UserDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
-    import kr.okku.server.dto.controller.fitting.FittingRequestDto;
-    import kr.okku.server.dto.controller.fitting.FittingResultDto;
-    import kr.okku.server.dto.controller.fitting.GetFittingListResponseDto;
+    import kr.okku.server.dto.controller.fitting.*;
     import kr.okku.server.dto.controller.pick.FittingInfo;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
@@ -108,6 +106,23 @@
             return result.orElse(null);
         }
 
+
+        public CanFittingResponseDto canFitting(CanFittingRequestDto requestDto){
+            String userImage = "";
+            try {
+                userImage = s3Client.upload(requestDto.getImage());
+                boolean isSuccess = scraperAdapter.canFitting(userImage);
+                if(!isSuccess)
+                {
+                    s3Client.deleteImageFromS3(userImage);
+                    return new CanFittingResponseDto("", false);
+                }
+                return new CanFittingResponseDto(userImage, isSuccess);
+            }catch (Exception e){
+                s3Client.deleteImageFromS3(userImage);
+                return new CanFittingResponseDto("", false);
+            }
+        }
         public boolean fitting(String userId, FittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
@@ -116,15 +131,15 @@
                 throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
             }
 
-            if (!requestDto.getIsNewImage().equals("false")) {
-                userImage = s3Client.upload(requestDto.getImage());
-                user.addUserImage(userImage);
-                userPersistenceAdapter.save(user);
-                System.out.println(userImage);
-            }
-            if(requestDto.getIsNewImage().equals("false")){
-                userImage = requestDto.getImageForUrl();
-            }
+//            if (!requestDto.getIsNewImage().equals("false")) {
+//                userImage = s3Client.upload(requestDto.getImage());
+//                user.addUserImage(userImage);
+//                userPersistenceAdapter.save(user);
+//                System.out.println(userImage);
+//            }
+//            if(requestDto.getIsNewImage().equals("false")){
+//                userImage = requestDto.getImageForUrl();
+//            }
 
             String pickId = requestDto.getPickId();
             String part = requestDto.getPart();
@@ -150,7 +165,7 @@
                 clothesPk=pick.getId();
             }
             System.out.printf("fcm token : %s\n",fcmToken);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrl,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 

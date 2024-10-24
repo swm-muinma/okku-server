@@ -2,10 +2,7 @@ package kr.okku.server.adapters.scraper;
 
 import io.sentry.Sentry;
 import kr.okku.server.domain.ScrapedDataDomain;
-import kr.okku.server.dto.adapter.FittingRequestDto;
-import kr.okku.server.dto.adapter.FittingResponseDto;
-import kr.okku.server.dto.adapter.ScraperRequestDto;
-import kr.okku.server.dto.adapter.ScraperResponseDto;
+import kr.okku.server.dto.adapter.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -53,10 +50,11 @@ public class ScraperAdapter {
         }
     }
 
-    public FittingResponseDto fitting(String userId, String clothesClass, MultipartFile itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
+    public FittingResponseDto fitting(String userId, String clothesClass, String itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
         try {
             System.out.printf("class = %s\n",clothesClass);
-            FittingResponseDto response = scraperClientAdapter.fitting(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
+            FittingRequestDto fittingRequestDto = new FittingRequestDto(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
+            FittingResponseDto response = scraperClientAdapter.fitting(fittingRequestDto);
             return response;
         } catch (Exception e) {
             Sentry.withScope(scope -> {
@@ -64,6 +62,21 @@ public class ScraperAdapter {
                 Sentry.captureException(e);
             });
             return null;
+        }
+    }
+
+    public boolean canFitting(String userImage) {
+        try {
+            ValidateRequestDto validateRequestDto = new ValidateRequestDto(userImage);
+            ValidateResponseDto response = scraperClientAdapter.validate(validateRequestDto);
+            System.out.println(response);
+            return response.getStatus().equals("success");
+        } catch (Exception e) {
+            Sentry.withScope(scope -> {
+                scope.setExtra("error_message", e.getMessage());
+                Sentry.captureException(e);
+            });
+            return false;
         }
     }
 }

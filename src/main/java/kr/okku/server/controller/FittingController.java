@@ -1,8 +1,6 @@
 package kr.okku.server.controller;
 
-import kr.okku.server.dto.controller.fitting.FittingRequestDto;
-import kr.okku.server.dto.controller.fitting.FittingResultDto;
-import kr.okku.server.dto.controller.fitting.GetFittingListResponseDto;
+import kr.okku.server.dto.controller.fitting.*;
 import kr.okku.server.service.FittingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -22,15 +20,26 @@ public class FittingController {
         this.fittingService = fittingService;
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping()
     public ResponseEntity<?> fitting(
             @AuthenticationPrincipal UserDetails userDetails,
-            @ModelAttribute FittingRequestDto requestDto) {
+            @RequestBody FittingRequestDto requestDto) {
             String userId = userDetails.getUsername();
         System.out.println("fitting");
         System.out.println(requestDto);
             var result = fittingService.fitting(userId, requestDto);
             return ResponseEntity.ok(result);
+    }
+
+    @PostMapping(value = "/validate",consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CanFittingResponseDto> canFitting(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @ModelAttribute CanFittingRequestDto requestDto) {
+        String userId = userDetails.getUsername();
+        System.out.println("fitting");
+        System.out.println(requestDto);
+        CanFittingResponseDto result = fittingService.canFitting(requestDto);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping()

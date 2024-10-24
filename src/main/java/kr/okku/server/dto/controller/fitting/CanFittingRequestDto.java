@@ -5,8 +5,6 @@ import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data
-public class FittingRequestDto extends BasicRequestDto {
-    private String imageForUrl;
-    private String pickId;
-    private String part;
+public class CanFittingRequestDto extends BasicRequestDto {
+    private MultipartFile image;
 }
