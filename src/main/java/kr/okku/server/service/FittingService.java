@@ -10,13 +10,12 @@
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.domain.UserDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
-    import kr.okku.server.dto.controller.fitting.FittingRequestDto;
-    import kr.okku.server.dto.controller.fitting.FittingResultDto;
-    import kr.okku.server.dto.controller.fitting.GetFittingListResponseDto;
+    import kr.okku.server.dto.controller.fitting.*;
     import kr.okku.server.dto.controller.pick.FittingInfo;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
     import org.springframework.mock.web.MockMultipartFile;
     import org.springframework.stereotype.Service;
     import org.springframework.web.multipart.MultipartFile;
@@ -37,8 +36,11 @@
         private final PickPersistenceAdapter pickPersistenceAdapter;
         private final UserPersistenceAdapter userPersistenceAdapter;
         private final ScraperAdapter scraperAdapter;
-
         private final FittingPersistenceAdapter fittingPersistenceAdapter;
+
+        @Value("${aws.s3.bucket-name}")
+        private String userImgBucket;
+        private String clothesImgBucket = "clothes-images-caching";
 
         private final S3Client s3Client;
 
@@ -68,6 +70,7 @@
                     info.setPickId(pick.getId());
                     info.setItemImage(pick.getImage());
                     info.setItemPlatform(pick.getPlatform().getName());
+                    info.setId(fitting.getId());
                     fittingInfos.add(info);
                 });
             });
@@ -88,6 +91,7 @@
                     info.setItemName(pick.getName());
                     info.setPickId(pick.getId());
                     info.setItemImage(pick.getImage());
+                    info.setId(fitting.getId());
                     info.setItemPlatform(pick.getPlatform().getName());
                     fittingInfos.add(info);
                 });
@@ -106,7 +110,25 @@
             return result.orElse(null);
         }
 
-        public boolean fitting(String userId, FittingRequestDto requestDto) {
+
+        public CanFittingResponseDto canFitting(CanFittingRequestDto requestDto){
+            String userImage = "";
+            try {
+                userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
+                boolean isSuccess = scraperAdapter.canFitting(userImage);
+                if(!isSuccess)
+                {
+                    s3Client.deleteImageFromS3(userImage,userImgBucket);
+                    return new CanFittingResponseDto("", false);
+                }
+                return new CanFittingResponseDto(userImage, isSuccess);
+            }catch (Exception e){
+                s3Client.deleteImageFromS3(userImage,userImgBucket);
+                return new CanFittingResponseDto("", false);
+            }
+        }
+
+        public boolean legacyFitting(String userId, LegacyFittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
@@ -115,7 +137,7 @@
             }
 
             if (!requestDto.getIsNewImage().equals("false")) {
-                userImage = s3Client.upload(requestDto.getImage());
+                userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
                 System.out.println(userImage);
@@ -136,6 +158,9 @@
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
+            if(part=="others"){
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+            }
             if(part==null || part == "" || part.length()==0 ){
                 part="upper_body";
             }
@@ -144,8 +169,61 @@
             if(clothesPk==null || clothesPk==""){
                 clothesPk=pick.getId();
             }
+
             System.out.printf("fcm token : %s\n",fcmToken);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImage,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            pick.addFittingList(fittingResponse.getId());
+            pickPersistenceAdapter.save(pick);
+
+            return true;
+        }
+        public boolean fitting(String userId, FittingRequestDto requestDto) {
+            String userImage = "";
+            UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+
+            if(user==null){
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+            }
+
+//            if (!requestDto.getIsNewImage().equals("false")) {
+//                userImage = s3Client.upload(requestDto.getImage());
+//                user.addUserImage(userImage);
+//                userPersistenceAdapter.save(user);
+//                System.out.println(userImage);
+//            }
+//            if(requestDto.getIsNewImage().equals("false")){
+//                userImage = requestDto.getImageForUrl();
+//            }
+
+            String pickId = requestDto.getPickId();
+            String part = requestDto.getPart();
+
+            String fcmToken = user.getFcmTokensForList()[0];
+            PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
+            if(pick==null){
+                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
+            }
+
+            String itemImageUrl = pick.getImage();
+            MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
+            part = part!=null ? part : pick.getFittingPart();
+            if(part=="others"){
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+            }
+            if(part==null || part == "" || part.length()==0 ){
+                part="upper_body";
+            }
+
+            String clothesPk = pick.getPk();
+            if(clothesPk==null || clothesPk==""){
+                clothesPk=pick.getId();
+            }
+
+            System.out.printf("fcm token : %s\n",fcmToken);
+            String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
+            userImage = requestDto.getImageForUrl();
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 

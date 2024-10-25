@@ -40,7 +40,29 @@ public class ItemPersistenceAdapter {
                         .build());
     }
 
-    public Boolean save(String url, String name, String image,Integer price, String pk, String platform){
+    public Optional<ScrapedDataDomain> findByPlatformAndProductpk(String platform, String productPk) {
+        return itemRepository.findByPlatformAndPk(platform,productPk)
+                .map(item -> ScrapedDataDomain.builder()
+                        .id(item.getId())
+                        .url(item.getUrl())
+                        .name(item.getName())
+                        .image(item.getImage())
+                        .productPk(item.getPk())
+                        .platform(item.getPlatform())
+                        .price(item.getPrice())
+                        .build());
+    }
+
+    public Integer getPickNum(String platform, String productPk) {
+        Optional<ItemEntity> optionalItemEntity = itemRepository.findByPlatformAndPk(platform, productPk);
+        ItemEntity itemEntity = optionalItemEntity.orElse(null);
+        if(itemEntity==null){
+            return 0;
+        }
+        return itemEntity.getPickNum();
+    }
+
+    public Boolean save(String url, String name, String image,Integer price, String pk, String platform, Integer pickNum){
 
         try {
             ItemEntity item = new ItemEntity();
@@ -50,6 +72,23 @@ public class ItemPersistenceAdapter {
             item.setPrice(price);
             item.setImage(image);
             item.setUrl(url);
+            item.setPickNum(pickNum);
+            itemRepository.save(item);
+
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
+
+    public Boolean update(String platform,String pk, Integer pickNum){
+
+        try {
+            ItemEntity item = itemRepository.findByPlatformAndPk(platform,pk).orElse(null);
+            if(item==null){
+                return false;
+            }
+            item.setPickNum(pickNum);
             itemRepository.save(item);
 
             return true;

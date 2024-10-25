@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class FittingResultDto {
+    private String id;
     private String itemName;
     private String itemImage;
     private String itemPlatform;

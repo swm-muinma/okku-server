@@ -10,9 +10,9 @@ import java.util.List;
 public class Utils {
     public void validatePickLimit(UserDomain user, List<PickDomain> picks) {
         if (!user.getIsPremium()) {
-            if (picks.size() > 20) {
-                throw new ErrorDomain(ErrorCode.MUST_INVITE,null);
-            }
+//            if (picks.size() > 20) {
+//                throw new ErrorDomain(ErrorCode.MUST_INVITE,null);
+//            }
         }
     }
 }

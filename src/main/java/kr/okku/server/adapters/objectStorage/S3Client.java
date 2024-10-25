@@ -27,24 +27,21 @@ public class S3Client {
     private final AmazonS3 amazonS3;
 
 
-    @Value("${aws.s3.bucket-name}")
-    private String bucketName;
-
     public S3Client(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
 
-    public String upload(MultipartFile image) {
+    public String upload(MultipartFile image, String bucketName) {
         if(image.isEmpty() || Objects.isNull(image.getOriginalFilename())){
             throw new ErrorDomain(ErrorCode.EMPTY_FILE_EXCEPTION,null);
         }
-        return this.uploadImage(image);
+        return this.uploadImage(image, bucketName);
     }
 
-    private String uploadImage(MultipartFile image) {
+    private String uploadImage(MultipartFile image, String bucketName) {
         this.validateImageFileExtention(image.getOriginalFilename());
         try {
-            return this.uploadImageToS3(image);
+            return this.uploadImageToS3(image, bucketName);
         } catch (IOException e) {
             throw new ErrorDomain(ErrorCode.IO_EXCEPTION_ON_IMAGE_UPLOAD,null);
         }
@@ -64,7 +61,7 @@ public class S3Client {
         }
     }
 
-    private String uploadImageToS3(MultipartFile image) throws IOException {
+    private String uploadImageToS3(MultipartFile image, String bucketName) throws IOException {
         String originalFilename = image.getOriginalFilename(); //원본 파일 명
         String extention = originalFilename.substring(originalFilename.lastIndexOf(".")); //확장자 명
 
@@ -93,7 +90,7 @@ public class S3Client {
         return amazonS3.getUrl(bucketName, s3FileName).toString();
     }
 
-    public void deleteImageFromS3(String imageAddress){
+    public void deleteImageFromS3(String imageAddress, String bucketName){
         String key = getKeyFromImageAddress(imageAddress);
         try{
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));

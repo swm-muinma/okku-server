@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ItemRepository extends MongoRepository<ItemEntity, String> {
     Optional<ItemEntity> findByUrl(String url);
+    Optional<ItemEntity> findByPlatformAndPk(String platform, String pk);
 }

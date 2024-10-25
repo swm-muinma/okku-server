@@ -1,6 +1,6 @@
 package kr.okku.server.exception;
 public enum ErrorCode {
-
+    WRONG_ITEM_FOR_FITTING("fittings are only available on top and bottom",400),
     MAYBE_SCRAPER_WAITING("maybe scraper waiting or down",500),
     IO_EXCEPTION_ON_IMAGE_DELETE("io exception on image delete",500),
     PUT_OBJECT_EXCEPTION("put object exception",500),
