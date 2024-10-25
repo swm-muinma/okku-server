@@ -127,6 +127,57 @@
                 return new CanFittingResponseDto("", false);
             }
         }
+
+        public boolean legacyFitting(String userId, LegacyFittingRequestDto requestDto) {
+            String userImage = "";
+            UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+
+            if(user==null){
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+            }
+
+            if (!requestDto.getIsNewImage().equals("false")) {
+                userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
+                user.addUserImage(userImage);
+                userPersistenceAdapter.save(user);
+                System.out.println(userImage);
+            }
+            if(requestDto.getIsNewImage().equals("false")){
+                userImage = requestDto.getImageForUrl();
+            }
+
+            String pickId = requestDto.getPickId();
+            String part = requestDto.getPart();
+
+            String fcmToken = user.getFcmTokensForList()[0];
+            PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
+            if(pick==null){
+                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
+            }
+
+            String itemImageUrl = pick.getImage();
+            MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
+            part = part!=null ? part : pick.getFittingPart();
+            if(part=="others"){
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+            }
+            if(part==null || part == "" || part.length()==0 ){
+                part="upper_body";
+            }
+
+            String clothesPk = pick.getPk();
+            if(clothesPk==null || clothesPk==""){
+                clothesPk=pick.getId();
+            }
+
+            System.out.printf("fcm token : %s\n",fcmToken);
+            String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            pick.addFittingList(fittingResponse.getId());
+            pickPersistenceAdapter.save(pick);
+
+            return true;
+        }
         public boolean fitting(String userId, FittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
@@ -171,6 +222,7 @@
 
             System.out.printf("fcm token : %s\n",fcmToken);
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
+            userImage = requestDto.getImageForUrl();
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
