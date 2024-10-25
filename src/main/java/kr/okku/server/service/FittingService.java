@@ -15,6 +15,7 @@
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
     import org.springframework.mock.web.MockMultipartFile;
     import org.springframework.stereotype.Service;
     import org.springframework.web.multipart.MultipartFile;
@@ -35,8 +36,11 @@
         private final PickPersistenceAdapter pickPersistenceAdapter;
         private final UserPersistenceAdapter userPersistenceAdapter;
         private final ScraperAdapter scraperAdapter;
-
         private final FittingPersistenceAdapter fittingPersistenceAdapter;
+
+        @Value("${aws.s3.bucket-name}")
+        private String userImgBucket;
+        private String clothesImgBucket = "clothes-images-caching";
 
         private final S3Client s3Client;
 
@@ -110,16 +114,16 @@
         public CanFittingResponseDto canFitting(CanFittingRequestDto requestDto){
             String userImage = "";
             try {
-                userImage = s3Client.upload(requestDto.getImage());
+                userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
                 boolean isSuccess = scraperAdapter.canFitting(userImage);
                 if(!isSuccess)
                 {
-                    s3Client.deleteImageFromS3(userImage);
+                    s3Client.deleteImageFromS3(userImage,userImgBucket);
                     return new CanFittingResponseDto("", false);
                 }
                 return new CanFittingResponseDto(userImage, isSuccess);
             }catch (Exception e){
-                s3Client.deleteImageFromS3(userImage);
+                s3Client.deleteImageFromS3(userImage,userImgBucket);
                 return new CanFittingResponseDto("", false);
             }
         }
@@ -164,8 +168,10 @@
             if(clothesPk==null || clothesPk==""){
                 clothesPk=pick.getId();
             }
+
             System.out.printf("fcm token : %s\n",fcmToken);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrl,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
