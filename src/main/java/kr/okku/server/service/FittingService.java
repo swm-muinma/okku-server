@@ -56,6 +56,10 @@
             this.s3Client = s3Client;
         }
 
+        public void deleteCachingUserImage(DeleteCachingUserImageRequestDto requestDto){
+            s3Client.deleteImageFromS3(requestDto.getImageUrl(), userImgBucket);
+        }
+
         public GetFittingListResponseDto getFittingList(String userId){
             List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
             List<FittingResultDto> fittingInfos = new ArrayList<>();
