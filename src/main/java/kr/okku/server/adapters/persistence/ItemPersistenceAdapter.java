@@ -56,7 +56,7 @@ public class ItemPersistenceAdapter {
     public Integer getPickNum(String platform, String productPk) {
         Optional<ItemEntity> optionalItemEntity = itemRepository.findByPlatformAndPk(platform, productPk);
         ItemEntity itemEntity = optionalItemEntity.orElse(null);
-        if(itemEntity==null){
+        if(itemEntity==null || itemEntity.getPickNum()==null){
             return 0;
         }
         return itemEntity.getPickNum();
