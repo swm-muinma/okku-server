@@ -56,8 +56,15 @@
             this.s3Client = s3Client;
         }
 
-        public void deleteCachingUserImage(DeleteCachingUserImageRequestDto requestDto){
-            s3Client.deleteImageFromS3(requestDto.getImageUrl(), userImgBucket);
+        public void deleteCachingUserImage(String userId, DeleteCachingUserImageRequestDto requestDto){
+            UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+            if(user==null){
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+            }
+            String imageUrl = requestDto.getImageUrl();
+            user.deleteUserImage(imageUrl);
+            userPersistenceAdapter.save(user);
+            s3Client.deleteImageFromS3(imageUrl, userImgBucket);
         }
 
         public GetFittingListResponseDto getFittingList(String userId){

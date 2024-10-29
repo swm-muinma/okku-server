@@ -63,7 +63,8 @@ public class FittingController {
     public ResponseEntity<Void> deleteCachingUserImage(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody DeleteCachingUserImageRequestDto requestDto) {
-        fittingService.deleteCachingUserImage(requestDto);
+        String userId = userDetails.getUsername();
+        fittingService.deleteCachingUserImage(userId,requestDto);
         return ResponseEntity.ok().build();
     }
 }

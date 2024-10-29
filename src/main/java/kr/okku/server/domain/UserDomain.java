@@ -62,4 +62,10 @@ public class UserDomain {
         modifiableUserImages.add(image);
         this.userImages = modifiableUserImages;
     }
+
+    public void deleteUserImage(String url){
+        if (userImages != null && userImages.contains(url)) {
+            userImages.remove(url);
+        }
+    }
 }
