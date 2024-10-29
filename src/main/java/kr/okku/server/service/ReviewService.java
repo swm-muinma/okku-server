@@ -93,7 +93,7 @@
 
             PickDomain pick = pickOptional.get();
             Date createdAt = pickPersistenceAdapter.getCreatedAt(pickId).orElse(null);
-            return getReviewsByProduct(
+            ProductReviewDto result = getReviewsByProduct(
                     pick.getPk(),
                     pick.getPlatform().getName(),
                     pick,
@@ -103,6 +103,11 @@
                     pick.getUrl(),
                     createdAt
             );
+            result.setCanFitting(true);
+            if(pick.getFittingPart()=="others"){
+                result.setCanFitting(false);
+            }
+            return result;
         }
 
         public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url) {
