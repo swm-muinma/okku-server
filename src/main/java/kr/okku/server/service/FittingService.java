@@ -122,7 +122,7 @@
         }
 
 
-        public CanFittingResponseDto canFitting(CanFittingRequestDto requestDto){
+        public CanFittingResponseDto canFitting(String userId,CanFittingRequestDto requestDto){
             String userImage = "";
             try {
                 userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
@@ -132,6 +132,12 @@
                     s3Client.deleteImageFromS3(userImage,userImgBucket);
                     return new CanFittingResponseDto("", false);
                 }
+                UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+                if(user==null){
+                    throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                }
+                user.addUserImage(userImage);
+                userPersistenceAdapter.save(user);
                 return new CanFittingResponseDto(userImage, isSuccess);
             }catch (Exception e){
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
