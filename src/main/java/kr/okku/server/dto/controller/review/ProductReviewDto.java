@@ -10,4 +10,5 @@ public class ProductReviewDto extends BasicRequestDto {
     private ReviewsDto reviews;
     private double ratingAvg;
     private String platform;
+    private Boolean canFitting;
 }
