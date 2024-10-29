@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +51,9 @@ public class UserService {
     public UserImagesResponseDto getUserImages(String userId){
         UserDomain user = userPersistenceAdapter.findById(userId).get();
         UserImagesResponseDto responseDto = new UserImagesResponseDto();
-        responseDto.setImages(user.getUserImages());
+        List<String> reverseList = new ArrayList<>(user.getUserImages());
+        Collections.reverse(reverseList);
+        responseDto.setImages(reverseList);
         return responseDto;
     }
 
