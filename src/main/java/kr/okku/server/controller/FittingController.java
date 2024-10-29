@@ -58,4 +58,12 @@ public class FittingController {
         FittingResultDto result = fittingService.getNowOne(userId);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/delete")
+    public ResponseEntity<Void> deleteCachingUserImage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody DeleteCachingUserImageRequestDto requestDto) {
+        fittingService.deleteCachingUserImage(requestDto);
+        return ResponseEntity.ok().build();
+    }
 }
