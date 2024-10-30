@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Document(collection = "users")
+@Document(collection = "fitting-logs")
 public class FittingLogEntity {
 
     @Id
