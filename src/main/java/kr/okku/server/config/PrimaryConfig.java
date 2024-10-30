@@ -6,6 +6,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import kr.okku.server.adapters.persistence.repository.cart.CartRepository;
+import kr.okku.server.adapters.persistence.repository.fittinglog.FittingLogRepository;
 import kr.okku.server.adapters.persistence.repository.item.ItemRepository;
 import kr.okku.server.adapters.persistence.repository.pick.PickRepository;
 import kr.okku.server.adapters.persistence.repository.refresh.RefreshRepository;
@@ -27,7 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Configuration
-@EnableMongoRepositories(basePackageClasses = {UserRepository.class, CartRepository.class, ItemRepository.class, PickRepository.class, RefreshRepository.class}, mongoTemplateRef = "primaryMongoTemplate")
+@EnableMongoRepositories(basePackageClasses = {UserRepository.class, CartRepository.class, ItemRepository.class, PickRepository.class, RefreshRepository.class, FittingLogRepository.class}, mongoTemplateRef = "primaryMongoTemplate")
 @EnableConfigurationProperties
 public class PrimaryConfig {
     @Value("${spring.data.mongodb.primary.database}")
