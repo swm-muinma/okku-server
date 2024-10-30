@@ -22,6 +22,10 @@ public class FittingLogMapper {
                 .userId(fittingLogEntity.getUserId())
                 .userName(fittingLogEntity.getUserName())
                 .fittingResultId(fittingLogEntity.getFittingResultId())
+                .itemPk(fittingLogEntity.getItemPk())
+                .itemPlatform(fittingLogEntity.getItemPlatform())
+                .callTime(fittingLogEntity.getCreatedAt().toString())
+                .doneTime(fittingLogEntity.getUpdatedAt().toString())
                 .build();
     }
 
@@ -38,6 +42,8 @@ public class FittingLogMapper {
         fittingLogEntity.setRequestUserImage(fittingLogDomain.getRequestUserImage());
         fittingLogEntity.setResponseMessage(fittingLogDomain.getResponseMessage());
         fittingLogEntity.setFittingResultId(fittingLogDomain.getFittingResultId());
+        fittingLogEntity.setItemPk(fittingLogDomain.getItemPk());
+        fittingLogEntity.setItemPlatform(fittingLogEntity.getItemPlatform());
         return fittingLogEntity;
     }
 

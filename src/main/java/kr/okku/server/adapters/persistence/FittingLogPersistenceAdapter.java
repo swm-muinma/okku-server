@@ -26,7 +26,7 @@ public class FittingLogPersistenceAdapter {
         this.fittingLogRepository = fittingLogRepository;
     }
 
-    public List<FittingLogDomain> findByIdIn() {
+    public List<FittingLogDomain> findAll() {
         return fittingLogRepository.findAll()
                 .stream()
                 .map(FittingLogMapper::toDomain)

@@ -28,6 +28,10 @@ public class FittingLogEntity {
     private String requestItemImage;
     @Field("request_item_url")
     private String requestItemUrl;
+    @Field("item_pk")
+    private String itemPk;
+    @Field("item_platform")
+    private String itemPlatform;
     @Field("response_image")
     private String responseImage;
     @Field("response_message")

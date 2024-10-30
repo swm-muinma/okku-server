@@ -3,27 +3,13 @@ package kr.okku.server.service;
 import kr.okku.server.adapters.persistence.*;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
-import kr.okku.server.dto.controller.BasicRequestDto;
-import kr.okku.server.dto.controller.PageInfoResponseDto;
 import kr.okku.server.dto.controller.admin.FiittingListResponseDto;
-import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
-import kr.okku.server.mapper.PickMapper;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,11 +21,13 @@ public class AdminService {
     private final ItemPersistenceAdapter itemPersistenceAdapter;
     private final FittingPersistenceAdapter fittingPersistenceAdapter;
 
+    private final FittingLogPersistenceAdapter fittingLogPersistenceAdapter;
+
     private final Utils utils;
 
     @Autowired
     public AdminService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                        ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, Utils utils
+                        ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, Utils utils
                      ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
@@ -47,13 +35,42 @@ public class AdminService {
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.itemPersistenceAdapter = itemPersistenceAdapter;
         this.fittingPersistenceAdapter = fittingPersistenceAdapter;
+        this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
         this.utils = utils;
     }
 
-    public FiittingListResponseDto getFiittingList(String input) {
-        List<FittingDomain> fittingDomains = fittingPersistenceAdapter.findAll();
-
-        return null;
+    public List<FiittingListResponseDto> getFiittingList(String userId) {
+        List<FittingLogDomain> fittingLogDomains = fittingLogPersistenceAdapter.findAll();
+        return fittingLogDomains.stream()
+                .map(fittingLog -> {
+                    // responseImage가 null인 경우 fittingPersistenceAdapter로 값을 채워준다.
+                    if (fittingLog.getResponseImage() == null) {
+                        FittingDomain fittingDomain = fittingPersistenceAdapter.findById(fittingLog.getFittingResultId()).orElse(null);
+                        if(fittingDomain==null){
+                            throw new ErrorDomain(ErrorCode.LOG_NOT_FOUND,null);
+                        }
+                        if (fittingDomain != null) { // fittingDomain이 존재하는 경우에만 값을 채움
+                            fittingLog.setResponseImage(fittingDomain.getImgUrl());
+                            fittingLog.setResponseMessage(fittingDomain.getStatus().getValue());
+                        }
+                    }
+                    fittingLogPersistenceAdapter.save(fittingLog);
+                    // FittingLogDomain을 FiittingListResponseDto로 변환
+                    return FiittingListResponseDto.builder()
+                            .userId(fittingLog.getUserId())
+                            .userName(fittingLog.getUserName())
+                            .requestUserImage(fittingLog.getRequestUserImage())
+                            .requestItemImage(fittingLog.getRequestItemImage())
+                            .requestItemUrl(fittingLog.getRequestItemUrl())
+                            .responseImage(fittingLog.getResponseImage())
+                            .responseMessage(fittingLog.getResponseMessage())
+                            .callTime(fittingLog.getCallTime())
+                            .doneTime(fittingLog.getDoneTime())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
+
+
 
 }

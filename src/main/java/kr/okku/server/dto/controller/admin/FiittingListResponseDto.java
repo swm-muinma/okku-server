@@ -17,4 +17,6 @@ public class FiittingListResponseDto extends BasicRequestDto {
     private String requestItemUrl;
     private String responseImage;
     private String responseMessage;
+    private String callTime;
+    private String doneTime;
 }

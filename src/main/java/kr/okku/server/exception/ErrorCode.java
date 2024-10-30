@@ -1,5 +1,6 @@
 package kr.okku.server.exception;
 public enum ErrorCode {
+
     WRONG_ITEM_FOR_FITTING("fittings are only available on top and bottom",400),
     MAYBE_SCRAPER_WAITING("maybe scraper waiting or down",500),
     IO_EXCEPTION_ON_IMAGE_DELETE("io exception on image delete",500),
@@ -11,6 +12,7 @@ public enum ErrorCode {
     MUST_INVITE("must invite", 402),
     DOMAIN_INVALID("domain invalid", 400),
     USER_NOT_FOUND("User not found", 404),
+    LOG_NOT_FOUND("Log not found", 404),
     INTERNAL_SERVER_ERROR("Internal Server Error", 500),
     INVALID_CARTID("cartId invalid", 400),
     IF_IS_DELETE_PERMENANT_IS_FALSE_THEN_CARTID_IS_REQUIRED("if isDeletePermenant is false, cartId is required",400),

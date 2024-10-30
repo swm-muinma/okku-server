@@ -251,6 +251,8 @@
                     .requestUserImage(requestDto.getImageForUrl())
                     .responseMessage("not served")
                     .fittingResultId(fittingResponse.getId())
+                    .itemPlatform(pick.getPlatform().getName())
+                    .itemPk(pick.getPk())
                     .build();
 
             fittingLogPersistenceAdapter.save(fittingLogDomain);
