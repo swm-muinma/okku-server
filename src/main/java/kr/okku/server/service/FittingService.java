@@ -250,6 +250,7 @@
                     .requestItemUrl(pick.getUrl())
                     .requestUserImage(requestDto.getImageForUrl())
                     .responseMessage("not served")
+                    .fittingResultId(fittingResponse.getId())
                     .build();
 
             fittingLogPersistenceAdapter.save(fittingLogDomain);
