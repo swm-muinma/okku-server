@@ -13,6 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
@@ -24,9 +26,9 @@ public class AdminController {
     }
 
     @GetMapping
-    public ResponseEntity<FiittingListResponseDto> fiittingList(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<FiittingListResponseDto>> fiittingList(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
-        FiittingListResponseDto responseDto = adminService.getFiittingList(userId);
+        List<FiittingListResponseDto> responseDto = adminService.getFiittingList(userId);
         return ResponseEntity.ok(responseDto);
 
     }
