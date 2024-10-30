@@ -38,7 +38,7 @@ public class FittingController {
         String userId = userDetails.getUsername();
         System.out.println("fitting");
         System.out.println(requestDto);
-        CanFittingResponseDto result = fittingService.canFitting(requestDto);
+        CanFittingResponseDto result = fittingService.canFitting(userId,requestDto);
         return ResponseEntity.ok(result);
     }
 

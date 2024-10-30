@@ -2,32 +2,28 @@
 
     import kr.okku.server.adapters.image.ImageFromUrlAdapter;
     import kr.okku.server.adapters.objectStorage.S3Client;
+    import kr.okku.server.adapters.persistence.FittingLogPersistenceAdapter;
     import kr.okku.server.adapters.persistence.FittingPersistenceAdapter;
     import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
     import kr.okku.server.adapters.persistence.UserPersistenceAdapter;
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.FittingDomain;
+    import kr.okku.server.domain.FittingLogDomain;
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.domain.UserDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
     import kr.okku.server.dto.controller.fitting.*;
-    import kr.okku.server.dto.controller.pick.FittingInfo;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.beans.factory.annotation.Value;
-    import org.springframework.mock.web.MockMultipartFile;
     import org.springframework.stereotype.Service;
     import org.springframework.web.multipart.MultipartFile;
 
-    import java.io.UnsupportedEncodingException;
-    import java.net.URLEncoder;
-    import java.nio.charset.StandardCharsets;
     import java.util.ArrayList;
     import java.util.Collections;
     import java.util.List;
     import java.util.Optional;
-    import java.util.stream.Collectors;
 
     @Service
     public class FittingService {
@@ -38,6 +34,8 @@
         private final ScraperAdapter scraperAdapter;
         private final FittingPersistenceAdapter fittingPersistenceAdapter;
 
+        private final FittingLogPersistenceAdapter fittingLogPersistenceAdapter;
+
         @Value("${aws.s3.bucket-name}")
         private String userImgBucket;
         private String clothesImgBucket = "clothes-images-caching";
@@ -47,12 +45,13 @@
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
                               ImageFromUrlAdapter imageFromUrlAdapter,
-                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, S3Client s3Client) {
+                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, S3Client s3Client) {
             this.imageFromUrlAdapter = imageFromUrlAdapter;
             this.pickPersistenceAdapter = pickPersistenceAdapter;
             this.scraperAdapter = scraperAdapter;
             this.userPersistenceAdapter = userPersistenceAdapter;
             this.fittingPersistenceAdapter = fittingPersistenceAdapter;
+            this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
             this.s3Client = s3Client;
         }
 
@@ -122,7 +121,7 @@
         }
 
 
-        public CanFittingResponseDto canFitting(CanFittingRequestDto requestDto){
+        public CanFittingResponseDto canFitting(String userId,CanFittingRequestDto requestDto){
             String userImage = "";
             try {
                 userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
@@ -132,6 +131,12 @@
                     s3Client.deleteImageFromS3(userImage,userImgBucket);
                     return new CanFittingResponseDto("", false);
                 }
+                UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
+                if(user==null){
+                    throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                }
+                user.addUserImage(userImage);
+                userPersistenceAdapter.save(user);
                 return new CanFittingResponseDto(userImage, isSuccess);
             }catch (Exception e){
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
@@ -237,6 +242,20 @@
             FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
+
+            FittingLogDomain fittingLogDomain = FittingLogDomain.builder()
+                    .userId(userId)
+                    .userName(user.getName())
+                    .requestItemImage(pick.getImage())
+                    .requestItemUrl(pick.getUrl())
+                    .requestUserImage(requestDto.getImageForUrl())
+                    .responseMessage("not served")
+                    .fittingResultId(fittingResponse.getId())
+                    .itemPlatform(pick.getPlatform().getName())
+                    .itemPk(pick.getPk())
+                    .build();
+
+            fittingLogPersistenceAdapter.save(fittingLogDomain);
 
             return true;
         }

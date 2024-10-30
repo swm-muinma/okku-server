@@ -104,7 +104,7 @@
                     createdAt
             );
             result.setCanFitting(true);
-            if(pick.getFittingPart()=="others"){
+            if(pick.getFittingPart().equals("others")){
                 result.setCanFitting(false);
             }
             return result;
