@@ -44,7 +44,6 @@ public class UserPersistenceAdapter {
         return Optional.ofNullable(UserMapper.toDomain(userEntity));
     }
 
-
     public void deleteById(String userId) {
         userRepository.deleteById(userId);
     }
