@@ -39,6 +39,7 @@ public class PickDomain {
             this.name = scrapedData.getName();
             this.price = scrapedData.getPrice();
             this.image = scrapedData.getImage();
+            this.fittingPart = scrapedData.getFittingPart();
             this.platform = platformInfo;
             this.pk = scrapedData.getProductPk();
 

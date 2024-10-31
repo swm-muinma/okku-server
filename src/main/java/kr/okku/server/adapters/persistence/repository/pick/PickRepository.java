@@ -5,16 +5,19 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PickRepository extends MongoRepository<PickEntity, String> {
-    Page<PickEntity> findByUserId(String userId, Pageable pageable);
+    Page<PickEntity> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
     List<PickEntity> findByUserIdOrderByCreatedAtDesc(String userId);
 
     List<PickEntity> findByIdInOrderByCreatedAtDesc(List<String> pickIds);
 
-    Page<PickEntity> findByIdIn(List<String> pickIds,Pageable pageable);
+    Page<PickEntity> findByIdInOrderByCreatedAtDesc(List<String> pickIds,Pageable pageable);
+
+    Optional<PickEntity> findByIdOrderByCreatedAtDesc(String id);
 
     long deleteByIdIn(List<String> pickIds);
 }

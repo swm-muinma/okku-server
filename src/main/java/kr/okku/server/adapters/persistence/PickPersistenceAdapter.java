@@ -42,11 +42,11 @@ public class PickPersistenceAdapter {
 
     // 사용자 ID로 Pick 조회 (Pageable)
     public Page<PickDomain> findByUserId(String userId, Pageable pageable) {
-        return pickRepository.findByUserId(userId, pageable)
+        return pickRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
                 .map(PickMapper::toDomain);
     }
     public Optional<PickDomain> findById(String id) {
-        return Optional.ofNullable(PickMapper.toDomain(pickRepository.findById(id).get()));
+        return Optional.ofNullable(PickMapper.toDomain(pickRepository.findByIdOrderByCreatedAtDesc(id).get()));
     }
     // 사용자 ID로 Pick 조회
     public List<PickDomain> findByUserId(String userId) {
@@ -66,7 +66,7 @@ public class PickPersistenceAdapter {
 
     public Page<PickDomain> findByIdIn(List<String> pickIds, Pageable pageable) {
         // 데이터베이스에서 엔티티를 페이지 단위로 가져온다
-        Page<PickEntity> pickEntityPage = pickRepository.findByIdIn(pickIds, pageable);
+        Page<PickEntity> pickEntityPage = pickRepository.findByIdInOrderByCreatedAtDesc(pickIds, pageable);
 
         // 엔티티 리스트를 도메인 객체 리스트로 변환
         List<PickDomain> pickDomainList = pickEntityPage.getContent().stream()
