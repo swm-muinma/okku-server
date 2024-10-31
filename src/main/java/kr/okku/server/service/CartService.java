@@ -3,6 +3,7 @@ package kr.okku.server.service;
 import kr.okku.server.adapters.persistence.CartPersistenceAdapter;
 import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
 import kr.okku.server.domain.CartDomain;
+import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.dto.controller.cart.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
@@ -29,12 +30,11 @@ public class CartService {
 
     }
 
-    public MyCartsResponseDto getMyCarts(String userId) {
+    public MyCartsResponseDto getMyCarts(TraceId traceId,String userId) {
         List<CartDomain> cartDomains = cartPersistenceAdapter.findByUserId(userId);
-        System.out.println(cartDomains);
 
         if (cartDomains == null) {
-            throw new ErrorDomain(ErrorCode.CART_NOT_EXIST,null);
+            throw new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId);
         }
 
         var resCart = cartDomains.stream().map(cart -> {
@@ -62,23 +62,23 @@ public class CartService {
 
 
     @Transactional
-    public String deleteCart(String userId, String cartId) {
+    public String deleteCart(TraceId traceId, String userId, String cartId) {
         CartDomain cartInfo = cartPersistenceAdapter.findById(cartId)
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,null));
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId));
         if (!cartInfo.getUserId().equals(userId)) {
-            throw new ErrorDomain(ErrorCode.NOT_CART_OWNER,null);
+            throw new ErrorDomain(ErrorCode.NOT_CART_OWNER,traceId);
         }
         cartPersistenceAdapter.deleteById(cartId);
         return cartId;
     }
 
     @Transactional
-    public CartDomain createCart(String userId, CreateCartRequestDto requestDto) {
+    public CartDomain createCart(TraceId traceId, String userId, CreateCartRequestDto requestDto) {
         String name = requestDto.getName();
         List<String> pickIds = requestDto.getPickIds();
 
         if (name == null || name.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.NAME_IS_EMPTY,requestDto);
+            throw new ErrorDomain(ErrorCode.NAME_IS_EMPTY,traceId);
         }
         Integer size = 0;
         if(pickIds==null){
@@ -101,12 +101,12 @@ public class CartService {
         if (savedCart != null) {
             return savedCart;
         }
-        throw new ErrorDomain(ErrorCode.DATABASE_ERROR_WITH_SAVE_CART,requestDto);
+        throw new ErrorDomain(ErrorCode.DATABASE_ERROR_WITH_SAVE_CART,traceId);
     }
 
 
     @Transactional
-    public MyCartsResponseDto updateCarts(String userId, UpdateCartsRequestDto requestDto) {
+    public MyCartsResponseDto updateCarts(TraceId traceId,String userId, UpdateCartsRequestDto requestDto) {
         List<CartDomain> userCarts = cartPersistenceAdapter.findByUserId(userId);
 
         Set<String> updateCartIds = requestDto.getCarts().stream()
@@ -126,13 +126,13 @@ public class CartService {
                 .collect(Collectors.toList());
 
         deletedCarts.forEach((cartDomain -> {
-            this.deleteCart(userId,cartDomain.getId());
+            this.deleteCart(traceId,userId,cartDomain.getId());
         }));
 
         createdCarts.forEach((cartDomain -> {
             CreateCartRequestDto cartRequestDto = new CreateCartRequestDto();
             cartRequestDto.setName(cartDomain.getName());
-            this.createCart(userId,cartRequestDto);
+            this.createCart(traceId,userId,cartRequestDto);
         }));
 
         List<CartDomain> updatedUserCarts = cartPersistenceAdapter.findByUserId(userId);
@@ -149,6 +149,6 @@ public class CartService {
                     });
         }
 
-        return getMyCarts(userId);
+        return getMyCarts(traceId,userId);
     }
 }

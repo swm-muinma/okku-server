@@ -9,6 +9,8 @@ import kr.okku.server.security.JwtTokenProvider;
 import kr.okku.server.service.Oauth2Service;
 import kr.okku.server.service.RefreshService;
 import kr.okku.server.service.ReviewService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +20,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/login")
 public class LoginController {
-
     private final Oauth2Service oauth2Service;
     private final RefreshService refreshService;
 

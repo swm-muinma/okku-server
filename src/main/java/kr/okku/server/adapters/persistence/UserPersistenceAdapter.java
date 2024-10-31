@@ -5,8 +5,10 @@ import kr.okku.server.adapters.persistence.repository.cart.CartRepository;
 import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.adapters.persistence.repository.user.UserRepository;
 import kr.okku.server.domain.CartDomain;
+import kr.okku.server.domain.PickDomain;
 import kr.okku.server.domain.UserDomain;
 import kr.okku.server.mapper.CartMapper;
+import kr.okku.server.mapper.PickMapper;
 import kr.okku.server.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,12 @@ public class UserPersistenceAdapter {
 
     public UserPersistenceAdapter(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+    public List<UserDomain> findAll() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     public UserDomain save(UserDomain userDomain) {

@@ -8,8 +8,6 @@
     import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
     import kr.okku.server.dto.controller.review.*;
     import kr.okku.server.enums.ReviewStatusEnum;
-    import kr.okku.server.exception.ErrorCode;
-    import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +47,6 @@
                         reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                     }
                     PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
-                    System.out.println(pickDto);
                     return ProductReviewDto.builder()
                             .pick(pickDto)
                             .reviews(reviewsDto)
@@ -66,7 +63,6 @@
                     reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                 }
                 PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
-                System.out.println(pickDto);
                 return ProductReviewDto.builder()
                         .pick(pickDto)
                         .reviews(reviewsDto)
@@ -104,7 +100,6 @@
                     createdAt
             );
             result.setCanFitting(true);
-            System.out.println(pick.getFittingPart());
             if(pick.getFittingPart().equals("others") || pick.getFittingPart()==null){
                 result.setCanFitting(false);
             }

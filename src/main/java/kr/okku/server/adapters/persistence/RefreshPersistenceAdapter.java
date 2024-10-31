@@ -2,11 +2,6 @@ package kr.okku.server.adapters.persistence;
 
 import kr.okku.server.adapters.persistence.repository.refresh.RefreshEntity;
 import kr.okku.server.adapters.persistence.repository.refresh.RefreshRepository;
-import kr.okku.server.adapters.persistence.repository.user.UserEntity;
-import kr.okku.server.adapters.persistence.repository.user.UserRepository;
-import kr.okku.server.domain.UserDomain;
-import kr.okku.server.mapper.CartMapper;
-import kr.okku.server.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
