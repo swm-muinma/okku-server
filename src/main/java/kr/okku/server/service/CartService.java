@@ -32,7 +32,6 @@ public class CartService {
 
     public MyCartsResponseDto getMyCarts(TraceId traceId,String userId) {
         List<CartDomain> cartDomains = cartPersistenceAdapter.findByUserId(userId);
-        System.out.println(cartDomains);
 
         if (cartDomains == null) {
             throw new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId);

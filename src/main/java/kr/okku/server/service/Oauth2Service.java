@@ -151,7 +151,6 @@ public class Oauth2Service {
                 String appleId = clames.get("sub").toString();
                 String email = clames.get("email").toString();
                 String emailPrefix = email.substring(0, email.indexOf("@"));
-        System.out.println(emailPrefix);
                 return processingAppleLogin(appleId, recommend, emailPrefix);
     }
 
@@ -262,7 +261,6 @@ public class Oauth2Service {
         UserDomain user = userPersistenceAdapter.findByKakaoId(kakaoId).orElse(null);
         if (user == null) {
             String nickname = (String) ((Map<String, Object>) userResponse.get("properties")).get("nickname");
-            System.out.println(nickname);
             user = UserDomain.builder()
                     .name(nickname)
                     .build();

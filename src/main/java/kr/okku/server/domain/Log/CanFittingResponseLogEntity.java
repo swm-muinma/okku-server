@@ -7,16 +7,18 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class CanFittingLogEntity {
+public class CanFittingResponseLogEntity {
     private Date time;
     private String traceId;
 
     private String userImage;
+    private String status;
     private String message;
 
-    public CanFittingLogEntity(TraceId traceId, String userImage, String message){
+    public CanFittingResponseLogEntity(TraceId traceId, String userImage, String status, String message){
         this.time = new Date();
         this.userImage=userImage;
+        this.status=status;
         this.traceId=traceId.getId();
         this.message=message;
     }

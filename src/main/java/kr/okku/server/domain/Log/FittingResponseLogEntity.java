@@ -8,16 +8,15 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class FittingRequestLogEntity {
+public class FittingResponseLogEntity {
     private Date time;
     private String traceId;
-
-    private FittingRequestDto fittingRequestDto;
+    private String resultId;
     private String message;
 
-    public FittingRequestLogEntity(TraceId traceId, FittingRequestDto fittingRequestDto, String message){
+    public FittingResponseLogEntity(TraceId traceId, String resultId, String message){
         this.time = new Date();
-        this.fittingRequestDto=fittingRequestDto;
+        this.resultId=resultId;
         this.traceId=traceId.getId();
         this.message=message;
     }

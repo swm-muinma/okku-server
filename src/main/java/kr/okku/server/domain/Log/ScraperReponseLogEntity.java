@@ -2,22 +2,21 @@ package kr.okku.server.domain.Log;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.okku.server.dto.controller.BasicRequestDto;
+import kr.okku.server.dto.adapter.ScraperResponseDto;
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-public class ScraperLogEntity {
+public class ScraperReponseLogEntity {
     private Date time;
     private String traceId;
-
-    private String url;
+    private ScraperResponseDto scraperResponseDto;
     private String message;
 
-    public ScraperLogEntity(TraceId traceId, String url, String message){
+    public ScraperReponseLogEntity(TraceId traceId, ScraperResponseDto scraperResponseDto, String message){
         this.time = new Date();
-        this.url=url;
+        this.scraperResponseDto=scraperResponseDto;
         this.traceId=traceId.getId();
         this.message=message;
     }

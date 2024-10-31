@@ -47,7 +47,6 @@
                         reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                     }
                     PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
-                    System.out.println(pickDto);
                     return ProductReviewDto.builder()
                             .pick(pickDto)
                             .reviews(reviewsDto)
@@ -64,7 +63,6 @@
                     reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                 }
                 PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
-                System.out.println(pickDto);
                 return ProductReviewDto.builder()
                         .pick(pickDto)
                         .reviews(reviewsDto)
@@ -102,7 +100,6 @@
                     createdAt
             );
             result.setCanFitting(true);
-            System.out.println(pick.getFittingPart());
             if(pick.getFittingPart().equals("others") || pick.getFittingPart()==null){
                 result.setCanFitting(false);
             }

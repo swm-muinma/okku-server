@@ -126,7 +126,7 @@
             String userImage = "";
             try {
                 userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
-                boolean isSuccess = scraperAdapter.canFitting(userImage);
+                boolean isSuccess = scraperAdapter.canFitting(traceId,userImage);
                 if(!isSuccess)
                 {
                     s3Client.deleteImageFromS3(userImage,userImgBucket);
@@ -157,7 +157,6 @@
                 userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
-                System.out.println(userImage);
             }
             if(requestDto.getIsNewImage().equals("false")){
                 userImage = requestDto.getImageForUrl();
@@ -187,9 +186,8 @@
                 clothesPk=pick.getId();
             }
 
-            System.out.printf("fcm token : %s\n",fcmToken);
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
@@ -207,7 +205,6 @@
 //                userImage = s3Client.upload(requestDto.getImage());
 //                user.addUserImage(userImage);
 //                userPersistenceAdapter.save(user);
-//                System.out.println(userImage);
 //            }
 //            if(requestDto.getIsNewImage().equals("false")){
 //                userImage = requestDto.getImageForUrl();
@@ -237,10 +234,9 @@
                 clothesPk=pick.getId();
             }
 
-            System.out.printf("fcm token : %s\n",fcmToken);
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
             userImage = requestDto.getImageForUrl();
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 

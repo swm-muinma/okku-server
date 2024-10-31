@@ -73,7 +73,7 @@ public class PickService {
         ScrapedDataDomain scrapedData;
 
         if(scrapedCachData.isEmpty()) {
-            Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(url);
+            Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(traceId,url);
 
             scrapedData = scrapedRawData.orElseGet(() -> {
                 try {
