@@ -92,6 +92,16 @@ public class UserController {
 
     }
 
+//    @GetMapping("/migration")
+//    public ResponseEntity<String> migration(@AuthenticationPrincipal UserDetails userDetails) {
+//        String userId = userDetails.getUsername();
+//        TraceId traceId = new TraceId();
+//        log.info("{}",new ControllerLogEntity(traceId,userId,"migration","GET",null,"마이그레이션 시작").toJson());
+//        String res = userService.migration();
+//        log.info("{}",new ControllerLogEntity(traceId,userId,"migration","GET",null,"마이그레이션 종료").toJson());
+//        return ResponseEntity.ok(res);
+//    }
+
     @GetMapping("/withdraw/{platform}")
     public ResponseEntity<Void> withdrawAccount(
             @AuthenticationPrincipal UserDetails userDetails,

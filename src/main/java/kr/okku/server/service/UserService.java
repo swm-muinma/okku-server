@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +40,26 @@ public class UserService {
         this.cartPersistenceAdapter = cartPersistenceAdapter;
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.appleOauthAdapter = appleOauthAdapter;
+    }
+
+    public String migration(){
+        List<UserDomain> users = userPersistenceAdapter.findAll();
+        for (UserDomain user : users) {
+            Set<String> fcmTokens = user.getFcmToken();
+
+            // fcmToken이 비어있지 않으면 첫 번째 값을 가져와 singleFcmToken에 할당
+            if (fcmTokens != null && !fcmTokens.isEmpty()) {
+                String firstToken = fcmTokens.iterator().next();
+                user.setSingleFcmToken(firstToken);
+            } else {
+                // 기본값을 설정하고 싶다면, 예를 들어 "default_token"
+                user.setSingleFcmToken("default_token");
+            }
+
+            // 변경된 user 객체를 저장
+            userPersistenceAdapter.save(user);
+        }
+        return "";
     }
 
     public UserDomain getProfile(TraceId traceId,String userId) {
@@ -87,6 +108,7 @@ public class UserService {
             throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId);
         }
         user.addFcmToken(fcmTokens);
+        user.setSingleFcmToken(fcmTokens);
         UserDomain updatedUser = userPersistenceAdapter.save(user);
         return new SetFcmTokenResponseDto(updatedUser.getFcmTokensForArray());
     }

@@ -165,7 +165,7 @@
             String pickId = requestDto.getPickId();
             String part = requestDto.getPart();
 
-            String fcmToken = user.getFcmTokensForList()[0];
+            String fcmToken = user.getSingleFcmToken();
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
                 throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,traceId);
@@ -213,7 +213,7 @@
             String pickId = requestDto.getPickId();
             String part = requestDto.getPart();
 
-            String fcmToken = user.getFcmTokensForList()[0];
+            String fcmToken = user.getSingleFcmToken();
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
                 throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,traceId);
