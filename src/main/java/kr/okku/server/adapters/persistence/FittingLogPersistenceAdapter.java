@@ -27,7 +27,7 @@ public class FittingLogPersistenceAdapter {
     }
 
     public List<FittingLogDomain> findAll() {
-        return fittingLogRepository.findAll()
+        return fittingLogRepository.findAllByCreatedAtDesc()
                 .stream()
                 .map(FittingLogMapper::toDomain)
                 .collect(Collectors.toList());
