@@ -1,10 +1,14 @@
 package kr.okku.server.controller;
 
+import kr.okku.server.domain.Log.ControllerLogEntity;
+import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
 import kr.okku.server.service.PickService;
 import kr.okku.server.service.ReviewService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/picks")
 public class PickController {
-
+    private final Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private final PickService pickService;
     private final ReviewService reviewService;
 
@@ -28,8 +32,10 @@ public class PickController {
             @RequestBody NewPickRequestDto request
     ) {
         String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST",request,"요청 시작").toJson());
             PickDomain pick = pickService.createPick(userId, request);
-            System.out.printf("Request successful - UserId: %s, New Pick URL: %s%n", userId, request.getUrl());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST",null,"요청 종료").toJson());
             return ResponseEntity.ok(pick);
     }
 
@@ -39,8 +45,11 @@ public class PickController {
             @RequestBody DeletePicksRequestDto request
     ) {
         String userId = userDetails.getUsername();
+
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/delete","POST",request,"요청 시작").toJson());
             pickService.deletePicks(userId, request);
-            System.out.printf("Request successful - UserId: %s, Deleted Picks: %s%n", userId, request.getPickIds());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/delete","POST",null,"요청 종료").toJson());
             return ResponseEntity.ok().build();
 
     }
@@ -53,22 +62,29 @@ public class PickController {
             @RequestParam(defaultValue = "10") int size
     ) {
         String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"POST",null,"요청 시작").toJson());
         GetMyPickRequestDto requestDto = new GetMyPickRequestDto();
         requestDto.setPage(page);
         requestDto.setSize(size);
         requestDto.setCartId(cartId);
             UserPicksResponseDto response = pickService.getMyPicks(userId, requestDto);
-            System.out.printf("Request successful - UserId: %s, CartId: %s, Page: %d, Size: %d%n", userId, cartId, page, size);
+
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"POST",null,"요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reviews")
     public ResponseEntity<ProductReviewDto> getReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String pickId
     ) {
-            ProductReviewDto reviews = reviewService.getReviews(pickId);
-            System.out.printf("Request successful - PickId: %s%n", pickId);
-            return ResponseEntity.ok(reviews);
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/reviews&pickId="+pickId,"GET",null,"요청 시작").toJson());
+        ProductReviewDto reviews = reviewService.getReviews(pickId);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/reviews&pickId="+pickId,"GET",null,"요청 종료").toJson());
+        return ResponseEntity.ok(reviews);
 
     }
 
@@ -78,9 +94,12 @@ public class PickController {
             @RequestBody MovePicksRequestDto request
     ) {
         String userId = userDetails.getUsername();
-            pickService.movePicks(userId, request);
-            System.out.printf("Request successful - UserId: %s, Moved Picks: %s%n", userId, request.getPickIds());
-            return ResponseEntity.ok().build();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks","PATCH",request,"요청 시작").toJson());
+        pickService.movePicks(userId, request);
+
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks","PATCH",null,"요청 종료").toJson());
+        return ResponseEntity.ok().build();
 
     }
 
@@ -89,8 +108,11 @@ public class PickController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam String pickId
     ){
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks?pickId="+pickId,"GET",null,"요청 시작").toJson());
             PickFittingResponseDto reviews = pickService.getFitting(pickId);
-            System.out.printf("Request successful - PickId: %s%n", pickId);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks?pickId="+pickId,"GET",null,"요청 종료").toJson());
             return ResponseEntity.ok(reviews);
 
     }

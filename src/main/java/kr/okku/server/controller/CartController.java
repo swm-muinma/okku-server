@@ -1,8 +1,12 @@
 package kr.okku.server.controller;
 
 import kr.okku.server.domain.CartDomain;
+import kr.okku.server.domain.Log.ControllerLogEntity;
+import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.dto.controller.cart.*;
 import kr.okku.server.service.CartService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/carts")
 public class CartController {
 
+    private final Logger log = LoggerFactory.getLogger(this.getClass().getSimpleName());
     private final CartService cartService;
 
     public CartController(CartService cartService) {
@@ -21,8 +26,10 @@ public class CartController {
     @GetMapping
     public ResponseEntity<MyCartsResponseDto> getMyCarts(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 시작").toJson());
             MyCartsResponseDto carts = cartService.getMyCarts(userId);
-            System.out.printf("Request successful - Get carts for userId: %s%n", userId);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 종료").toJson());
             return ResponseEntity.ok(carts);
 
     }
@@ -30,8 +37,10 @@ public class CartController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCart(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 시작").toJson());
             cartService.deleteCart(userId, id);
-            System.out.printf("Request successful - Deleted cart with id: %s for userId: %s%n", id, userId);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 종료").toJson());
             return ResponseEntity.ok().build();
     }
 
@@ -41,9 +50,12 @@ public class CartController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userId = userDetails.getUsername();
-            CartDomain savedCart = cartService.createCart(userId, request);
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",request,"요청 시작").toJson());
+        CartDomain savedCart = cartService.createCart(userId, request);
             CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
-            System.out.printf("Request successful - Created cart for userId: %s with name: %s%n", userId, request.getName());
+
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",null,"요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 
@@ -53,8 +65,10 @@ public class CartController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",request,"요청 시작").toJson());
         MyCartsResponseDto savedCart = cartService.updateCarts(userId, request);
-        System.out.printf("Request successful - Rename cart for userId: %s%n", userId);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",null,"요청 종료").toJson());
         return ResponseEntity.ok(savedCart);
     }
 
