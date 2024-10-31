@@ -55,16 +55,13 @@ public class ImageFromUrlAdapter {
             );
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                System.out.println("call");
                 byte[] imageBytes = response.getBody();
 
                 // 이미지 포맷에 상관없이 BufferedImage로 변환
                 ByteArrayInputStream imageInputStream = new ByteArrayInputStream(imageBytes);
                 BufferedImage originalImage = ImageIO.read(imageInputStream);
                 originalImage = this.removeAlphaChannel(originalImage);
-                System.out.println("call3");
                 if (originalImage == null) {
-                    System.out.println("call2");
                     // ImageIO.read가 null을 반환하면 gif 또는 지원하지 않는 이미지일 수 있으므로 추가 처리
                     ImageReader gifReader = ImageIO.getImageReadersByFormatName("gif").next();
                     gifReader.setInput(ImageIO.createImageInputStream(imageInputStream), true);
@@ -73,11 +70,8 @@ public class ImageFromUrlAdapter {
 
                 // JPEG로 변환
                 ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream();
-                System.out.println("call5");
                 ImageIO.write(originalImage, "jpg", jpegOutputStream);
-                System.out.println("call6");
                 byte[] jpegBytes = jpegOutputStream.toByteArray();
-                System.out.println("call4");
                 // 파일 이름 및 ContentType 설정
                 String fileName = "downloaded_image.jpg"; // JPEG 파일 이름
                 String contentType = "image/jpeg"; // JPEG Content Type
@@ -86,7 +80,6 @@ public class ImageFromUrlAdapter {
                 return new MockMultipartFile(fileName, fileName, contentType, new ByteArrayInputStream(jpegBytes));
             }
         } catch (IOException e) {
-            System.out.println(e);
             throw new ErrorDomain(ErrorCode.INVALID_ITEM_IMAGE, null);
         }
         throw new ErrorDomain(ErrorCode.INVALID_ITEM_IMAGE, null);

@@ -8,6 +8,7 @@ public enum FormEnum {
     SLIM("slim"),
     NORMAL("normal"),
     PLUMP("plump"),
+    Athletic("Athletic"),
     FAT("fat");
 
     private final String value;

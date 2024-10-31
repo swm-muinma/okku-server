@@ -10,12 +10,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ErrorDomain.class)
     public ResponseEntity<Object> handleErrorDomain(ErrorDomain ex) {
-        Sentry.withScope(scope -> {
-            if (ex.getRequestDto() != null) {
-                scope.setExtra("Request Data", ex.getRequestDto().toString());
-            }
-            Sentry.captureException(ex);
+        Sentry.configureScope(scope -> {
+            scope.setExtra("TraceId", ex.getTraceId());
         });
+        Sentry.captureException(ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.valueOf(ex.getStatusCode()));
     }
 

@@ -30,8 +30,13 @@ public class UserEntity {
     private String kakaoId;
     @Field("apple_id")
     private String appleId;
+
     @Field("fcm_token")
     private String[] fcmToken;
+
+    @Field("single_fcm_token")
+    private String singleFcmToken;
+
     @Field("user_images")
     private List<String> userImages;
     @Field("created_at")

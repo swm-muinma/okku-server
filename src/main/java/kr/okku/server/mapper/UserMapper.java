@@ -32,6 +32,8 @@ public class UserMapper {
                         .orElseGet(() -> Stream.of("fcm_token_null")) // null일 경우 빈 문자열을 가진 Stream 반환
                         .collect(Collectors.toSet()))
                 .userImages(Optional.ofNullable(userEntity.getUserImages()).orElse(new ArrayList<>()))
+                .singleFcmToken(Optional.ofNullable(userEntity.getSingleFcmToken())
+                        .orElse("default_token"))
                 .build();
     }
 
@@ -51,6 +53,7 @@ public class UserMapper {
         userEntity.setAppleId(userDomain.getAppleId());
         userEntity.setFcmToken(userDomain.getFcmTokensForList());
         userEntity.setUserImages(userDomain.getUserImages());
+        userEntity.setSingleFcmToken(userDomain.getSingleFcmToken());
         return userEntity;
     }
 }

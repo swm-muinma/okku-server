@@ -41,7 +41,6 @@ public class AdminService {
 
     public List<FiittingListResponseDto> getFiittingList(String userId) {
         List<FittingLogDomain> fittingLogDomains = fittingLogPersistenceAdapter.findAll();
-        System.out.println(fittingLogDomains);
         return fittingLogDomains.stream()
                 .map(fittingLog -> {
                     // responseImage가 null인 경우 fittingPersistenceAdapter로 값을 채워준다.
@@ -55,7 +54,6 @@ public class AdminService {
                             fittingLog.setResponseMessage(fittingDomain.getStatus().getValue());
                         }
                     }
-                    System.out.println(fittingLog);
 //                    fittingLogPersistenceAdapter.save(fittingLog);
                     // FittingLogDomain을 FiittingListResponseDto로 변환
                     return FiittingListResponseDto.builder()
