@@ -104,7 +104,8 @@
                     createdAt
             );
             result.setCanFitting(true);
-            if(pick.getFittingPart().equals("others")){
+            System.out.println(pick.getFittingPart());
+            if(pick.getFittingPart().equals("others") || pick.getFittingPart()==null){
                 result.setCanFitting(false);
             }
             return result;
