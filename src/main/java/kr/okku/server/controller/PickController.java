@@ -34,7 +34,7 @@ public class PickController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST",request,"요청 시작").toJson());
-            PickDomain pick = pickService.createPick(userId, request);
+            PickDomain pick = pickService.createPick(traceId,userId, request);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST",null,"요청 종료").toJson());
             return ResponseEntity.ok(pick);
     }
@@ -48,7 +48,7 @@ public class PickController {
 
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/delete","POST",request,"요청 시작").toJson());
-            pickService.deletePicks(userId, request);
+            pickService.deletePicks(traceId,userId, request);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/delete","POST",null,"요청 종료").toJson());
             return ResponseEntity.ok().build();
 
@@ -68,7 +68,7 @@ public class PickController {
         requestDto.setPage(page);
         requestDto.setSize(size);
         requestDto.setCartId(cartId);
-            UserPicksResponseDto response = pickService.getMyPicks(userId, requestDto);
+            UserPicksResponseDto response = pickService.getMyPicks(traceId,userId, requestDto);
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"POST",null,"요청 종료").toJson());
             return ResponseEntity.ok(response);
@@ -96,7 +96,7 @@ public class PickController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks","PATCH",request,"요청 시작").toJson());
-        pickService.movePicks(userId, request);
+        pickService.movePicks(traceId,userId, request);
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks","PATCH",null,"요청 종료").toJson());
         return ResponseEntity.ok().build();
@@ -111,7 +111,7 @@ public class PickController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks?pickId="+pickId,"GET",null,"요청 시작").toJson());
-            PickFittingResponseDto reviews = pickService.getFitting(pickId);
+            PickFittingResponseDto reviews = pickService.getFitting(traceId,pickId);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks?pickId="+pickId,"GET",null,"요청 종료").toJson());
             return ResponseEntity.ok(reviews);
 

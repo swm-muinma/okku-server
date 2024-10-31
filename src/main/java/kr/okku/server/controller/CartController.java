@@ -28,7 +28,7 @@ public class CartController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 시작").toJson());
-            MyCartsResponseDto carts = cartService.getMyCarts(userId);
+            MyCartsResponseDto carts = cartService.getMyCarts(traceId,userId);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 종료").toJson());
             return ResponseEntity.ok(carts);
 
@@ -39,7 +39,7 @@ public class CartController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 시작").toJson());
-            cartService.deleteCart(userId, id);
+            cartService.deleteCart(traceId,userId, id);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 종료").toJson());
             return ResponseEntity.ok().build();
     }
@@ -52,7 +52,7 @@ public class CartController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",request,"요청 시작").toJson());
-        CartDomain savedCart = cartService.createCart(userId, request);
+        CartDomain savedCart = cartService.createCart(traceId,userId, request);
             CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",null,"요청 종료").toJson());
@@ -67,7 +67,7 @@ public class CartController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",request,"요청 시작").toJson());
-        MyCartsResponseDto savedCart = cartService.updateCarts(userId, request);
+        MyCartsResponseDto savedCart = cartService.updateCarts(traceId,userId, request);
         log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",null,"요청 종료").toJson());
         return ResponseEntity.ok(savedCart);
     }

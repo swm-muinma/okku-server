@@ -9,6 +9,7 @@
     import kr.okku.server.adapters.scraper.ScraperAdapter;
     import kr.okku.server.domain.FittingDomain;
     import kr.okku.server.domain.FittingLogDomain;
+    import kr.okku.server.domain.Log.TraceId;
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.domain.UserDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
@@ -55,10 +56,10 @@
             this.s3Client = s3Client;
         }
 
-        public void deleteCachingUserImage(String userId, DeleteCachingUserImageRequestDto requestDto){
+        public void deleteCachingUserImage(TraceId traceId, String userId, DeleteCachingUserImageRequestDto requestDto){
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
             if(user==null){
-                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId);
             }
             String imageUrl = requestDto.getImageUrl();
             user.deleteUserImage(imageUrl);
@@ -66,7 +67,7 @@
             s3Client.deleteImageFromS3(imageUrl, userImgBucket);
         }
 
-        public GetFittingListResponseDto getFittingList(String userId){
+        public GetFittingListResponseDto getFittingList(TraceId traceId, String userId){
             List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
             List<FittingResultDto> fittingInfos = new ArrayList<>();
 
@@ -88,7 +89,7 @@
             return new GetFittingListResponseDto(fittingInfos);
         }
 
-        public FittingResultDto getNowOne(String userId){
+        public FittingResultDto getNowOne(TraceId traceId, String userId){
             List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
             List<FittingResultDto> fittingInfos = new ArrayList<>();
 
@@ -121,7 +122,7 @@
         }
 
 
-        public CanFittingResponseDto canFitting(String userId,CanFittingRequestDto requestDto){
+        public CanFittingResponseDto canFitting(TraceId traceId,String userId,CanFittingRequestDto requestDto){
             String userImage = "";
             try {
                 userImage = s3Client.upload(requestDto.getImage(),userImgBucket);
@@ -133,7 +134,7 @@
                 }
                 UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
                 if(user==null){
-                    throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                    throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId);
                 }
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
@@ -144,12 +145,12 @@
             }
         }
 
-        public boolean legacyFitting(String userId, LegacyFittingRequestDto requestDto) {
+        public boolean legacyFitting(TraceId traceId,String userId, LegacyFittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
-                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId);
             }
 
             if (!requestDto.getIsNewImage().equals("false")) {
@@ -168,14 +169,14 @@
             String fcmToken = user.getFcmTokensForList()[0];
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
-                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
+                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,traceId);
             }
 
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
             if(part=="others"){
-                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,traceId);
             }
             if(part==null || part == "" || part.length()==0 ){
                 part="upper_body";
@@ -194,12 +195,12 @@
 
             return true;
         }
-        public boolean fitting(String userId, FittingRequestDto requestDto) {
+        public boolean fitting(TraceId traceId,String userId, FittingRequestDto requestDto) {
             String userImage = "";
             UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
 
             if(user==null){
-                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto);
+                throw new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId);
             }
 
 //            if (!requestDto.getIsNewImage().equals("false")) {
@@ -218,14 +219,14 @@
             String fcmToken = user.getFcmTokensForList()[0];
             PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
             if(pick==null){
-                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,requestDto);
+                throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,traceId);
             }
 
             String itemImageUrl = pick.getImage();
             MultipartFile itemImage = imageFromUrlAdapter.imageFromUrl(itemImageUrl);
             part = part!=null ? part : pick.getFittingPart();
             if(part=="others"){
-                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,requestDto);
+                throw new ErrorDomain(ErrorCode.WRONG_ITEM_FOR_FITTING,traceId);
             }
             if(part==null || part == "" || part.length()==0 ){
                 part="upper_body";

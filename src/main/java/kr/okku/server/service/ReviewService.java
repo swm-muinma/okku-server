@@ -8,8 +8,6 @@
     import kr.okku.server.dto.controller.pick.PickPlatformResponseDto;
     import kr.okku.server.dto.controller.review.*;
     import kr.okku.server.enums.ReviewStatusEnum;
-    import kr.okku.server.exception.ErrorCode;
-    import kr.okku.server.exception.ErrorDomain;
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;

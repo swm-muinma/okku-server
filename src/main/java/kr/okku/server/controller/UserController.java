@@ -28,7 +28,7 @@ public class UserController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET",null,"요청 시작").toJson());
-        UserDomain user = userService.getProfile(userId);
+        UserDomain user = userService.getProfile(traceId,userId);
             UserResponseDto response = new UserResponseDto(user.getId(), user.getName(), user.getHeight(), user.getWeight(), user.getForm());
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET",null,"요청 종료").toJson());
@@ -56,7 +56,7 @@ public class UserController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH",null,"요청 시작").toJson());
-            UserDomain updatedUser = userService.updateProfile(userId, request);
+            UserDomain updatedUser = userService.updateProfile(traceId,userId, request);
             UserResponseDto response = new UserResponseDto(updatedUser.getId(), updatedUser.getName(), updatedUser.getHeight(), updatedUser.getWeight(), updatedUser.getForm());
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH",null,"요청 종료").toJson());
@@ -73,7 +73,7 @@ public class UserController {
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH",request,"요청 시작").toJson());
         System.out.println(request);
-        SetFcmTokenResponseDto response = userService.addFcmToken(userId, request);
+        SetFcmTokenResponseDto response = userService.addFcmToken(traceId,userId, request);
 
         log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH",null,"요청 종료").toJson());
         return ResponseEntity.ok(response);

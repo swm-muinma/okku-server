@@ -3,6 +3,7 @@ package kr.okku.server.service;
 import kr.okku.server.adapters.persistence.*;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
+import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.dto.controller.BasicRequestDto;
 import kr.okku.server.dto.controller.PageInfoResponseDto;
 import kr.okku.server.dto.controller.pick.*;
@@ -58,11 +59,11 @@ public class PickService {
 
         return null;
     }
-    public PickDomain createPick(String userId, NewPickRequestDto requestDto) {
+    public PickDomain createPick(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         String url = extractValidUrl(requestDto.getUrl());
         System.out.println(url);
         UserDomain user = userPersistenceAdapter.findById(userId)
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto));
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
 
 //        utils.validatePickLimit(user,picks);
@@ -126,28 +127,28 @@ public class PickService {
         return savedPick;
     }
 
-    public void deletePicks(String userId, DeletePicksRequestDto requestDto) {
+    public void deletePicks(TraceId traceId,String userId, DeletePicksRequestDto requestDto) {
         List<String> pickIds= requestDto.getPickIds();
         String cartId=requestDto.getCartId();
         boolean isDeletePermenant =requestDto.isDeletePermenant();
 
         if (isDeletePermenant) {
             if (cartId != null && !cartId.isEmpty()) {
-                throw new ErrorDomain(ErrorCode.CARTID_IS_EMPTY,requestDto);
+                throw new ErrorDomain(ErrorCode.CARTID_IS_EMPTY,traceId);
             }
         }
         if (isDeletePermenant==false && (cartId == null || cartId.isEmpty())) {
-                throw new ErrorDomain(ErrorCode.IF_IS_DELETE_PERMENANT_IS_FALSE_THEN_CARTID_IS_REQUIRED,requestDto);
+                throw new ErrorDomain(ErrorCode.IF_IS_DELETE_PERMENANT_IS_FALSE_THEN_CARTID_IS_REQUIRED,traceId);
         }
 
         if (pickIds.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.PICKID_IS_EMPTY,requestDto);
+            throw new ErrorDomain(ErrorCode.PICKID_IS_EMPTY,traceId);
         }
 
         List<PickDomain> picksInfo = pickPersistenceAdapter.findByIdIn(pickIds);
         picksInfo.forEach(el -> {
             if (!el.getUserId().equals(userId)) {
-                throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,requestDto);
+                throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,traceId);
             }
         });
 
@@ -155,11 +156,11 @@ public class PickService {
             long deleteNum = pickPersistenceAdapter.deleteByIdIn(pickIds);
             this.deletePickFromAllCart(pickIds);
         } else {
-            var isDeleted = this.deleteFromCart(pickIds, cartId,requestDto);
+            var isDeleted = this.deleteFromCart(traceId,pickIds, cartId,requestDto);
         }
     }
 
-    public UserPicksResponseDto getMyPicks(String userId, GetMyPickRequestDto requestDto) {
+    public UserPicksResponseDto getMyPicks(TraceId traceId,String userId, GetMyPickRequestDto requestDto) {
         String cartId = requestDto.getCartId();
         int page = requestDto.getPage();
         int size = requestDto.getSize();
@@ -172,10 +173,10 @@ public class PickService {
 
         if (cartId != null) {
             CartDomain cart = cartPersistenceAdapter.findById(cartId)
-                    .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
+                    .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId));
             Page<PickDomain> pickPage = pickPersistenceAdapter.findByIdIn(cart.getPickItemIds(), pageable);
             UserDomain user = userPersistenceAdapter.findById(cart.getUserId())
-                    .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,requestDto));
+                    .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId));
 
             cartDTO = new PickCartResponseDto();
             cartDTO.setName(cart.getName());
@@ -206,29 +207,29 @@ public class PickService {
         return responseDTO;
     }
 
-    public Map<String, Object> movePicks(String userId,MovePicksRequestDto requestDto) {
+    public Map<String, Object> movePicks(TraceId traceId,String userId,MovePicksRequestDto requestDto) {
         List<String> pickIds = requestDto.getPickIds();
         String sourceCartId = requestDto.getSourceCartId();
         String destinationCartId =requestDto.getDestinationCartId();
         Boolean isDeleteFromOrigin = requestDto.isDeleteFromOrigin();
         if (isDeleteFromOrigin == null) {
-            throw new ErrorDomain(ErrorCode.IS_DELETE_FROM_ORIGIN_REQUIRED,requestDto);
+            throw new ErrorDomain(ErrorCode.IS_DELETE_FROM_ORIGIN_REQUIRED,traceId);
         }
         if (destinationCartId == null || destinationCartId.isEmpty()) {
-            throw new ErrorDomain(ErrorCode.DESTINATION_CART_ID_REQUIRED,requestDto);
+            throw new ErrorDomain(ErrorCode.DESTINATION_CART_ID_REQUIRED,traceId);
         }
         if (!isDeleteFromOrigin) {
-            List<String> movedPickIds = this.addToCart(pickIds, destinationCartId, requestDto);
+            List<String> movedPickIds = this.addToCart(traceId,pickIds, destinationCartId, requestDto);
             if (movedPickIds == null || movedPickIds.isEmpty()) {
-                throw new ErrorDomain(ErrorCode.ALREADY_EXIST_CART,requestDto);
+                throw new ErrorDomain(ErrorCode.ALREADY_EXIST_CART,traceId);
             }
             if (pickIds.isEmpty()) {
-                throw new ErrorDomain(ErrorCode.PICK_IDS_REQUIRED,requestDto);
+                throw new ErrorDomain(ErrorCode.PICK_IDS_REQUIRED,traceId);
             }
             List<PickDomain> picksInfo = pickPersistenceAdapter.findByIdIn(pickIds);
             picksInfo.forEach(pick -> {
                 if (!pick.getUserId().equals(userId)) {
-                    throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,requestDto);
+                    throw new ErrorDomain(ErrorCode.NOT_PICK_OWNER,traceId);
                 }
             });
             return Map.of(
@@ -236,7 +237,7 @@ public class PickService {
                     "destination", Map.of("cartId", destinationCartId, "pickIds", movedPickIds)
             );
         } else {
-            List<String> movedPickIds = this.moveCart(pickIds, sourceCartId, destinationCartId,requestDto);
+            List<String> movedPickIds = this.moveCart(traceId,pickIds, sourceCartId, destinationCartId,requestDto);
             return Map.of(
                     "source", Map.of("cartId", sourceCartId != null ? sourceCartId : "__all__", "pickIds", List.of()),
                     "destination", Map.of("cartId", destinationCartId, "pickIds", movedPickIds)
@@ -245,22 +246,22 @@ public class PickService {
     }
 
     @Transactional
-    List<String> moveCart(List<String> pickIds, String sourceCartId, String destinationCartId, MovePicksRequestDto requestDto) {
-            List<String> addedPicks = this.addToCart(pickIds, destinationCartId,requestDto);
+    List<String> moveCart(TraceId traceId,List<String> pickIds, String sourceCartId, String destinationCartId, MovePicksRequestDto requestDto) {
+            List<String> addedPicks = this.addToCart(traceId,pickIds, destinationCartId,requestDto);
             if (addedPicks == null || addedPicks.isEmpty()) {
-                throw new ErrorDomain(ErrorCode.DUPLICATED_PICK,requestDto);
+                throw new ErrorDomain(ErrorCode.DUPLICATED_PICK,traceId);
             }
 
-            this.deleteFromCart(pickIds, sourceCartId,requestDto);
+            this.deleteFromCart(traceId,pickIds, sourceCartId,requestDto);
 
             return addedPicks;
     }
 
     @Transactional
-    public List<String> addToCart(List<String> pickIds, String cartId, BasicRequestDto requestDto) {
-        checkPickIdExist(pickIds, requestDto);
+    public List<String> addToCart(TraceId traceId,List<String> pickIds, String cartId, BasicRequestDto requestDto) {
+        checkPickIdExist(traceId,pickIds, requestDto);
         System.out.println(requestDto);
-        CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
+        CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId));
 
         cart.addPicks(pickIds);
 
@@ -270,11 +271,11 @@ public class PickService {
         return updatedCart.getPickItemIds();
     }
     @Transactional
-    public List<String> deleteFromCart(List<String> pickIds, String cartId,BasicRequestDto requestDto) {
-        checkPickIdExist(pickIds,requestDto);
+    public List<String> deleteFromCart(TraceId traceId,List<String> pickIds, String cartId,BasicRequestDto requestDto) {
+        checkPickIdExist(traceId,pickIds,requestDto);
 
         CartDomain cart = cartPersistenceAdapter.findById(cartId)
-                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,requestDto));
+                .orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId));
 
        cart.deletePicks(pickIds);
 
@@ -298,17 +299,17 @@ public class PickService {
             return pickIds;
     }
 
-    private void checkPickIdExist(List<String> pickIds, BasicRequestDto requestDto) {
+    private void checkPickIdExist(TraceId traceId,List<String> pickIds, BasicRequestDto requestDto) {
         List<PickDomain> persistencePicks = pickPersistenceAdapter.findByIdIn(pickIds);
         if(pickIds.size() != persistencePicks.size()){
-            throw new ErrorDomain(ErrorCode.INVALID_PICKIDS,requestDto);
+            throw new ErrorDomain(ErrorCode.INVALID_PICKIDS,traceId);
         }
     }
 
-    public PickFittingResponseDto getFitting(String pickId){
+    public PickFittingResponseDto getFitting(TraceId traceId,String pickId){
         PickDomain pick = pickPersistenceAdapter.findById(pickId).orElse(null);
         if(pick==null){
-            throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,null);
+            throw new ErrorDomain(ErrorCode.PICK_NOT_EXIST,traceId);
         }
         PickPlatformResponseDto pickPlatformResponse = new PickPlatformResponseDto();
         pickPlatformResponse.setName(pick.getPlatform().getName());
