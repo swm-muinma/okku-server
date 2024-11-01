@@ -30,10 +30,10 @@ public class FittingController {
             @RequestBody FittingRequestDto request) {
             String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","POST",request,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","POST","요청 시작").toJson());
             var result = fittingService.fitting(traceId,userId, request);
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","POST","요청 종료").toJson());
             return ResponseEntity.ok(result);
     }
 
@@ -43,9 +43,9 @@ public class FittingController {
             @ModelAttribute CanFittingRequestDto requestDto) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/validate","POST",requestDto,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/validate","POST","요청 시작").toJson());
         CanFittingResponseDto result = fittingService.canFitting(traceId,userId,requestDto);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/validate","POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/validate","POST","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
 
@@ -54,10 +54,10 @@ public class FittingController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","GET","요청 시작").toJson());
         GetFittingListResponseDto result = fittingService.getFittingList(traceId,userId);
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting","GET","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
     @GetMapping("/recent")
@@ -65,9 +65,9 @@ public class FittingController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/recent","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/recent","GET","요청 시작").toJson());
         FittingResultDto result = fittingService.getNowOne(traceId,userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/recent","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/recent","GET","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
 
@@ -77,9 +77,9 @@ public class FittingController {
             @RequestBody DeleteCachingUserImageRequestDto requestDto) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/delete","POST",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/delete","POST","요청 시작").toJson());
         fittingService.deleteCachingUserImage(traceId,userId,requestDto);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/delete","POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/delete","POST","요청 종료").toJson());
         return ResponseEntity.ok().build();
     }
 }
