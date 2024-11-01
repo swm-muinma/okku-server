@@ -7,11 +7,7 @@ import kr.okku.server.dto.adapter.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -29,7 +25,7 @@ public class ScraperAdapter {
         try {
             ScraperRequestDto scraperRequestDto = new ScraperRequestDto(url);
             ScraperResponseDto response = scraperClientAdapter.scrape(scraperRequestDto);
-            log.info("{}",new ScraperReponseLogEntity(traceId,response,"스크랩 종료").toJson());
+            log.info("{}",new ScraperReponseLogEntity(traceId,"스크랩 종료").toJson());
             return Optional.ofNullable(ScrapedDataDomain.builder()
                     .price(response.getPrice())
                     .image(response.getImg_url())
@@ -53,10 +49,9 @@ public class ScraperAdapter {
     }
 
     public FittingResponseDto fitting(TraceId traceId,String userId, String clothesClass, String itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
-        log.info("{}",new CanFittingLogEntity(traceId,userImage,"피팅 요청 시작").toJson());
         try {
             FittingRequestDto fittingRequestDto = new FittingRequestDto(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
-            log.info("{}",new FittingRequestLogEntity(traceId,fittingRequestDto,"피팅 요청 시작").toJson());
+            log.info("{}",new FittingRequestLogEntity(traceId,"피팅 요청 시작").toJson());
             FittingResponseDto response = scraperClientAdapter.fitting(fittingRequestDto);
             log.info("{}",new FittingResponseLogEntity(traceId,response.getId(),"피팅 요청 종료").toJson());
             return response;

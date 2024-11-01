@@ -12,12 +12,10 @@ public class FittingRequestLogEntity {
     private Date time;
     private String traceId;
 
-    private FittingRequestDto fittingRequestDto;
     private String message;
 
-    public FittingRequestLogEntity(TraceId traceId, FittingRequestDto fittingRequestDto, String message){
+    public FittingRequestLogEntity(TraceId traceId, String message){
         this.time = new Date();
-        this.fittingRequestDto=fittingRequestDto;
         this.traceId=traceId.getId();
         this.message=message;
     }

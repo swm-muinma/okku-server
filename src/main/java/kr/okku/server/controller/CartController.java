@@ -27,9 +27,9 @@ public class CartController {
     public ResponseEntity<MyCartsResponseDto> getMyCarts(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET","요청 시작").toJson());
             MyCartsResponseDto carts = cartService.getMyCarts(traceId,userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","GET","요청 종료").toJson());
             return ResponseEntity.ok(carts);
 
     }
@@ -38,9 +38,9 @@ public class CartController {
     public ResponseEntity<Void> deleteCart(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE","요청 시작").toJson());
             cartService.deleteCart(traceId,userId, id);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts/"+id,"DELETE","요청 종료").toJson());
             return ResponseEntity.ok().build();
     }
 
@@ -51,11 +51,11 @@ public class CartController {
     ) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",request,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST","요청 시작").toJson());
         CartDomain savedCart = cartService.createCart(traceId,userId, request);
             CreateCartResponseDto response = new CreateCartResponseDto(savedCart.getId(), savedCart.getName(), savedCart.getPickItemIds());
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","POST","요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 
@@ -66,9 +66,9 @@ public class CartController {
     ) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",request,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH","요청 시작").toJson());
         MyCartsResponseDto savedCart = cartService.updateCarts(traceId,userId, request);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/carts","PATCH","요청 종료").toJson());
         return ResponseEntity.ok(savedCart);
     }
 

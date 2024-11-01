@@ -11,12 +11,10 @@ import java.util.Date;
 public class ScraperReponseLogEntity {
     private Date time;
     private String traceId;
-    private ScraperResponseDto scraperResponseDto;
     private String message;
 
-    public ScraperReponseLogEntity(TraceId traceId, ScraperResponseDto scraperResponseDto, String message){
+    public ScraperReponseLogEntity(TraceId traceId, String message){
         this.time = new Date();
-        this.scraperResponseDto=scraperResponseDto;
         this.traceId=traceId.getId();
         this.message=message;
     }

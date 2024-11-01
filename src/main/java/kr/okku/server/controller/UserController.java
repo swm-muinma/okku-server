@@ -27,11 +27,11 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET","요청 시작").toJson());
         UserDomain user = userService.getProfile(traceId,userId);
             UserResponseDto response = new UserResponseDto(user.getId(), user.getName(), user.getHeight(), user.getWeight(), user.getForm());
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","GET","요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 
@@ -41,9 +41,9 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/images","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/images","GET","요청 시작").toJson());
         UserImagesResponseDto result = userService.getUserImages(userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/images","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/images","GET","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
 
@@ -55,11 +55,11 @@ public class UserController {
     ) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH","요청 시작").toJson());
             UserDomain updatedUser = userService.updateProfile(traceId,userId, request);
             UserResponseDto response = new UserResponseDto(updatedUser.getId(), updatedUser.getName(), updatedUser.getHeight(), updatedUser.getWeight(), updatedUser.getForm());
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users","PATCH","요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 
@@ -71,11 +71,11 @@ public class UserController {
         String userId = userDetails.getUsername();
 
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH",request,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH","요청 시작").toJson());
         System.out.println(request);
         SetFcmTokenResponseDto response = userService.addFcmToken(traceId,userId, request);
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/fcmtoken","PATCH","요청 종료").toJson());
         return ResponseEntity.ok(response);
 
     }
@@ -85,9 +85,9 @@ public class UserController {
     public ResponseEntity<String> withdrawCheck(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/pre-withdraw","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/pre-withdraw","GET","요청 시작").toJson());
         String res = userService.checkAccountSocial(userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/pre-withdraw","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/pre-withdraw","GET","요청 종료").toJson());
         return ResponseEntity.ok(res);
 
     }
@@ -110,9 +110,9 @@ public class UserController {
     ) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/withdraw","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/withdraw","GET","요청 시작").toJson());
         userService.withdrawAccount(userId, platform, code);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/withdraw","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/users/withdraw","GET","요청 종료").toJson());
         return ResponseEntity.ok().build();
     }
 }
