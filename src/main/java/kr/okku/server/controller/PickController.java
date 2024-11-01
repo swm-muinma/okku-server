@@ -63,14 +63,14 @@ public class PickController {
     ) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"POST",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"GET",null,"요청 시작").toJson());
         GetMyPickRequestDto requestDto = new GetMyPickRequestDto();
         requestDto.setPage(page);
         requestDto.setSize(size);
         requestDto.setCartId(cartId);
             UserPicksResponseDto response = pickService.getMyPicks(traceId,userId, requestDto);
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks&cartId="+cartId,"GET",null,"요청 종료").toJson());
             return ResponseEntity.ok(response);
     }
 

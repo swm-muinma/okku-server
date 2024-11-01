@@ -53,7 +53,6 @@ public class ScraperAdapter {
     }
 
     public FittingResponseDto fitting(TraceId traceId,String userId, String clothesClass, String itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
-        log.info("{}",new CanFittingLogEntity(traceId,userImage,"피팅 요청 시작").toJson());
         try {
             FittingRequestDto fittingRequestDto = new FittingRequestDto(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
             log.info("{}",new FittingRequestLogEntity(traceId,fittingRequestDto,"피팅 요청 시작").toJson());
