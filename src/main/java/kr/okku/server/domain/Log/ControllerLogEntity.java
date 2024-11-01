@@ -14,16 +14,14 @@ public class ControllerLogEntity {
     private String userId;
     private String path;
     private String method;
-    private BasicRequestDto request;
     private String message;
 
-    public ControllerLogEntity(TraceId traceId, String userId, String path,String method, BasicRequestDto request,String message){
+    public ControllerLogEntity(TraceId traceId, String userId, String path,String method,String message){
         this.time = new Date();
         this.traceId=traceId.getId();
         this.userId=userId;
         this.path=path;
         this.method=method;
-        this.request=request;
         this.message=message;
     }
 

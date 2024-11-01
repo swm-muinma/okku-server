@@ -27,9 +27,9 @@ public class AdminController {
     public ResponseEntity<List<FiittingListResponseDto>> fiittingList(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET","요청 시작").toJson());
         List<FiittingListResponseDto> responseDto = adminService.getFiittingList(userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET","요청 종료").toJson());
         return ResponseEntity.ok(responseDto);
 
     }

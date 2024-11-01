@@ -34,10 +34,10 @@ public class LegacyFittingController {
             @ModelAttribute LegacyFittingRequestDto requestDto) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","POST",requestDto,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","POST","요청 시작").toJson());
         var result = fittingService.legacyFitting(traceId, userId, requestDto);
 
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","POST",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","POST","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
 
@@ -46,9 +46,9 @@ public class LegacyFittingController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","GET","요청 시작").toJson());
         GetFittingListResponseDto result = fittingService.getFittingList(traceId, userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting","GET","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
     @GetMapping("/recent")
@@ -56,9 +56,9 @@ public class LegacyFittingController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting/recent","GET",null,"요청 시작").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting/recent","GET","요청 시작").toJson());
         FittingResultDto result = fittingService.getNowOne(traceId,userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting/recent","GET",null,"요청 종료").toJson());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/fitting/recent","GET","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
 }
