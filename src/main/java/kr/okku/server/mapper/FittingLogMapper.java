@@ -6,6 +6,11 @@ import kr.okku.server.domain.FittingDomain;
 import kr.okku.server.domain.FittingLogDomain;
 import kr.okku.server.domain.PickDomain;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class FittingLogMapper {
 
     public static FittingLogDomain toDomain(FittingLogEntity fittingLogEntity) {
@@ -34,6 +39,7 @@ public class FittingLogMapper {
             return null;
         }
         FittingLogEntity fittingLogEntity = new FittingLogEntity();
+        fittingLogEntity.setId(fittingLogDomain.getId());
         fittingLogEntity.setUserId(fittingLogDomain.getUserId());
         fittingLogEntity.setUserName(fittingLogDomain.getUserName());
         fittingLogEntity.setResponseImage(fittingLogDomain.getResponseImage());
@@ -44,6 +50,19 @@ public class FittingLogMapper {
         fittingLogEntity.setFittingResultId(fittingLogDomain.getFittingResultId());
         fittingLogEntity.setItemPk(fittingLogDomain.getItemPk());
         fittingLogEntity.setItemPlatform(fittingLogEntity.getItemPlatform());
+        if(fittingLogDomain.getCallTime()!=null){
+            SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+
+            try {
+                // Parse the string to a Date object
+                Date createdAt = formatter.parse(fittingLogDomain.getCallTime());
+                fittingLogEntity.setCreatedAt(createdAt);
+                // Now you can assign `createdAt` to your object
+                // fittingLogDomain.setCreatedAt(createdAt); // example of setting it in your object
+            } catch (ParseException e) {
+                System.err.println("Failed to parse date: " + e.getMessage());
+            }
+        }
         return fittingLogEntity;
     }
 
