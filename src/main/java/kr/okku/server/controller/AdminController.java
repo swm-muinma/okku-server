@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 @RestController
@@ -27,10 +28,16 @@ public class AdminController {
     public ResponseEntity<List<FiittingListResponseDto>> fiittingList(@AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET","요청 시작").toJson());
         List<FiittingListResponseDto> responseDto = adminService.getFiittingList(userId);
-        log.info("{}",new ControllerLogEntity(traceId,userId,"/admin","GET","요청 종료").toJson());
         return ResponseEntity.ok(responseDto);
+
+    }
+
+    @GetMapping("/retention")
+    public ResponseEntity<Boolean> getRetention(@AuthenticationPrincipal UserDetails userDetails) throws ParseException {
+        String userId = userDetails.getUsername();
+        adminService.getRetentionStats();
+        return ResponseEntity.ok(true);
 
     }
 }

@@ -1,6 +1,8 @@
 package kr.okku.server.exception;
 public enum ErrorCode {
 
+    FORBIDDEN("Forbidden",403),
+
     WRONG_ITEM_FOR_FITTING("fittings are only available on top and bottom",400),
     MAYBE_SCRAPER_WAITING("maybe scraper waiting or down",500),
     IO_EXCEPTION_ON_IMAGE_DELETE("io exception on image delete",500),

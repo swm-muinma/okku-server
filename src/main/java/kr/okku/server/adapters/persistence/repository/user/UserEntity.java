@@ -30,7 +30,7 @@ public class UserEntity {
     private String kakaoId;
     @Field("apple_id")
     private String appleId;
-
+    private String role;
     @Field("fcm_token")
     private String[] fcmToken;
 
