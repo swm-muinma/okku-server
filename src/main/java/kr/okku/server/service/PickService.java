@@ -12,6 +12,8 @@ import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.mapper.PickMapper;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -101,6 +103,70 @@ public class PickService {
         return reviewDetailDomains;
     }
 
+    public List<ReviewDetailDomain> getReviewDetailDomainsFromWconcept(String html){
+        Document doc = Jsoup.parse(html);
+
+        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+
+        Elements reviewRows = doc.select("tr");
+
+        for (Element reviewRow : reviewRows) {
+            // Extract rating stars
+            Elements starRating = reviewRow.select(".star-grade > strong");
+            Integer rating = this.convertWidthToRating(starRating.attr("style"));  // rating might be based on the width percentage
+
+            // Extract product options
+            Elements productOptions = reviewRow.select(".pdt_review_option p span");
+//            String purchaseOption = productOptions.get(0).text();  // Example: "구매옵션 : Black_L"
+//            String sizeInfo = productOptions.get(1).text(); // Example: "사이즈 정보 : 172cm,59kg,M/66,29inch"
+
+            // Extract review date and reviewer info
+            Elements reviewerInfo = reviewRow.select(".product_review_info_right > em");
+//            String reviewer = reviewerInfo.text();  // Reviewer: sm********
+//            String reviewDate = reviewRow.select(".product_review_info_right > span").text();  // Date: 2024.11.06
+
+            // Extract review text
+            String reviewText = reviewRow.select(".pdt_review_text").text();  // Review content
+
+            // Extract images associated with the review
+            Elements images = reviewRow.select(".pdt_review_photo img");
+            List<String> imageUrls = new ArrayList<>();
+            for (Element image : images) {
+                String imageUrl = image.attr("src");
+                imageUrls.add(imageUrl);
+                System.out.println("Image URL: " + imageUrl);
+            }
+
+            // Print extracted review details
+            System.out.println("Rating: " + rating);
+//            System.out.println("Purchase Option: " + purchaseOption);
+//            System.out.println("Size Info: " + sizeInfo);
+//            System.out.println("Reviewer: " + reviewer);
+//            System.out.println("Review Date: " + reviewDate);
+            System.out.println("Review Text: " + reviewText);
+            System.out.println("---");
+            ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
+                    .rating(Integer.valueOf(rating))
+                    .content(reviewText)
+                    .imageUrl(imageUrls)
+                    .build();
+            reviewDetailDomains.add(reviewDetailDomain);
+        }
+        return reviewDetailDomains;
+    }
+
+    private static int convertWidthToRating(String widthString) {
+        // "width: 100%"에서 숫자 부분만 추출
+        int percent = Integer.parseInt(widthString.replaceAll("[^0-9]", ""));
+
+        // 별점 계산: 5점 만점에서 비례하는 별점 계산
+        int rating = (percent * 5) / 100;
+
+        // 0점이 나오는 경우는 1점으로 설정 (1~5점 사이로 반환)
+        return Math.max(rating, 1);
+    }
+
+
     public List<ReviewDetailDomain> getReviewDetailDomainsFromMusinsa(String jsonData) {
 
         // JSON parser setup
@@ -173,6 +239,16 @@ public class PickService {
             return true;
         }
         return false;
+    }
+
+    public Boolean isLastPageFromWconcept(String html){
+        Document doc = Jsoup.parse(html);
+
+        // "no_data" 클래스가 있는 요소를 찾음
+        Element noDataElement = doc.selectFirst(".no_data");
+
+        // 요소가 존재하면 true, 없으면 false 반환
+        return noDataElement != null;
     }
 
     public List<ReviewDetailDomain> getReviewDetailDomainsFromZigzag(String jsonData) {
@@ -248,7 +324,12 @@ public class PickService {
                 reviewDetailDomains.addAll(reviewsFromCurrentData);
             }
         }
-        if(platform.equals("wconcept")){}
+        if(platform.equals("wconcept")){
+            for(String data : request.getData()){
+                List<ReviewDetailDomain> reviewsFromCurrentData = this.getReviewDetailDomainsFromWconcept(data);
+                reviewDetailDomains.addAll(reviewsFromCurrentData);
+            }
+        }
 
         ReviewDomain reviewDomain = ReviewDomain.builder()
                 .reviews(reviewDetailDomains)
@@ -295,7 +376,13 @@ public class PickService {
 
         }
         if(request.getPlatform().equals("wconcept")){
-
+            requestBody = RequestBodyDto.builder()
+                    .method("post")
+                    .type("multipart/form-data")
+                    .data(this.createZigzagGraphQLRequest(pk,page))
+                    .build();
+            url="https://www.wconcept.co.kr/Ajax/ProductReViewList";
+            lastPage=this.isLastPageFromWconcept(request.getData());
         }
 
         GetNextPageForRawReviewsResponseDto response = GetNextPageForRawReviewsResponseDto.builder()
