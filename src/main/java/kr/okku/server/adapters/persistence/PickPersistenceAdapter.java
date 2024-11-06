@@ -56,6 +56,13 @@ public class PickPersistenceAdapter {
                 .collect(Collectors.toList());
     }
 
+    public List<PickDomain> findAll() {
+        return pickRepository.findAll()
+                .stream()
+                .map(PickMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
     // 여러 Pick ID로 조회
     public List<PickDomain> findByIdIn(List<String> pickIds) {
         return pickRepository.findByIdInOrderByCreatedAtDesc(pickIds)

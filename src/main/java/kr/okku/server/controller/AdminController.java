@@ -38,6 +38,12 @@ public class AdminController {
         String userId = userDetails.getUsername();
         adminService.getRetentionStats();
         return ResponseEntity.ok(true);
+    }
 
+    @GetMapping("/unique-user")
+    public ResponseEntity<Boolean> getUser(@AuthenticationPrincipal UserDetails userDetails) throws ParseException {
+        String userId = userDetails.getUsername();
+        adminService.getUniqueUser();
+        return ResponseEntity.ok(true);
     }
 }

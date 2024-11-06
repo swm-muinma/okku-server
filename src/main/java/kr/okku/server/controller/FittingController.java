@@ -48,7 +48,15 @@ public class FittingController {
         log.info("{}",new ControllerLogEntity(traceId,userId,"/v2/fitting/validate","POST","요청 종료").toJson());
         return ResponseEntity.ok(result);
     }
+    @GetMapping("/validate-test")
+    public ResponseEntity<String> validateTest(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        String result = fittingService.validateTest("userId");
 
+        return ResponseEntity.ok(result);
+    }
     @GetMapping()
     public ResponseEntity<GetFittingListResponseDto> getFittingList(
             @AuthenticationPrincipal UserDetails userDetails) {
