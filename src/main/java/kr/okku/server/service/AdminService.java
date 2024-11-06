@@ -30,6 +30,8 @@ public class AdminService {
 
     private final Utils utils;
 
+
+
     @Autowired
     public AdminService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
                         ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, Utils utils
@@ -43,6 +45,24 @@ public class AdminService {
         this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
         this.utils = utils;
     }
+
+    public void getUniqueUser(){
+        List<PickDomain> pickDomains = pickPersistenceAdapter.findAll();
+        int uniqueUserCount = this.getUniqueUserCountByUserId(pickDomains);
+        System.out.println("Unique User Count: " + uniqueUserCount);
+    }
+
+    public int getUniqueUserCountByUserId(List<PickDomain> pickDomains) {
+        // Stream을 사용해 userId를 추출하고, Set으로 변환하여 고유한 userId만 남김
+        Set<String> uniqueUserIds = new HashSet<>();
+        for (PickDomain pick : pickDomains) {
+            if (pick.getUserId() != null) {
+                uniqueUserIds.add(pick.getUserId());
+            }
+        }
+        return uniqueUserIds.size();
+    }
+
 
     public List<FiittingListResponseDto> getFiittingList(String userId) {
         String userRole = userPersistenceAdapter.getRole(userId).orElse(null);

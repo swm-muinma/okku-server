@@ -1,5 +1,6 @@
 package kr.okku.server.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.okku.server.adapters.persistence.*;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
 import kr.okku.server.domain.*;
@@ -59,9 +60,98 @@ public class PickService {
 
         return null;
     }
+
+    public SubmitRawReviewsResponseDto submitRawReviews(TraceId traceId, SubmitRawReviewsRequestDto request){
+        String pk = request.getPk();
+        String platform = request.getPlatform();
+
+        SubmitRawReviewsResponseDto response = SubmitRawReviewsResponseDto.builder()
+                .pk(pk)
+                .platform(platform)
+                .status("success")
+                .traceId(traceId.getId())
+                .build();
+
+        return response;
+    }
+
+    public GetNextPageForRawReviewsResponseDto getNextPageForRawReviews(TraceId traceId, GetNextPageForRawReviewsRequestDto request){
+        String platform = request.getPlatform();
+        String pk = request.getPk();
+        Integer page = request.getPage();
+        RequestBodyDto requestBody = RequestBodyDto.builder()
+                .method("post")
+                .type("application/json")
+                .data(this.createZigzagGraphQLRequest(pk))
+                .build();
+        GetNextPageForRawReviewsResponseDto response = GetNextPageForRawReviewsResponseDto.builder()
+                .urlForRawReviews("https://api.zigzag.kr/api/2/graphql/batch/GetNormalReviewFeedList")
+                .lastPage(true)
+                .requestBody(requestBody)
+                .page(page)
+                .traceId(traceId.getId())
+                .platform(platform)
+                .pk(pk)
+                .build();
+        return response;
+    }
+    public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
+        PickDomain savedPick = this.createPick(traceId, userId,requestDto);
+
+        CreatePickResponseDto response = CreatePickResponseDto.builder()
+                .id(savedPick.getId())
+                .pk(savedPick.getPk())
+                .brand(savedPick.getBrand())
+                .category(savedPick.getCategory())
+                .fittingList(savedPick.getFittingList())
+                .fittingPart(savedPick.getFittingPart())
+                .price(savedPick.getPrice())
+                .image(savedPick.getImage())
+                .userId(savedPick.getUserId())
+                .url(savedPick.getUrl())
+                .platform(savedPick.getPlatform())
+                .name(savedPick.getName())
+                .build();
+
+        response.setUrlForRawReviews("https://api.zigzag.kr/api/2/graphql/batch/GetNormalReviewFeedList");
+        response.setLastPage(true);
+        RequestBodyDto requestBody = RequestBodyDto.builder()
+                .method("post")
+                .type("application/json")
+                .data(this.createZigzagGraphQLRequest(savedPick.getPk()))
+                .build();
+        response.setRequestBody(requestBody);
+        response.setPage(1);
+        response.setTraceId(traceId.getId());
+        return response;
+    }
+
+    public Map<String, Object> createZigzagGraphQLRequest(String pk) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> variables = new HashMap<>();
+        // 동적 요청 바디를 위한 Map 생성
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("operationName", "GetNormalReviewFeedList");
+        requestBody.put("query", "query GetNormalReviewFeedList($product_id: ID!, $limit_count: Int, $skip_count: Int, $order: ProductReviewListOrderType) { feed_list: product_review_list(product_id: $product_id, limit_count: $limit_count, skip_count: $skip_count, order: $order) { total_count item_list { id contents date_created rating attachment_list { original_url thumbnail_url } reviewer { profile { nickname } } } } }");
+        requestBody.put("variables", variables);
+
+        try {
+
+
+            variables.put("order", "BEST_SCORE_DESC");
+            variables.put("limit_count", 100000);
+            variables.put("product_id", pk);
+            variables.put("skip_count", 0);
+
+            // JSON 문자열로 변환
+            return requestBody;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create JSON request body", e);
+        }
+    }
+
     public PickDomain createPick(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         String url = extractValidUrl(requestDto.getUrl());
-        System.out.println(url);
         UserDomain user = userPersistenceAdapter.findById(userId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
@@ -74,7 +164,6 @@ public class PickService {
 
         if(scrapedCachData.isEmpty()) {
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(traceId,url);
-
             scrapedData = scrapedRawData.orElseGet(() -> {
                 try {
                     Document document = Jsoup.connect(url).get();
@@ -91,6 +180,7 @@ public class PickService {
             String platformName = scrapedData.getPlatform();
             String productPk = scrapedData.getProductPk();
             Optional<ScrapedDataDomain> scrapedCachDataByKey = itemPersistenceAdapter.findByPlatformAndProductpk(platformName,productPk);
+
             if (scrapedData.getPrice() != 0) {
                 if (scrapedCachDataByKey.isEmpty()) {
                     itemPersistenceAdapter.save(

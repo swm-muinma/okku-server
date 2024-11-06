@@ -2,6 +2,7 @@
 
     import kr.okku.server.adapters.image.ImageFromUrlAdapter;
     import kr.okku.server.adapters.objectStorage.S3Client;
+    import kr.okku.server.adapters.openai.OpenaiAdapter;
     import kr.okku.server.adapters.persistence.FittingLogPersistenceAdapter;
     import kr.okku.server.adapters.persistence.FittingPersistenceAdapter;
     import kr.okku.server.adapters.persistence.PickPersistenceAdapter;
@@ -37,6 +38,8 @@
 
         private final FittingLogPersistenceAdapter fittingLogPersistenceAdapter;
 
+        private final OpenaiAdapter openaiAdapter;
+
         @Value("${aws.s3.bucket-name}")
         private String userImgBucket;
         private String clothesImgBucket = "clothes-images-caching";
@@ -46,13 +49,14 @@
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
                               ImageFromUrlAdapter imageFromUrlAdapter,
-                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, S3Client s3Client) {
+                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, OpenaiAdapter openaiAdapter, S3Client s3Client) {
             this.imageFromUrlAdapter = imageFromUrlAdapter;
             this.pickPersistenceAdapter = pickPersistenceAdapter;
             this.scraperAdapter = scraperAdapter;
             this.userPersistenceAdapter = userPersistenceAdapter;
             this.fittingPersistenceAdapter = fittingPersistenceAdapter;
             this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
+            this.openaiAdapter = openaiAdapter;
             this.s3Client = s3Client;
         }
 
@@ -143,6 +147,11 @@
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
                 return new CanFittingResponseDto("", false);
             }
+        }
+
+        public String  validateTest(String imageUrl){
+            String response = openaiAdapter.generateHaiku(imageUrl).orElse(null);
+            return response;
         }
 
         public boolean legacyFitting(TraceId traceId,String userId, LegacyFittingRequestDto requestDto) {
