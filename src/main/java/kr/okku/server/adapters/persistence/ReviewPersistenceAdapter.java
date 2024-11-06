@@ -33,5 +33,11 @@ public class ReviewPersistenceAdapter {
                 .map(ReviewMapper::toDomain);
     }
 
+    public ReviewDomain save(ReviewDomain reviewDomain){
+        ReviewEntity reviewEntity = ReviewMapper.toEntity(reviewDomain);
+        ReviewEntity savedEntity = reviewRepository.save(reviewEntity);
+        return ReviewMapper.toDomain(savedEntity);
+    }
+
 
 }
