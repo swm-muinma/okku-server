@@ -35,7 +35,6 @@ public class PickService {
     private final UserPersistenceAdapter userPersistenceAdapter;
     private final ItemPersistenceAdapter itemPersistenceAdapter;
     private final FittingPersistenceAdapter fittingPersistenceAdapter;
-
     private final ReviewPersistenceAdapter reviewPersistenceAdapter;
     private final Utils utils;
 
@@ -121,8 +120,14 @@ public class PickService {
 
         // Loop through each review in the list
         for (JsonNode reviewNode : listNode) {
+            // Extract user nickname
             String userNickName = reviewNode.path("userProfileInfo").path("userNickName").asText();
-            int grade = reviewNode.path("grade").asInt();
+
+            // Extract grade (convert from String to int)
+            String gradeStr = reviewNode.path("grade").asText();
+            int grade = gradeStr.isEmpty() ? 0 : Integer.parseInt(gradeStr);
+
+            // Extract content
             String content = reviewNode.path("content").asText();
 
             // Extract all image URLs from the "images" array
@@ -149,6 +154,27 @@ public class PickService {
         return reviewDetailDomains;
     }
 
+
+    public Boolean isLastPageFromZigzag(String jsonData, Integer page){
+        System.out.println(jsonData);
+        // JSON parser setup
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = null;
+        try {
+            rootNode = mapper.readTree(jsonData);
+        } catch (Exception e) {
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR, new TraceId());
+        }
+
+        JsonNode dataNode = rootNode.path("data");
+        JsonNode feedListNode = dataNode.path("feed_list");
+        Integer totalCount = feedListNode.path("total_count").asInt();
+        if((totalCount/100)<=page){
+            return true;
+        }
+        return false;
+    }
+
     public List<ReviewDetailDomain> getReviewDetailDomainsFromZigzag(String jsonData) {
 
         // JSON parser setup
@@ -160,20 +186,17 @@ public class PickService {
             throw new ErrorDomain(ErrorCode.SCRAPER_ERROR, new TraceId());
         }
 
-        // Traverse the node to find review data
         JsonNode dataNode = rootNode.path("data");
         JsonNode feedListNode = dataNode.path("feed_list");
         JsonNode itemListNode = feedListNode.path("item_list");
+        int totalCount = feedListNode.path("total_count").asInt();
 
-        // List to store reviews
         List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
 
-        // Loop through each review item
         for (JsonNode reviewNode : itemListNode) {
             String contents = reviewNode.path("contents").asText();
             int point = reviewNode.path("rating").asInt();
 
-            // Get attachment URLs (images)
             JsonNode attachmentListNode = reviewNode.path("attachment_list");
             List<String> imageUrls = new ArrayList<>();
             if (attachmentListNode.isArray()) {
@@ -195,7 +218,6 @@ public class PickService {
         return reviewDetailDomains;
     }
 
-
     public static String extractValidUrl(String input) {
         String urlPattern = "(https?://\\S+)(\\s|$)";
         Pattern pattern = Pattern.compile(urlPattern);
@@ -204,7 +226,6 @@ public class PickService {
         if (matcher.find()) {
             return matcher.group(1);
         }
-
         return null;
     }
 
@@ -221,7 +242,11 @@ public class PickService {
             reviewDetailDomains = this.getReviewDetailDomainsFromMusinsa(request.getData().get(0));
         }
         if(platform.equals("zigzag")){
-            reviewDetailDomains = this.getReviewDetailDomainsFromZigzag(request.getData().get(0));
+            for(String data : request.getData()){
+                List<ReviewDetailDomain> reviewsFromCurrentData = this.getReviewDetailDomainsFromZigzag(data);
+
+                reviewDetailDomains.addAll(reviewsFromCurrentData);
+            }
         }
         if(platform.equals("wconcept")){}
 
@@ -249,20 +274,40 @@ public class PickService {
         String platform = request.getPlatform();
         String pk = request.getPk();
         Integer page = request.getPage();
-        RequestBodyDto requestBody = RequestBodyDto.builder()
-                .method("post")
-                .type("application/json")
-                .data(this.createZigzagGraphQLRequest(pk))
-                .build();
+        String url = "";
+        RequestBodyDto requestBody = RequestBodyDto.builder().build();
+        System.out.println(request.getData());
+
+        Boolean lastPage = true;
+        if(request.getPlatform().equals("zigzag")){
+            requestBody = RequestBodyDto.builder()
+                    .method("post")
+                    .type("application/json")
+                    .data(this.createZigzagGraphQLRequest(pk,page))
+                    .build();
+            url="https://api.zigzag.kr/api/2/graphql/batch/GetNormalReviewFeedList";
+            lastPage=this.isLastPageFromZigzag(request.getData(),page);
+        }
+        if(request.getPlatform().equals("29cm")){
+
+        }
+        if(request.getPlatform().equals("musinsa")){
+
+        }
+        if(request.getPlatform().equals("wconcept")){
+
+        }
+
         GetNextPageForRawReviewsResponseDto response = GetNextPageForRawReviewsResponseDto.builder()
-                .urlForRawReviews("https://api.zigzag.kr/api/2/graphql/batch/GetNormalReviewFeedList")
-                .lastPage(true)
+                .urlForRawReviews(url)
+                .lastPage(lastPage)
                 .requestBody(requestBody)
                 .page(page)
                 .traceId(traceId.getId())
                 .platform(platform)
                 .pk(pk)
                 .build();
+
         return response;
     }
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
@@ -284,16 +329,16 @@ public class PickService {
                 .build();
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
-            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
         }
         if(savedPick.getPlatform().getName().equals("musinsa")){
-            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,true);
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
         }
         if(savedPick.getPlatform().getName().equals("29cm")){
-            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,true);
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
         }
         if(savedPick.getPlatform().getName().equals("wconcept")){
-            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
         }
 
         return tempResponse;
@@ -305,7 +350,7 @@ public class PickService {
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("post")
                 .type("application/json")
-                .data(this.createZigzagGraphQLRequest(pk))
+                .data(this.createZigzagGraphQLRequest(pk,page))
                 .build();
         response.setRequestBody(requestBody);
         response.setPage(page);
@@ -355,19 +400,19 @@ public class PickService {
         return response;
     }
 
-    private Map<String, Object> createZigzagGraphQLRequest(String pk) {
+    private Map<String, Object> createZigzagGraphQLRequest(String pk,Integer page) {
         Map<String, Object> variables = new HashMap<>();
         // 동적 요청 바디를 위한 Map 생성
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("operationName", "GetNormalReviewFeedList");
         requestBody.put("query", "query GetNormalReviewFeedList($product_id: ID!, $limit_count: Int, $skip_count: Int, $order: ProductReviewListOrderType) { feed_list: product_review_list(product_id: $product_id, limit_count: $limit_count, skip_count: $skip_count, order: $order) { total_count item_list { id contents date_created rating attachment_list { original_url thumbnail_url } reviewer { profile { nickname } } } } }");
         requestBody.put("variables", variables);
-
+        Integer skipCount = (page-1)*100;
         try {
             variables.put("order", "BEST_SCORE_DESC");
             variables.put("limit_count", 100);
             variables.put("product_id", pk);
-            variables.put("skip_count", 0);
+            variables.put("skip_count", skipCount);
 
             // JSON 문자열로 변환
             return requestBody;

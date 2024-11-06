@@ -66,7 +66,6 @@ public class PickController {
         return ResponseEntity.ok(pick);
     }
 
-
     @PostMapping("/v1/raw-reviews/submit")
     public ResponseEntity<SubmitRawReviewsResponseDto> submitRawReviews(
             @AuthenticationPrincipal UserDetails userDetails,
