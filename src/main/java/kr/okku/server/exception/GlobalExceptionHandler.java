@@ -13,13 +13,15 @@ public class GlobalExceptionHandler {
         Sentry.configureScope(scope -> {
             scope.setExtra("TraceId", ex.getTraceId());
         });
-        Sentry.captureException(ex);
+//        Sentry.captureException(ex);
+        ex.printStackTrace();  // 스
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.valueOf(ex.getStatusCode()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
-        Sentry.captureException(ex);
+//        Sentry.captureException(ex);
+        ex.printStackTrace();  // 스
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

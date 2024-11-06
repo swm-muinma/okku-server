@@ -1,5 +1,6 @@
 package kr.okku.server.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.okku.server.adapters.persistence.*;
 import kr.okku.server.adapters.scraper.ScraperAdapter;
@@ -34,11 +35,13 @@ public class PickService {
     private final UserPersistenceAdapter userPersistenceAdapter;
     private final ItemPersistenceAdapter itemPersistenceAdapter;
     private final FittingPersistenceAdapter fittingPersistenceAdapter;
+
+    private final ReviewPersistenceAdapter reviewPersistenceAdapter;
     private final Utils utils;
 
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, Utils utils
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ReviewPersistenceAdapter reviewPersistenceAdapter, Utils utils
                      ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
@@ -46,8 +49,152 @@ public class PickService {
         this.userPersistenceAdapter = userPersistenceAdapter;
         this.itemPersistenceAdapter = itemPersistenceAdapter;
         this.fittingPersistenceAdapter = fittingPersistenceAdapter;
+        this.reviewPersistenceAdapter = reviewPersistenceAdapter;
         this.utils = utils;
     }
+
+    public List<ReviewDetailDomain> getReviewDetailDomainsFrom29cm(String jsonData) {
+        // JSON 파서 설정
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = null;
+        try {
+            rootNode = mapper.readTree(jsonData);
+        } catch (Exception e) {
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR, new TraceId());
+        }
+
+        // 리뷰 데이터를 포함하는 노드 탐색
+        JsonNode dataNode = rootNode.path("data");
+        JsonNode resultsNode = dataNode.path("results");
+
+        // 전체 리뷰 개수 출력
+        int totalReviewCount = dataNode.path("count").asInt();
+        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+
+        // 개별 리뷰 정보 출력
+        for (JsonNode reviewNode : resultsNode) {
+            String userId = reviewNode.path("userId").asText();
+            int point = reviewNode.path("point").asInt();
+            String contents = reviewNode.path("contents").asText();
+
+            // uploadFiles 배열의 이미지 URL 가져오기 (null 체크 포함)
+            JsonNode uploadFilesNode = reviewNode.path("uploadFiles");
+            List<String> imageUrls = new ArrayList<>();
+
+            if (uploadFilesNode.isArray()) {
+                for (JsonNode fileNode : uploadFilesNode) {
+                    String url = fileNode.path("url").asText();  // 각 파일의 URL을 가져옴
+                    if (!url.isEmpty()) {
+                        imageUrls.add(url);  // 리스트에 추가
+                    }
+                }
+            }
+
+            ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
+                    .content(contents)
+                    .rating(point)
+                    .imageUrl(imageUrls)  // 이미지 URL 리스트를 전달
+                    .build();
+
+            reviewDetailDomains.add(reviewDetailDomain);
+        }
+
+        return reviewDetailDomains;
+    }
+
+    public List<ReviewDetailDomain> getReviewDetailDomainsFromMusinsa(String jsonData) {
+
+        // JSON parser setup
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode;
+        try {
+            rootNode = mapper.readTree(jsonData);
+        } catch (Exception e) {
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR, new TraceId());
+        }
+
+        // Access the list of reviews
+        JsonNode dataNode = rootNode.path("data");
+        JsonNode listNode = dataNode.path("list");
+
+        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+
+        // Loop through each review in the list
+        for (JsonNode reviewNode : listNode) {
+            String userNickName = reviewNode.path("userProfileInfo").path("userNickName").asText();
+            int grade = reviewNode.path("grade").asInt();
+            String content = reviewNode.path("content").asText();
+
+            // Extract all image URLs from the "images" array
+            List<String> imageUrls = new ArrayList<>();
+            JsonNode imagesNode = reviewNode.path("images");
+            if (imagesNode.isArray()) {
+                for (JsonNode imageNode : imagesNode) {
+                    String imageUrl = imageNode.path("imageUrl").asText();
+                    if (!imageUrl.isEmpty()) {
+                        imageUrls.add(imageUrl);
+                    }
+                }
+            }
+
+            // Create a ReviewDetailDomain object and add to the list
+            ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
+                    .content(content)
+                    .rating(grade)
+                    .imageUrl(imageUrls)
+                    .build();
+            reviewDetailDomains.add(reviewDetailDomain);
+        }
+
+        return reviewDetailDomains;
+    }
+
+    public List<ReviewDetailDomain> getReviewDetailDomainsFromZigzag(String jsonData) {
+
+        // JSON parser setup
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode rootNode = null;
+        try {
+            rootNode = mapper.readTree(jsonData);
+        } catch (Exception e) {
+            throw new ErrorDomain(ErrorCode.SCRAPER_ERROR, new TraceId());
+        }
+
+        // Traverse the node to find review data
+        JsonNode dataNode = rootNode.path("data");
+        JsonNode feedListNode = dataNode.path("feed_list");
+        JsonNode itemListNode = feedListNode.path("item_list");
+
+        // List to store reviews
+        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+
+        // Loop through each review item
+        for (JsonNode reviewNode : itemListNode) {
+            String contents = reviewNode.path("contents").asText();
+            int point = reviewNode.path("rating").asInt();
+
+            // Get attachment URLs (images)
+            JsonNode attachmentListNode = reviewNode.path("attachment_list");
+            List<String> imageUrls = new ArrayList<>();
+            if (attachmentListNode.isArray()) {
+                for (JsonNode fileNode : attachmentListNode) {
+                    String originalUrl = fileNode.path("original_url").asText();
+                    imageUrls.add(originalUrl);
+                }
+            }
+
+            // Create ReviewDetailDomain and add to the list
+            ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
+                    .content(contents)
+                    .rating(point)
+                    .imageUrl(imageUrls)
+                    .build();
+            reviewDetailDomains.add(reviewDetailDomain);
+        }
+
+        return reviewDetailDomains;
+    }
+
 
     public static String extractValidUrl(String input) {
         String urlPattern = "(https?://\\S+)(\\s|$)";
@@ -64,6 +211,29 @@ public class PickService {
     public SubmitRawReviewsResponseDto submitRawReviews(TraceId traceId, SubmitRawReviewsRequestDto request){
         String pk = request.getPk();
         String platform = request.getPlatform();
+
+        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+        System.out.println(request.getData().get(0));
+        if(platform.equals("29cm")){
+            reviewDetailDomains = this.getReviewDetailDomainsFrom29cm(request.getData().get(0));
+        }
+        if(platform.equals("musinsa")){
+            reviewDetailDomains = this.getReviewDetailDomainsFromMusinsa(request.getData().get(0));
+        }
+        if(platform.equals("zigzag")){
+            reviewDetailDomains = this.getReviewDetailDomainsFromZigzag(request.getData().get(0));
+        }
+        if(platform.equals("wconcept")){}
+
+        ReviewDomain reviewDomain = ReviewDomain.builder()
+                .reviews(reviewDetailDomains)
+                .productKey(pk)
+                .isDoneScrapeReviews(true)
+                .platform(platform)
+                .build();
+
+        ReviewDomain savedReviewDomain = reviewPersistenceAdapter.save(reviewDomain);
+        System.out.println(savedReviewDomain);
 
         SubmitRawReviewsResponseDto response = SubmitRawReviewsResponseDto.builder()
                 .pk(pk)
@@ -98,7 +268,7 @@ public class PickService {
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         PickDomain savedPick = this.createPick(traceId, userId,requestDto);
 
-        CreatePickResponseDto response = CreatePickResponseDto.builder()
+        CreatePickResponseDto tempResponse = CreatePickResponseDto.builder()
                 .id(savedPick.getId())
                 .pk(savedPick.getPk())
                 .brand(savedPick.getBrand())
@@ -113,21 +283,79 @@ public class PickService {
                 .name(savedPick.getName())
                 .build();
 
+        if(savedPick.getPlatform().getName().equals("zigzag")){
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+        }
+        if(savedPick.getPlatform().getName().equals("musinsa")){
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,true);
+        }
+        if(savedPick.getPlatform().getName().equals("29cm")){
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,true);
+        }
+        if(savedPick.getPlatform().getName().equals("wconcept")){
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+        }
+
+        return tempResponse;
+    }
+
+    private CreatePickResponseDto createZigzagRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page,Boolean isLast){
         response.setUrlForRawReviews("https://api.zigzag.kr/api/2/graphql/batch/GetNormalReviewFeedList");
-        response.setLastPage(true);
+        response.setLastPage(isLast);
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("post")
                 .type("application/json")
-                .data(this.createZigzagGraphQLRequest(savedPick.getPk()))
+                .data(this.createZigzagGraphQLRequest(pk))
                 .build();
         response.setRequestBody(requestBody);
-        response.setPage(1);
-        response.setTraceId(traceId.getId());
+        response.setPage(page);
+        response.setTraceId(traceId);
         return response;
     }
 
-    public Map<String, Object> createZigzagGraphQLRequest(String pk) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private CreatePickResponseDto createMusinsaRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page, Boolean isLast){
+        response.setUrlForRawReviews("https://goods.musinsa.com/api2/review/v1/view/list?page=0&pageSize=100000&goodsNo="+pk+"&sort=up_cnt_desc");
+        response.setLastPage(isLast);
+        RequestBodyDto requestBody = RequestBodyDto.builder()
+                .method("get")
+                .type("application/json")
+                .data(null)
+                .build();
+        response.setRequestBody(requestBody);
+        response.setPage(page);
+        response.setTraceId(traceId);
+        return response;
+    }
+
+    private CreatePickResponseDto create29cmRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page,Boolean isLast){
+        response.setUrlForRawReviews("https://review-api.29cm.co.kr/api/v4/reviews?itemId="+pk+"&page=0&size=100000");
+        response.setLastPage(isLast);
+        RequestBodyDto requestBody = RequestBodyDto.builder()
+                .method("get")
+                .type("application/json")
+                .data(null)
+                .build();
+        response.setRequestBody(requestBody);
+        response.setPage(page);
+        response.setTraceId(traceId);
+        return response;
+    }
+
+    private CreatePickResponseDto createWconceptRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page,Boolean isLast){
+        response.setUrlForRawReviews("https://www.wconcept.co.kr/Ajax/ProductReViewList");
+        response.setLastPage(isLast);
+        RequestBodyDto requestBody = RequestBodyDto.builder()
+                .method("post")
+                .type("multipart/form-data")
+                .data(this.createWconceptFormdataRequest(pk,page))
+                .build();
+        response.setRequestBody(requestBody);
+        response.setPage(page);
+        response.setTraceId(traceId);
+        return response;
+    }
+
+    private Map<String, Object> createZigzagGraphQLRequest(String pk) {
         Map<String, Object> variables = new HashMap<>();
         // 동적 요청 바디를 위한 Map 생성
         Map<String, Object> requestBody = new HashMap<>();
@@ -136,14 +364,28 @@ public class PickService {
         requestBody.put("variables", variables);
 
         try {
-
-
             variables.put("order", "BEST_SCORE_DESC");
-            variables.put("limit_count", 100000);
+            variables.put("limit_count", 100);
             variables.put("product_id", pk);
             variables.put("skip_count", 0);
 
             // JSON 문자열로 변환
+            return requestBody;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create JSON request body", e);
+        }
+    }
+
+    private Map<String, Object> createWconceptFormdataRequest(String pk, Integer page) {
+        Map<String, Object> variables = new HashMap<>();
+        // 동적 요청 바디를 위한 Map 생성
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("itemcd", pk);
+        requestBody.put("pageIndex", page);
+        requestBody.put("order", 1);
+        requestBody.put("mediumcd", "M33439436");
+
+        try {
             return requestBody;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create JSON request body", e);
