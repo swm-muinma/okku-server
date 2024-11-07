@@ -554,6 +554,7 @@ public class PickService {
 
         if(scrapedCachData.isEmpty()) {
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(traceId,url);
+            System.out.println(scrapedRawData);
             scrapedData = scrapedRawData.orElseGet(() -> {
                 try {
                     Document document = Jsoup.connect(url).get();
