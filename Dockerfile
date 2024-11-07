@@ -7,9 +7,11 @@ COPY . .
 ARG SENTRY_AUTH_TOKEN
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
-# Make gradlew executable and disable file system watching
-RUN chmod +x gradlew
-RUN ./gradlew clean build --no-daemon --stacktrace --info -Dorg.gradle.vfs.watch=false
+# Build the application using Gradle
+RUN ./gradlew clean build --no-daemon --stacktrace --info
+
+# Uncomment if using Maven instead
+# RUN ./mvnw clean package -DskipTests
 
 # Second stage: Run the application
 FROM bellsoft/liberica-openjdk-alpine:17
