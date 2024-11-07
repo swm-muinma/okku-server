@@ -38,13 +38,7 @@ public class ScraperAdapter {
                     .fittingPart(response.getFitting_part())
                     .build());
         } catch (Exception e) {
-            Sentry.withScope(scope -> {
-                scope.setExtra("url", url);
-                scope.setExtra("traceId", traceId.getId());
-                scope.setExtra("error_message", e.getMessage());
-                Sentry.captureException(e);
-            });
-            return Optional.ofNullable(null);
+            return Optional.empty();
         }
     }
 

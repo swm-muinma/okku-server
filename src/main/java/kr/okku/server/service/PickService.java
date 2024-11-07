@@ -166,7 +166,6 @@ public class PickService {
         return Math.max(rating, 1);
     }
 
-
     public List<ReviewDetailDomain> getReviewDetailDomainsFromMusinsa(String jsonData) {
 
         // JSON parser setup
@@ -203,7 +202,7 @@ public class PickService {
                 for (JsonNode imageNode : imagesNode) {
                     String imageUrl = imageNode.path("imageUrl").asText();
                     if (!imageUrl.isEmpty()) {
-                        imageUrls.add(imageUrl);
+                        imageUrls.add("https://image.msscdn.net/thumbnails"+imageUrl);
                     }
                 }
             }
@@ -238,10 +237,18 @@ public class PickService {
         if((totalCount/100)<=page){
             return true;
         }
+        if(page>5) {
+            return true;
+        }
+
         return false;
     }
 
-    public Boolean isLastPageFromWconcept(String html){
+    public Boolean isLastPageFromWconcept(String html, Integer page){
+        if(page>83){
+            return true;
+        }
+
         Document doc = Jsoup.parse(html);
 
         // "no_data" 클래스가 있는 요소를 찾음
@@ -381,10 +388,10 @@ public class PickService {
             requestBody = RequestBodyDto.builder()
                     .method("post")
                     .type("multipart/form-data")
-                    .data(this.createZigzagGraphQLRequest(pk,page))
+                    .data(this.createWconceptFormdataRequest(pk,page))
                     .build();
             url="https://www.wconcept.co.kr/Ajax/ProductReViewList";
-            lastPage=this.isLastPageFromWconcept(request.getData());
+            lastPage=this.isLastPageFromWconcept(request.getData(),page);
         }
 
         GetNextPageForRawReviewsResponseDto response = GetNextPageForRawReviewsResponseDto.builder()
@@ -401,6 +408,8 @@ public class PickService {
     }
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         PickDomain savedPick = this.createPick(traceId, userId,requestDto);
+        String platform = savedPick.getPlatform().getName();
+        String pk = savedPick.getPk();
 
         CreatePickResponseDto tempResponse = CreatePickResponseDto.builder()
                 .id(savedPick.getId())
@@ -416,18 +425,23 @@ public class PickService {
                 .platform(savedPick.getPlatform())
                 .name(savedPick.getName())
                 .build();
+        Optional<ReviewDomain> reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(pk,platform);
+        Boolean isLast = false;
+        if(!reviewDomain.isEmpty()){
+            isLast=true;
+        }
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
-            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
         if(savedPick.getPlatform().getName().equals("musinsa")){
-            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
         if(savedPick.getPlatform().getName().equals("29cm")){
-            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
         if(savedPick.getPlatform().getName().equals("wconcept")){
-            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
 
         return tempResponse;
@@ -448,7 +462,7 @@ public class PickService {
     }
 
     private CreatePickResponseDto createMusinsaRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page, Boolean isLast){
-        response.setUrlForRawReviews("https://goods.musinsa.com/api2/review/v1/view/list?page=0&pageSize=100000&goodsNo="+pk+"&sort=up_cnt_desc");
+        response.setUrlForRawReviews("https://goods.musinsa.com/api2/review/v1/view/list?page=0&pageSize=500&goodsNo="+pk+"&sort=up_cnt_desc");
         response.setLastPage(isLast);
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("get")
@@ -462,7 +476,7 @@ public class PickService {
     }
 
     private CreatePickResponseDto create29cmRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page,Boolean isLast){
-        response.setUrlForRawReviews("https://review-api.29cm.co.kr/api/v4/reviews?itemId="+pk+"&page=0&size=100000");
+        response.setUrlForRawReviews("https://review-api.29cm.co.kr/api/v4/reviews?itemId="+pk+"&page=0&size=500");
         response.setLastPage(isLast);
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("get")
@@ -540,6 +554,7 @@ public class PickService {
 
         if(scrapedCachData.isEmpty()) {
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(traceId,url);
+            System.out.println(scrapedRawData);
             scrapedData = scrapedRawData.orElseGet(() -> {
                 try {
                     Document document = Jsoup.connect(url).get();
@@ -568,6 +583,7 @@ public class PickService {
                             scrapedData.getPlatform(),
                             1
                     );
+
             } else {
                     Integer pickNum = itemPersistenceAdapter.getPickNum(platformName,productPk);
                     itemPersistenceAdapter.update(

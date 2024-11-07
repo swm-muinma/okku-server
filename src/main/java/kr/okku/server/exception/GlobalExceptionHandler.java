@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex) {
         Sentry.captureException(ex);
-//        ex.printStackTrace();
+        ex.printStackTrace();
         return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -29,8 +29,9 @@ public class ReviewPersistenceAdapter {
     }
 
     public Optional<ReviewDomain> findByProductPkAndPlatform(String productPk, String platform) {
-        return reviewRepository.findByPlatformAndProductKey(platform, productPk)
-                .map(ReviewMapper::toDomain);
+        List<ReviewEntity> reviewEntities = reviewRepository.findByPlatformAndProductKey(platform, productPk);
+
+        return reviewEntities.isEmpty() ? Optional.empty() : Optional.ofNullable(ReviewMapper.toDomain(reviewEntities.get(0)));
     }
 
     public ReviewDomain save(ReviewDomain reviewDomain){
@@ -38,6 +39,5 @@ public class ReviewPersistenceAdapter {
         ReviewEntity savedEntity = reviewRepository.save(reviewEntity);
         return ReviewMapper.toDomain(savedEntity);
     }
-
 
 }
