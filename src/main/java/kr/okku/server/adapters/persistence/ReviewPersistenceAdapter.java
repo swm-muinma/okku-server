@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class ReviewPersistenceAdapter {
     private final ReviewRepository reviewRepository;
 
-    // PickRepository 의존성 주입
     public ReviewPersistenceAdapter(ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
     }

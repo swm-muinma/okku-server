@@ -104,55 +104,58 @@ public class PickService {
     }
 
     public List<ReviewDetailDomain> getReviewDetailDomainsFromWconcept(String html){
-        Document doc = Jsoup.parse(html);
+        try {
+            Document doc = Jsoup.parse(html);
 
-        List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
+            List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
 
-        Elements reviewRows = doc.select("tr");
+            Elements reviewRows = doc.select("tr");
 
-        for (Element reviewRow : reviewRows) {
-            // Extract rating stars
-            Elements starRating = reviewRow.select(".star-grade > strong");
-            Integer rating = this.convertWidthToRating(starRating.attr("style"));  // rating might be based on the width percentage
+            for (Element reviewRow : reviewRows) {
+                // Extract rating stars
+                Elements starRating = reviewRow.select(".star-grade > strong");
+                Integer rating = this.convertWidthToRating(starRating.attr("style"));  // rating might be based on the width percentage
 
-            // Extract product options
-            Elements productOptions = reviewRow.select(".pdt_review_option p span");
+                // Extract product options
+                Elements productOptions = reviewRow.select(".pdt_review_option p span");
 //            String purchaseOption = productOptions.get(0).text();  // Example: "구매옵션 : Black_L"
 //            String sizeInfo = productOptions.get(1).text(); // Example: "사이즈 정보 : 172cm,59kg,M/66,29inch"
 
-            // Extract review date and reviewer info
-            Elements reviewerInfo = reviewRow.select(".product_review_info_right > em");
+                // Extract review date and reviewer info
+                Elements reviewerInfo = reviewRow.select(".product_review_info_right > em");
 //            String reviewer = reviewerInfo.text();  // Reviewer: sm********
 //            String reviewDate = reviewRow.select(".product_review_info_right > span").text();  // Date: 2024.11.06
 
-            // Extract review text
-            String reviewText = reviewRow.select(".pdt_review_text").text();  // Review content
+                // Extract review text
+                String reviewText = reviewRow.select(".pdt_review_text").text();  // Review content
 
-            // Extract images associated with the review
-            Elements images = reviewRow.select(".pdt_review_photo img");
-            List<String> imageUrls = new ArrayList<>();
-            for (Element image : images) {
-                String imageUrl = image.attr("src");
-                imageUrls.add(imageUrl);
-                System.out.println("Image URL: " + imageUrl);
-            }
+                // Extract images associated with the review
+                Elements images = reviewRow.select(".pdt_review_photo img");
+                List<String> imageUrls = new ArrayList<>();
+                for (Element image : images) {
+                    String imageUrl = image.attr("src");
+                    imageUrls.add(imageUrl);
+                }
 
-            // Print extracted review details
-            System.out.println("Rating: " + rating);
+                // Print extracted review details
+//                System.out.println("Rating: " + rating);
 //            System.out.println("Purchase Option: " + purchaseOption);
 //            System.out.println("Size Info: " + sizeInfo);
 //            System.out.println("Reviewer: " + reviewer);
 //            System.out.println("Review Date: " + reviewDate);
-            System.out.println("Review Text: " + reviewText);
-            System.out.println("---");
-            ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
-                    .rating(Integer.valueOf(rating))
-                    .content(reviewText)
-                    .imageUrl(imageUrls)
-                    .build();
-            reviewDetailDomains.add(reviewDetailDomain);
+//                System.out.println("Review Text: " + reviewText);
+//                System.out.println("---");
+                ReviewDetailDomain reviewDetailDomain = ReviewDetailDomain.builder()
+                        .rating(Integer.valueOf(rating))
+                        .content(reviewText)
+                        .imageUrl(imageUrls)
+                        .build();
+                reviewDetailDomains.add(reviewDetailDomain);
+            }
+            return reviewDetailDomains;
+        }catch (Exception ex){
+            return new ArrayList<>();
         }
-        return reviewDetailDomains;
     }
 
     private static int convertWidthToRating(String widthString) {
@@ -221,7 +224,7 @@ public class PickService {
 
 
     public Boolean isLastPageFromZigzag(String jsonData, Integer page){
-        System.out.println(jsonData);
+//        System.out.println(jsonData);
         // JSON parser setup
         ObjectMapper mapper = new ObjectMapper();
         JsonNode rootNode = null;
@@ -317,7 +320,7 @@ public class PickService {
         String platform = request.getPlatform();
 
         List<ReviewDetailDomain> reviewDetailDomains = new ArrayList<>();
-        System.out.println(request.getData().get(0));
+//        System.out.println(request.getData().get(0));
         if(platform.equals("29cm")){
             reviewDetailDomains = this.getReviewDetailDomainsFrom29cm(request.getData().get(0));
         }
@@ -346,7 +349,6 @@ public class PickService {
                 .build();
 
         ReviewDomain savedReviewDomain = reviewPersistenceAdapter.save(reviewDomain);
-        System.out.println(savedReviewDomain);
 
         String status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
 
@@ -366,7 +368,6 @@ public class PickService {
         Integer page = request.getPage();
         String url = "";
         RequestBodyDto requestBody = RequestBodyDto.builder().build();
-        System.out.println(request.getData());
 
         Boolean lastPage = true;
         if(request.getPlatform().equals("zigzag")){
@@ -406,6 +407,7 @@ public class PickService {
 
         return response;
     }
+
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         PickDomain savedPick = this.createPick(traceId, userId,requestDto);
         String platform = savedPick.getPlatform().getName();
@@ -425,7 +427,9 @@ public class PickService {
                 .platform(savedPick.getPlatform())
                 .name(savedPick.getName())
                 .build();
+
         Optional<ReviewDomain> reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(pk,platform);
+
         Boolean isLast = false;
         if(!reviewDomain.isEmpty()){
             isLast=true;
@@ -434,12 +438,15 @@ public class PickService {
         if(savedPick.getPlatform().getName().equals("zigzag")){
             return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
+
         if(savedPick.getPlatform().getName().equals("musinsa")){
             return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
+
         if(savedPick.getPlatform().getName().equals("29cm")){
             return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
+
         if(savedPick.getPlatform().getName().equals("wconcept")){
             return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
@@ -554,7 +561,6 @@ public class PickService {
 
         if(scrapedCachData.isEmpty()) {
             Optional<ScrapedDataDomain> scrapedRawData = scraperAdapter.scrape(traceId,url);
-            System.out.println(scrapedRawData);
             scrapedData = scrapedRawData.orElseGet(() -> {
                 try {
                     Document document = Jsoup.connect(url).get();
@@ -742,13 +748,11 @@ public class PickService {
     @Transactional
     public List<String> addToCart(TraceId traceId,List<String> pickIds, String cartId, BasicRequestDto requestDto) {
         checkPickIdExist(traceId,pickIds, requestDto);
-        System.out.println(requestDto);
         CartDomain cart = cartPersistenceAdapter.findById(cartId).orElseThrow(() -> new ErrorDomain(ErrorCode.CART_NOT_EXIST,traceId));
 
         cart.addPicks(pickIds);
 
         CartDomain updatedCart = cartPersistenceAdapter.save(cart);
-        System.out.println(updatedCart);
 
         return updatedCart.getPickItemIds();
     }
