@@ -237,10 +237,18 @@ public class PickService {
         if((totalCount/100)<=page){
             return true;
         }
+        if(page>5) {
+            return true;
+        }
+
         return false;
     }
 
-    public Boolean isLastPageFromWconcept(String html){
+    public Boolean isLastPageFromWconcept(String html, Integer page){
+        if(page>83){
+            return true;
+        }
+
         Document doc = Jsoup.parse(html);
 
         // "no_data" 클래스가 있는 요소를 찾음
@@ -383,7 +391,7 @@ public class PickService {
                     .data(this.createWconceptFormdataRequest(pk,page))
                     .build();
             url="https://www.wconcept.co.kr/Ajax/ProductReViewList";
-            lastPage=this.isLastPageFromWconcept(request.getData());
+            lastPage=this.isLastPageFromWconcept(request.getData(),page);
         }
 
         GetNextPageForRawReviewsResponseDto response = GetNextPageForRawReviewsResponseDto.builder()
@@ -454,7 +462,7 @@ public class PickService {
     }
 
     private CreatePickResponseDto createMusinsaRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page, Boolean isLast){
-        response.setUrlForRawReviews("https://goods.musinsa.com/api2/review/v1/view/list?page=0&pageSize=100000&goodsNo="+pk+"&sort=up_cnt_desc");
+        response.setUrlForRawReviews("https://goods.musinsa.com/api2/review/v1/view/list?page=0&pageSize=500&goodsNo="+pk+"&sort=up_cnt_desc");
         response.setLastPage(isLast);
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("get")
@@ -468,7 +476,7 @@ public class PickService {
     }
 
     private CreatePickResponseDto create29cmRequestBody(CreatePickResponseDto response, String pk, String traceId, Integer page,Boolean isLast){
-        response.setUrlForRawReviews("https://review-api.29cm.co.kr/api/v4/reviews?itemId="+pk+"&page=0&size=100000");
+        response.setUrlForRawReviews("https://review-api.29cm.co.kr/api/v4/reviews?itemId="+pk+"&page=0&size=500");
         response.setLastPage(isLast);
         RequestBodyDto requestBody = RequestBodyDto.builder()
                 .method("get")
