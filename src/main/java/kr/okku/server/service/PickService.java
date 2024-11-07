@@ -166,7 +166,6 @@ public class PickService {
         return Math.max(rating, 1);
     }
 
-
     public List<ReviewDetailDomain> getReviewDetailDomainsFromMusinsa(String jsonData) {
 
         // JSON parser setup
@@ -203,7 +202,7 @@ public class PickService {
                 for (JsonNode imageNode : imagesNode) {
                     String imageUrl = imageNode.path("imageUrl").asText();
                     if (!imageUrl.isEmpty()) {
-                        imageUrls.add(imageUrl);
+                        imageUrls.add("https://image.msscdn.net/thumbnails"+imageUrl);
                     }
                 }
             }
@@ -381,7 +380,7 @@ public class PickService {
             requestBody = RequestBodyDto.builder()
                     .method("post")
                     .type("multipart/form-data")
-                    .data(this.createZigzagGraphQLRequest(pk,page))
+                    .data(this.createWconceptFormdataRequest(pk,page))
                     .build();
             url="https://www.wconcept.co.kr/Ajax/ProductReViewList";
             lastPage=this.isLastPageFromWconcept(request.getData());
@@ -401,6 +400,8 @@ public class PickService {
     }
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
         PickDomain savedPick = this.createPick(traceId, userId,requestDto);
+        String platform = savedPick.getPlatform().getName();
+        String pk = savedPick.getPk();
 
         CreatePickResponseDto tempResponse = CreatePickResponseDto.builder()
                 .id(savedPick.getId())
@@ -416,18 +417,23 @@ public class PickService {
                 .platform(savedPick.getPlatform())
                 .name(savedPick.getName())
                 .build();
+        Optional<ReviewDomain> reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(pk,platform);
+        Boolean isLast = false;
+        if(!reviewDomain.isEmpty()){
+            isLast=true;
+        }
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
-            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
         if(savedPick.getPlatform().getName().equals("musinsa")){
-            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
         if(savedPick.getPlatform().getName().equals("29cm")){
-            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,false);
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
         }
         if(savedPick.getPlatform().getName().equals("wconcept")){
-            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,false);
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
         }
 
         return tempResponse;
@@ -568,6 +574,7 @@ public class PickService {
                             scrapedData.getPlatform(),
                             1
                     );
+
             } else {
                     Integer pickNum = itemPersistenceAdapter.getPickNum(platformName,productPk);
                     itemPersistenceAdapter.update(

@@ -44,7 +44,7 @@ public class ScraperAdapter {
                 scope.setExtra("error_message", e.getMessage());
                 Sentry.captureException(e);
             });
-            return Optional.ofNullable(null);
+            return Optional.empty();
         }
     }
 
