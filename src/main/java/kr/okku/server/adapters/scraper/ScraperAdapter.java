@@ -81,4 +81,19 @@ public class ScraperAdapter {
             return false;
         }
     }
+
+    public String crateInsight(String traceId, String pk, String platform) {
+        try {
+            CreateInsightRequestDto createInsightRequestDto = new CreateInsightRequestDto(traceId,pk,platform);
+            CreateInsightResponseDto response = scraperClientAdapter.createInsight(createInsightRequestDto);
+            return response.getStatus();
+        } catch (Exception e) {
+            Sentry.withScope(scope -> {
+                scope.setExtra("traceId", traceId);
+                scope.setExtra("error_message", e.getMessage());
+                Sentry.captureException(e);
+            });
+            return "fail";
+        }
+    }
 }

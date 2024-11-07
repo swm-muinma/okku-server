@@ -341,10 +341,12 @@ public class PickService {
         ReviewDomain savedReviewDomain = reviewPersistenceAdapter.save(reviewDomain);
         System.out.println(savedReviewDomain);
 
+        String status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
+
         SubmitRawReviewsResponseDto response = SubmitRawReviewsResponseDto.builder()
                 .pk(pk)
                 .platform(platform)
-                .status("success")
+                .status(status)
                 .traceId(traceId.getId())
                 .build();
 

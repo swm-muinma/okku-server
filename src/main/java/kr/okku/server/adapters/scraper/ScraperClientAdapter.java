@@ -22,4 +22,9 @@ public interface ScraperClientAdapter {
     ValidateResponseDto validate(
             @RequestBody ValidateRequestDto validateRequestDto
     );
+
+    @PostMapping(value = "/v2/insight", consumes = MediaType.APPLICATION_JSON_VALUE)
+    CreateInsightResponseDto createInsight(
+            @RequestBody CreateInsightRequestDto validateRequestDto
+    );
 }
