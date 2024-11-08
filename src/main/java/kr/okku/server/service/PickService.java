@@ -86,7 +86,7 @@ public class PickService {
                 for (JsonNode fileNode : uploadFilesNode) {
                     String url = fileNode.path("url").asText();  // 각 파일의 URL을 가져옴
                     if (!url.isEmpty()) {
-                        imageUrls.add(url);  // 리스트에 추가
+                        imageUrls.add("https://img.29cm.co.kr"+url);  // 리스트에 추가
                     }
                 }
             }
@@ -221,7 +221,6 @@ public class PickService {
 
         return reviewDetailDomains;
     }
-
 
     public Boolean isLastPageFromZigzag(String jsonData, Integer page){
 //        System.out.println(jsonData);
