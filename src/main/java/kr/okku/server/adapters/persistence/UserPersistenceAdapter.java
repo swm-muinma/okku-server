@@ -37,6 +37,12 @@ public class UserPersistenceAdapter {
         return UserMapper.toDomain(savedEntity);
     }
 
+
+    public Optional<String> getRole(String id) {
+        UserEntity userEntity = userRepository.findById(id).orElse(null);
+        return Optional.ofNullable(userEntity.getRole());
+    }
+
     public Optional<UserDomain> findById(String id) {
         UserEntity userEntity = userRepository.findById(id).orElse(null);
         return Optional.ofNullable(UserMapper.toDomain(userEntity));

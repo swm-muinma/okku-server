@@ -23,15 +23,20 @@ import java.util.stream.Collectors;
 public class ReviewPersistenceAdapter {
     private final ReviewRepository reviewRepository;
 
-    // PickRepository 의존성 주입
     public ReviewPersistenceAdapter(ReviewRepository reviewRepository) {
         this.reviewRepository = reviewRepository;
     }
 
     public Optional<ReviewDomain> findByProductPkAndPlatform(String productPk, String platform) {
-        return reviewRepository.findByPlatformAndProductKey(platform, productPk)
-                .map(ReviewMapper::toDomain);
+        List<ReviewEntity> reviewEntities = reviewRepository.findByPlatformAndProductKey(platform, productPk);
+
+        return reviewEntities.isEmpty() ? Optional.empty() : Optional.ofNullable(ReviewMapper.toDomain(reviewEntities.get(0)));
     }
 
+    public ReviewDomain save(ReviewDomain reviewDomain){
+        ReviewEntity reviewEntity = ReviewMapper.toEntity(reviewDomain);
+        ReviewEntity savedEntity = reviewRepository.save(reviewEntity);
+        return ReviewMapper.toDomain(savedEntity);
+    }
 
 }

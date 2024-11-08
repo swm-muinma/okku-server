@@ -34,6 +34,7 @@ public class UserMapper {
                 .userImages(Optional.ofNullable(userEntity.getUserImages()).orElse(new ArrayList<>()))
                 .singleFcmToken(Optional.ofNullable(userEntity.getSingleFcmToken())
                         .orElse("default_token"))
+                .role(userEntity.getRole() != null ? userEntity.getRole() : "user")
                 .build();
     }
 
@@ -54,6 +55,7 @@ public class UserMapper {
         userEntity.setFcmToken(userDomain.getFcmTokensForList());
         userEntity.setUserImages(userDomain.getUserImages());
         userEntity.setSingleFcmToken(userDomain.getSingleFcmToken());
+        userEntity.setRole(userDomain.getRole() != null ? userDomain.getRole() : "user");
         return userEntity;
     }
 }

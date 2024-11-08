@@ -39,6 +39,46 @@ public class PickController {
             return ResponseEntity.ok(pick);
     }
 
+    @PostMapping("/v1/new")
+    public ResponseEntity<CreatePickResponseDto> createPickForRawReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody NewPickRequestDto request
+    ) {
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/new","POST","요청 시작").toJson());
+        CreatePickResponseDto pick = pickService.createPickForRawReviews(traceId,userId, request);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/new","POST","요청 종료").toJson());
+        return ResponseEntity.ok(pick);
+    }
+
+    @PostMapping("/v1/raw-reviews")
+    public ResponseEntity<GetNextPageForRawReviewsResponseDto> getNextPageForRawReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody GetNextPageForRawReviewsRequestDto request
+    ) {
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        traceId.setId(request.getTraceId());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/raw-reviews","POST","요청 시작").toJson());
+        GetNextPageForRawReviewsResponseDto pick = pickService.getNextPageForRawReviews(traceId,request);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/raw-reviews","POST","요청 종료").toJson());
+        return ResponseEntity.ok(pick);
+    }
+
+    @PostMapping("/v1/raw-reviews/submit")
+    public ResponseEntity<SubmitRawReviewsResponseDto> submitRawReviews(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody SubmitRawReviewsRequestDto request
+    ) {
+        String userId = userDetails.getUsername();
+        TraceId traceId = new TraceId();
+        traceId.setId(request.getTraceId());
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/raw-reviews/done","POST","요청 시작").toJson());
+        SubmitRawReviewsResponseDto pick = pickService.submitRawReviews(traceId,request);
+        log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/v1/raw-reviews/done","POST","요청 종료").toJson());
+        return ResponseEntity.ok(pick);
+    }
     @PostMapping("/delete")
     public ResponseEntity<Void> deletePicks(
             @AuthenticationPrincipal UserDetails userDetails,

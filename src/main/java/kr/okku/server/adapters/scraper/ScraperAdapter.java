@@ -38,13 +38,7 @@ public class ScraperAdapter {
                     .fittingPart(response.getFitting_part())
                     .build());
         } catch (Exception e) {
-            Sentry.withScope(scope -> {
-                scope.setExtra("url", url);
-                scope.setExtra("traceId", traceId.getId());
-                scope.setExtra("error_message", e.getMessage());
-                Sentry.captureException(e);
-            });
-            return Optional.ofNullable(null);
+            return Optional.empty();
         }
     }
 
@@ -79,6 +73,21 @@ public class ScraperAdapter {
                 Sentry.captureException(e);
             });
             return false;
+        }
+    }
+
+    public String crateInsight(String traceId, String pk, String platform) {
+        try {
+            CreateInsightRequestDto createInsightRequestDto = new CreateInsightRequestDto(traceId,pk,platform);
+            CreateInsightResponseDto response = scraperClientAdapter.createInsight(createInsightRequestDto);
+            return response.getStatus();
+        } catch (Exception e) {
+            Sentry.withScope(scope -> {
+                scope.setExtra("traceId", traceId);
+                scope.setExtra("error_message", e.getMessage());
+                Sentry.captureException(e);
+            });
+            return "fail";
         }
     }
 }

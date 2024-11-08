@@ -39,6 +39,7 @@
                                                      String image, String name, Integer price, String url,Date createdAt) {
             try {
                 Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
+                System.out.println(reviews);
                 if (reviews.isEmpty()) {
                     PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
                     platformResponseDto.setName(pick.getPlatform().getName());
@@ -53,9 +54,9 @@
                             .platform(platform)
                             .build();
                 }
-
                 return createProductReviewDto(reviews, platform, pick, image, name, price, url);
             }catch (Exception e){
+                e.printStackTrace();
                 PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
                 platformResponseDto.setName(pick.getPlatform().getName());
                 ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();

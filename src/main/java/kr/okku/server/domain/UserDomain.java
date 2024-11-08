@@ -37,6 +37,8 @@ public class UserDomain {
 
     private String singleFcmToken;
 
+    private String role;
+
     private String kakaoId;
     private String appleId;
 
