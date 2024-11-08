@@ -430,9 +430,10 @@ public class PickService {
         Optional<ReviewDomain> reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(pk,platform);
 
         Boolean isLast = false;
-        if(!reviewDomain.isEmpty()){
-            isLast=true;
-        }
+        // caching : prod에서는 주석 제거하기
+//        if(!reviewDomain.isEmpty()){
+//            isLast=true;
+//        }
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
             return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
