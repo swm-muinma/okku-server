@@ -9,6 +9,7 @@ import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.dto.controller.BasicRequestDto;
 import kr.okku.server.dto.controller.PageInfoResponseDto;
 import kr.okku.server.dto.controller.pick.*;
+import kr.okku.server.dto.service.CreatePickDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.mapper.PickMapper;
@@ -399,7 +400,7 @@ public class PickService {
                 .lastPage(lastPage)
                 .requestBody(requestBody)
                 .page(page)
-                .traceId(traceId.getId())
+                .traceId(request.getTraceId())
                 .platform(platform)
                 .pk(pk)
                 .build();
@@ -408,7 +409,9 @@ public class PickService {
     }
 
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
-        PickDomain savedPick = this.createPick(traceId, userId,requestDto);
+        CreatePickDto createPickDto = this.createPick(traceId, userId,requestDto);
+        PickDomain savedPick = createPickDto.getPickDomain();
+        String traceIdForAi = createPickDto.getTraceId();
         String platform = savedPick.getPlatform().getName();
         String pk = savedPick.getPk();
 
@@ -436,19 +439,19 @@ public class PickService {
 //        }
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
-            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,1,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("musinsa")){
-            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,0,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("29cm")){
-            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,0,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("wconcept")){
-            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,1,isLast);
         }
 
         return tempResponse;
@@ -547,12 +550,12 @@ public class PickService {
         }
     }
 
-    public PickDomain createPick(TraceId traceId,String userId, NewPickRequestDto requestDto) {
+    public CreatePickDto createPick(TraceId traceId, String userId, NewPickRequestDto requestDto) {
         String url = extractValidUrl(requestDto.getUrl());
         UserDomain user = userPersistenceAdapter.findById(userId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
-
+        String traceIdForAi= traceId.getId();
 //        utils.validatePickLimit(user,picks);
 
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
@@ -571,9 +574,11 @@ public class PickService {
                             .image("default-image.png")
                             .url(url)
                             .platform("Unknown Platform")
+                            .traceId(traceId.getId())
                             .build();
                 }
             });
+            traceIdForAi = scrapedData.getTraceId();
             String platformName = scrapedData.getPlatform();
             String productPk = scrapedData.getProductPk();
             Optional<ScrapedDataDomain> scrapedCachDataByKey = itemPersistenceAdapter.findByPlatformAndProductpk(platformName,productPk);
@@ -612,7 +617,7 @@ public class PickService {
                 .build();
         PickDomain savedPick = pickPersistenceAdapter.save(pick);
 
-        return savedPick;
+        return new CreatePickDto(savedPick,traceIdForAi);
     }
 
     public void deletePicks(TraceId traceId,String userId, DeletePicksRequestDto requestDto) {

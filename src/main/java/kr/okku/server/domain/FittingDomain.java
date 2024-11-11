@@ -28,6 +28,8 @@ public class FittingDomain {
 
     private String imgUrl;
 
+    private Date createdAt;
+
     public FittingStatusEnum getStatus() {
         if ("waiting".equals(this.status)) {
             return FittingStatusEnum.waiting;
