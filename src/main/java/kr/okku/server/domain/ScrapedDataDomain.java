@@ -23,6 +23,7 @@ public class ScrapedDataDomain {
     private String brand;
     private String category;
     private String fittingPart;
+    private String traceId;
 
     // ScrapedDataDomain을 설정하는 메서드
     public static ScrapedDataDomain fromDocument(Document document, String url) {

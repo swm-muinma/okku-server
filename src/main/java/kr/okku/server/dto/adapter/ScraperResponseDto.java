@@ -18,4 +18,5 @@ public class ScraperResponseDto {
     private String brand;
     private String category;
     private String fitting_part;
+    private String traceparent;
 }

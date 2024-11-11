@@ -5,6 +5,7 @@ import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.domain.PickDomain;
 import kr.okku.server.dto.controller.pick.*;
 import kr.okku.server.dto.controller.review.ProductReviewDto;
+import kr.okku.server.dto.service.CreatePickDto;
 import kr.okku.server.service.PickService;
 import kr.okku.server.service.ReviewService;
 import org.slf4j.Logger;
@@ -34,7 +35,8 @@ public class PickController {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST","요청 시작").toJson());
-            PickDomain pick = pickService.createPick(traceId,userId, request);
+            CreatePickDto createPickDto = pickService.createPick(traceId,userId, request);
+            PickDomain pick = createPickDto.getPickDomain();
         log.info("{}",new ControllerLogEntity(traceId,userId,"/picks/new","POST","요청 종료").toJson());
             return ResponseEntity.ok(pick);
     }
