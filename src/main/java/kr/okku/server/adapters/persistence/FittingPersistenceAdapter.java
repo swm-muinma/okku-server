@@ -2,6 +2,7 @@ package kr.okku.server.adapters.persistence;
 
 import kr.okku.server.adapters.persistence.repository.fitting.FittingEntity;
 import kr.okku.server.adapters.persistence.repository.fitting.FittingRepository;
+import kr.okku.server.adapters.persistence.repository.pick.PickEntity;
 import kr.okku.server.adapters.persistence.repository.user.UserEntity;
 import kr.okku.server.domain.FittingDomain;
 import kr.okku.server.domain.PickDomain;
@@ -48,5 +49,18 @@ public class FittingPersistenceAdapter {
                 .stream()
                 .map(FittingMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    public List<FittingDomain> findByStatus(String status) {
+        return fittingRepository.findByStatus(status)
+                .stream()
+                .map(FittingMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    public FittingDomain save(FittingDomain fittingDomain) {
+        FittingEntity fittingEntity = FittingMapper.toEntity(fittingDomain);
+        FittingEntity savedEntity = fittingRepository.save(fittingEntity);
+        return FittingMapper.toDomain(savedEntity);
     }
 }
