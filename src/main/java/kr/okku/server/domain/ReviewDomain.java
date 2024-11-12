@@ -13,6 +13,7 @@ public class ReviewDomain {
     private String platform;
     private String productKey;
     private boolean isDoneScrapeReviews;
+    private String crawlerVersion;
     private List<ReviewDetailDomain> reviews;
 
     public double calculateAverageRating() {

@@ -1,7 +1,9 @@
 package kr.okku.server.mapper;
 
+import kr.okku.server.adapters.persistence.repository.review.ReviewEntity;
 import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewInsightEntity;
 import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewSummaryEntity;
+import kr.okku.server.domain.ReviewDomain;
 import kr.okku.server.domain.ReviewInsightDomain;
 import kr.okku.server.domain.ReviewSummaryDomain;
 
@@ -67,4 +69,5 @@ public class ReviewInsightMapper {
         reviewSummaryEntity.setDescription(reviewSummaryDomain.getDescription());
         return reviewSummaryEntity;
     }
+
 }
