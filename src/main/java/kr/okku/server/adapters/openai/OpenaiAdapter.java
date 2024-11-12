@@ -71,21 +71,17 @@ public class OpenaiAdapter {
 
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(requestDto);
+            System.out.println(json);
 
             logger.debug("Sending request to OpenAI API: {}", requestDto);
             OpenAiResponseDto response = openaiClientAdapter.getChatCompletion("Bearer " + openAiApiKey, requestDto);
+            System.out.println(response);
             logger.debug("Received response from OpenAI API: {}", response);
-
-            String haiku = response.getChoices().get(0).getMessage().getContent();
-            System.out.println(response.getChoices());
-
-            System.out.println(response.getChoices().get(0));
-
             System.out.println(response.getChoices().get(0).getMessage());
 
-            System.out.println(haiku);
+            OpenAiResponseDto.Choice.Message.Content haiku = response.getChoices().get(0).getMessage().getParsedContent();
             log.info("{}", new ScraperReponseLogEntity(traceId, "OpenAI 요청 종료").toJson());
-            return Optional.ofNullable(haiku);
+            return Optional.ofNullable(haiku.getJudgement_reason());
 
         } catch (Exception e) {
             Sentry.withScope(scope -> {

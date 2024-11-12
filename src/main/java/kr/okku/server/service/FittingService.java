@@ -134,7 +134,7 @@
                 if(!isSuccess)
                 {
                     s3Client.deleteImageFromS3(userImage,userImgBucket);
-                    return new CanFittingResponseDto("", false);
+                    return new CanFittingResponseDto("", false,"이미지에서 사람을 인식하지 못했습니다.");
                 }
                 UserDomain user = userPersistenceAdapter.findById(userId).orElse(null);
                 if(user==null){
@@ -142,14 +142,16 @@
                 }
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
-                return new CanFittingResponseDto(userImage, isSuccess);
+                String cautionMessage = openaiAdapter.generateHaiku(userImage).orElse("");
+                return new CanFittingResponseDto(userImage, isSuccess,cautionMessage);
             }catch (Exception e){
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
-                return new CanFittingResponseDto("", false);
+                return new CanFittingResponseDto("", false,"일시적인 서버 에러입니다.");
             }
         }
 
         public String  validateTest(String imageUrl){
+            System.out.println("call");
             String response = openaiAdapter.generateHaiku(imageUrl).orElse(null);
             return response;
         }
