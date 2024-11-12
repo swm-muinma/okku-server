@@ -39,11 +39,13 @@ public class PickService {
     private final ItemPersistenceAdapter itemPersistenceAdapter;
     private final FittingPersistenceAdapter fittingPersistenceAdapter;
     private final ReviewPersistenceAdapter reviewPersistenceAdapter;
+
+    private final ReviewInsightPersistenceAdapter reviewInsightPersistenceAdapter;
     private final Utils utils;
 
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ReviewPersistenceAdapter reviewPersistenceAdapter, Utils utils
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ReviewPersistenceAdapter reviewPersistenceAdapter, ReviewInsightPersistenceAdapter reviewInsightPersistenceAdapter, Utils utils
                      ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
@@ -52,6 +54,7 @@ public class PickService {
         this.itemPersistenceAdapter = itemPersistenceAdapter;
         this.fittingPersistenceAdapter = fittingPersistenceAdapter;
         this.reviewPersistenceAdapter = reviewPersistenceAdapter;
+        this.reviewInsightPersistenceAdapter = reviewInsightPersistenceAdapter;
         this.utils = utils;
     }
 
@@ -346,11 +349,18 @@ public class PickService {
                 .productKey(pk)
                 .isDoneScrapeReviews(true)
                 .platform(platform)
+                .crawlerVersion("2.0.0")
                 .build();
 
         ReviewDomain savedReviewDomain = reviewPersistenceAdapter.save(reviewDomain);
 
-        String status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
+        String status="review_empty";
+
+        if(!savedReviewDomain.getReviews().isEmpty()){
+            status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
+        }
+
+
 
         SubmitRawReviewsResponseDto response = SubmitRawReviewsResponseDto.builder()
                 .pk(pk)

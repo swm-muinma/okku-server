@@ -1,10 +1,13 @@
 package kr.okku.server.adapters.persistence;
 
+import kr.okku.server.adapters.persistence.repository.review.ReviewEntity;
 import kr.okku.server.adapters.persistence.repository.review.ReviewRepository;
 import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewInsightEntity;
 import kr.okku.server.adapters.persistence.repository.reviewInsight.ReviewInsightRepository;
+import kr.okku.server.domain.ReviewDomain;
 import kr.okku.server.domain.ReviewInsightDomain;
 import kr.okku.server.mapper.ReviewInsightMapper;
+import kr.okku.server.mapper.ReviewMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
