@@ -128,6 +128,7 @@
             if (isInsightEmpty) {
                 return createEmptyProductReviewDto(pick, image, name, price, url,status);
             }
+            status=ReviewStatusEnum.DONE;
 
             ReviewsDto reviewsDto =  ReviewsDto.builder().build();
             reviewsDto.setReviewSections(insight, review, platform);
