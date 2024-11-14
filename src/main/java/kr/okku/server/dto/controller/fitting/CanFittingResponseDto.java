@@ -10,4 +10,5 @@ import org.springframework.web.multipart.MultipartFile;
 public class CanFittingResponseDto extends BasicRequestDto {
     private String userImageUrl;
     private Boolean status;
+    private String message;
 }

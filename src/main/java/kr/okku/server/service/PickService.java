@@ -9,6 +9,7 @@ import kr.okku.server.domain.Log.TraceId;
 import kr.okku.server.dto.controller.BasicRequestDto;
 import kr.okku.server.dto.controller.PageInfoResponseDto;
 import kr.okku.server.dto.controller.pick.*;
+import kr.okku.server.dto.service.CreatePickDto;
 import kr.okku.server.exception.ErrorCode;
 import kr.okku.server.exception.ErrorDomain;
 import kr.okku.server.mapper.PickMapper;
@@ -38,11 +39,13 @@ public class PickService {
     private final ItemPersistenceAdapter itemPersistenceAdapter;
     private final FittingPersistenceAdapter fittingPersistenceAdapter;
     private final ReviewPersistenceAdapter reviewPersistenceAdapter;
+
+    private final ReviewInsightPersistenceAdapter reviewInsightPersistenceAdapter;
     private final Utils utils;
 
     @Autowired
     public PickService(PickPersistenceAdapter pickPersistenceAdapter, CartPersistenceAdapter cartPersistenceAdapter,
-                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ReviewPersistenceAdapter reviewPersistenceAdapter, Utils utils
+                       ScraperAdapter scraperAdapter, UserPersistenceAdapter userPersistenceAdapter, ItemPersistenceAdapter itemPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ReviewPersistenceAdapter reviewPersistenceAdapter, ReviewInsightPersistenceAdapter reviewInsightPersistenceAdapter, Utils utils
                      ) {
         this.pickPersistenceAdapter = pickPersistenceAdapter;
         this.cartPersistenceAdapter = cartPersistenceAdapter;
@@ -51,6 +54,7 @@ public class PickService {
         this.itemPersistenceAdapter = itemPersistenceAdapter;
         this.fittingPersistenceAdapter = fittingPersistenceAdapter;
         this.reviewPersistenceAdapter = reviewPersistenceAdapter;
+        this.reviewInsightPersistenceAdapter = reviewInsightPersistenceAdapter;
         this.utils = utils;
     }
 
@@ -345,11 +349,18 @@ public class PickService {
                 .productKey(pk)
                 .isDoneScrapeReviews(true)
                 .platform(platform)
+                .crawlerVersion("2.0.0")
                 .build();
 
         ReviewDomain savedReviewDomain = reviewPersistenceAdapter.save(reviewDomain);
 
-        String status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
+        String status="review_empty";
+
+        if(!savedReviewDomain.getReviews().isEmpty()){
+            status = scraperAdapter.crateInsight(traceId.getId(),pk,platform);
+        }
+
+
 
         SubmitRawReviewsResponseDto response = SubmitRawReviewsResponseDto.builder()
                 .pk(pk)
@@ -399,7 +410,7 @@ public class PickService {
                 .lastPage(lastPage)
                 .requestBody(requestBody)
                 .page(page)
-                .traceId(traceId.getId())
+                .traceId(request.getTraceId())
                 .platform(platform)
                 .pk(pk)
                 .build();
@@ -408,7 +419,9 @@ public class PickService {
     }
 
     public CreatePickResponseDto createPickForRawReviews(TraceId traceId,String userId, NewPickRequestDto requestDto) {
-        PickDomain savedPick = this.createPick(traceId, userId,requestDto);
+        CreatePickDto createPickDto = this.createPick(traceId, userId,requestDto);
+        PickDomain savedPick = createPickDto.getPickDomain();
+        String traceIdForAi = createPickDto.getTraceId();
         String platform = savedPick.getPlatform().getName();
         String pk = savedPick.getPk();
 
@@ -430,24 +443,25 @@ public class PickService {
         Optional<ReviewDomain> reviewDomain = reviewPersistenceAdapter.findByProductPkAndPlatform(pk,platform);
 
         Boolean isLast = false;
-        if(!reviewDomain.isEmpty()){
-            isLast=true;
-        }
+        // caching : prod에서는 주석 제거하기
+//        if(!reviewDomain.isEmpty()){
+//            isLast=true;
+//        }
 
         if(savedPick.getPlatform().getName().equals("zigzag")){
-            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
+            return createZigzagRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,1,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("musinsa")){
-            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
+            return createMusinsaRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,0,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("29cm")){
-            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),0,isLast);
+            return create29cmRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,0,isLast);
         }
 
         if(savedPick.getPlatform().getName().equals("wconcept")){
-            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceId.getId(),1,isLast);
+            return createWconceptRequestBody(tempResponse,savedPick.getPk(),traceIdForAi,1,isLast);
         }
 
         return tempResponse;
@@ -546,12 +560,12 @@ public class PickService {
         }
     }
 
-    public PickDomain createPick(TraceId traceId,String userId, NewPickRequestDto requestDto) {
+    public CreatePickDto createPick(TraceId traceId, String userId, NewPickRequestDto requestDto) {
         String url = extractValidUrl(requestDto.getUrl());
         UserDomain user = userPersistenceAdapter.findById(userId)
                 .orElseThrow(() -> new ErrorDomain(ErrorCode.USER_NOT_FOUND,traceId));
         List<PickDomain> picks = pickPersistenceAdapter.findByUserId(userId);
-
+        String traceIdForAi= traceId.getId();
 //        utils.validatePickLimit(user,picks);
 
         Optional<ScrapedDataDomain> scrapedCachData = itemPersistenceAdapter.findByUrl(url);
@@ -570,9 +584,11 @@ public class PickService {
                             .image("default-image.png")
                             .url(url)
                             .platform("Unknown Platform")
+                            .traceId(traceId.getId())
                             .build();
                 }
             });
+            traceIdForAi = scrapedData.getTraceId();
             String platformName = scrapedData.getPlatform();
             String productPk = scrapedData.getProductPk();
             Optional<ScrapedDataDomain> scrapedCachDataByKey = itemPersistenceAdapter.findByPlatformAndProductpk(platformName,productPk);
@@ -611,7 +627,7 @@ public class PickService {
                 .build();
         PickDomain savedPick = pickPersistenceAdapter.save(pick);
 
-        return savedPick;
+        return new CreatePickDto(savedPick,traceIdForAi);
     }
 
     public void deletePicks(TraceId traceId,String userId, DeletePicksRequestDto requestDto) {

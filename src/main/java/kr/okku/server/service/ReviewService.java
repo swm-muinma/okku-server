@@ -39,7 +39,6 @@
                                                      String image, String name, Integer price, String url,Date createdAt) {
             try {
                 Optional<ReviewDomain> reviews = reviewPersistenceAdapter.findByProductPkAndPlatform(productPk, platform);
-                System.out.println(reviews);
                 if (reviews.isEmpty()) {
                     PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
                     platformResponseDto.setName(pick.getPlatform().getName());
@@ -56,10 +55,9 @@
                 }
                 return createProductReviewDto(reviews, platform, pick, image, name, price, url);
             }catch (Exception e){
-                e.printStackTrace();
                 PickPlatformResponseDto platformResponseDto = new PickPlatformResponseDto();
                 platformResponseDto.setName(pick.getPlatform().getName());
-                ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.ERROR).build();
+                ReviewsDto reviewsDto = ReviewsDto.builder().reviewStatus(ReviewStatusEnum.REVIEW_NOT_EXIST).build();
                 if(createdAt!=null && this.isWithinThreeMinutes(createdAt)){
                     reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                 }
@@ -107,14 +105,19 @@
             return result;
         }
 
-        public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url) {
+        public ProductReviewDto createProductReviewDto(Optional<ReviewDomain> optionalReviewDomain, String platform, PickDomain pick, String image, String name, Integer price, String url)
+        {
             ReviewInsightDomain insight = ReviewInsightDomain.builder().build();
+            ReviewStatusEnum status = ReviewStatusEnum.PROCESSING;
+            ReviewDomain review = optionalReviewDomain.orElse(null);
+            if(review.getReviews().isEmpty()){
+                status = ReviewStatusEnum.REVIEW_NOT_EXIST;
+            }
             boolean isInsightEmpty = true;
             if (!optionalReviewDomain.isEmpty()) {
                 ReviewDomain reviewDomain = optionalReviewDomain.get();
                 if (reviewDomain.getReviews() != null && !reviewDomain.getReviews().isEmpty()) {
                     Optional<ReviewInsightDomain> optionalInsight = reviewInsightPersistenceAdapter.findByProductPkAndPlatform(reviewDomain.getProductKey(), reviewDomain.getPlatform());
-
                     if(!optionalInsight.isEmpty()){
                         insight = optionalInsight.get();
                         isInsightEmpty = false;
@@ -123,14 +126,13 @@
             }
 
             if (isInsightEmpty) {
-                return createEmptyProductReviewDto(pick, image, name, price, url);
+                return createEmptyProductReviewDto(pick, image, name, price, url,status);
             }
-
-            ReviewDomain review = optionalReviewDomain.orElse(null);
+            status=ReviewStatusEnum.DONE;
 
             ReviewsDto reviewsDto =  ReviewsDto.builder().build();
             reviewsDto.setReviewSections(insight, review, platform);
-
+            reviewsDto.setReviewStatus(status);
 
             PickPlatformResponseDto platformInfo = new PickPlatformResponseDto();
             platformInfo.setName(platform);
@@ -150,8 +152,10 @@
                     .build();
         }
 
-        private ProductReviewDto createEmptyProductReviewDto(PickDomain pick, String image, String name, Integer price, String url) {
-            ReviewsDto reviewsDto = ReviewsDto.builder().build();
+        private ProductReviewDto createEmptyProductReviewDto(PickDomain pick, String image, String name, Integer price, String url, ReviewStatusEnum status) {
+            ReviewsDto reviewsDto = ReviewsDto.builder()
+                    .reviewStatus(status)
+                    .build();
             return ProductReviewDto.builder()
                     .pick(new PickDto(
                             pick != null ? pick.getId() : null,

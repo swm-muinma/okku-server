@@ -36,6 +36,7 @@ public class ScraperAdapter {
                     .brand(response.getBrand())
                     .category(response.getCategory())
                     .fittingPart(response.getFitting_part())
+                    .traceId(response.getTraceparent())
                     .build());
         } catch (Exception e) {
             return Optional.empty();
