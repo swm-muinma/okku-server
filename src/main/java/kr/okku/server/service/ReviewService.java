@@ -61,7 +61,7 @@
                 if(createdAt!=null && this.isWithinThreeMinutes(createdAt)){
                     reviewsDto.setReviewStatus(ReviewStatusEnum.PROCESSING);
                 }
-                if(platform.equals("zigzag") && platform.equals("musinsa") && platform.equals("29cm") && platform.equals("wcencept")){
+                if(!platform.equals("zigzag") && !platform.equals("musinsa") && !platform.equals("29cm") && !platform.equals("wcencept")){
                     reviewsDto.setReviewStatus(ReviewStatusEnum.NOT_SUPPORTED_PLATFORM);
                 }
                 PickDto pickDto = new PickDto(pick.getId(),pick.getImage(),pick.getPrice(),pick.getName(),pick.getUrl(),platformResponseDto);
