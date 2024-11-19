@@ -4,6 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ReviewStatusEnum {
+
+    NOT_SUPPORTED_PLATFORM("NOT_SUPPORTED_PLATFORM"),
     REVIEW_NOT_EXIST("REVIEW_NOT_EXIST"),
     DONE("DONE"),
     PROCESSING("PROCESSING"),
