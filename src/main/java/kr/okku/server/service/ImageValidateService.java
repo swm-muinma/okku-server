@@ -34,6 +34,11 @@ public class ImageValidateService {
                     .filter(Objects::nonNull) // Null 결과 제거
                     .collect(Collectors.toList());
 
+            if (results.isEmpty()) {
+                // 모든 작업이 실패하거나 null일 경우 빈 문자열 반환
+                return "";
+            }
+
             // judgement_number 간의 중복값 계산
             Map<Integer, Long> frequencyMap = results.stream()
                     .flatMap(content -> content.getJudgement_number().stream())
@@ -50,7 +55,7 @@ public class ImageValidateService {
                     .filter(content -> content.getJudgement_number().stream().anyMatch(duplicatedNumbers::contains))
                     .map(OpenAiResponseDto.Choice.Message.Content::getJudgement_reason)
                     .findFirst()
-                    .orElse("피팅하기 좋은 이미지입니다.");
+                    .orElse("");
 
         } finally {
             executor.shutdown(); // 스레드 풀 종료

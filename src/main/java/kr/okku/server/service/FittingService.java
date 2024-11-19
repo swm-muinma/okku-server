@@ -129,7 +129,6 @@
             return result.orElse(null);
         }
 
-
         public CanFittingResponseDto canFitting(TraceId traceId,String userId,CanFittingRequestDto requestDto){
             String userImage = "";
             try {
@@ -147,6 +146,9 @@
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
                 String cautionMessage = imageValidateService.validateTest(userImage);
+                if(!cautionMessage.equals("")){
+                    isSuccess=false;
+                }
                 return new CanFittingResponseDto(userImage, isSuccess,cautionMessage);
             }catch (Exception e){
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
