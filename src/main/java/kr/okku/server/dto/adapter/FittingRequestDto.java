@@ -15,5 +15,6 @@ public class FittingRequestDto {
     private String clothes_platform;
     private String human_img_url;
     private String clothes_img_url;
+    private String pick_id;
 
 }

@@ -41,7 +41,6 @@
 
         private final FittingLogPersistenceAdapter fittingLogPersistenceAdapter;
 
-        private final OpenaiAdapter openaiAdapter;
 
         @Value("${aws.s3.bucket-name}")
         private String userImgBucket;
@@ -60,7 +59,6 @@
             this.fittingPersistenceAdapter = fittingPersistenceAdapter;
             this.imageValidateService = imageValidateService;
             this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
-            this.openaiAdapter = openaiAdapter;
             this.s3Client = s3Client;
         }
 
@@ -157,7 +155,6 @@
         }
 
         public String  validateTest(String imageUrl){
-            System.out.println("call");
             String response = imageValidateService.validateTest(imageUrl);
             return response;
         }
@@ -204,7 +201,7 @@
             }
 
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName(),pickId);
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
@@ -253,7 +250,7 @@
 
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
             userImage = requestDto.getImageForUrl();
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName(),pickId);
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
