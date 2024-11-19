@@ -14,6 +14,7 @@
     import kr.okku.server.domain.PickDomain;
     import kr.okku.server.domain.UserDomain;
     import kr.okku.server.dto.adapter.FittingResponseDto;
+    import kr.okku.server.dto.adapter.openai.OpenAiResponseDto;
     import kr.okku.server.dto.controller.fitting.*;
     import kr.okku.server.exception.ErrorCode;
     import kr.okku.server.exception.ErrorDomain;
@@ -36,9 +37,10 @@
         private final ScraperAdapter scraperAdapter;
         private final FittingPersistenceAdapter fittingPersistenceAdapter;
 
+        private final ImageValidateService imageValidateService;
+
         private final FittingLogPersistenceAdapter fittingLogPersistenceAdapter;
 
-        private final OpenaiAdapter openaiAdapter;
 
         @Value("${aws.s3.bucket-name}")
         private String userImgBucket;
@@ -49,14 +51,14 @@
         @Autowired
         public FittingService(ScraperAdapter scraperAdapter,
                               ImageFromUrlAdapter imageFromUrlAdapter,
-                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, OpenaiAdapter openaiAdapter, S3Client s3Client) {
+                              PickPersistenceAdapter pickPersistenceAdapter, UserPersistenceAdapter userPersistenceAdapter, FittingPersistenceAdapter fittingPersistenceAdapter, ImageValidateService imageValidateService, FittingLogPersistenceAdapter fittingLogPersistenceAdapter, OpenaiAdapter openaiAdapter, S3Client s3Client) {
             this.imageFromUrlAdapter = imageFromUrlAdapter;
             this.pickPersistenceAdapter = pickPersistenceAdapter;
             this.scraperAdapter = scraperAdapter;
             this.userPersistenceAdapter = userPersistenceAdapter;
             this.fittingPersistenceAdapter = fittingPersistenceAdapter;
+            this.imageValidateService = imageValidateService;
             this.fittingLogPersistenceAdapter = fittingLogPersistenceAdapter;
-            this.openaiAdapter = openaiAdapter;
             this.s3Client = s3Client;
         }
 
@@ -125,7 +127,6 @@
             return result.orElse(null);
         }
 
-
         public CanFittingResponseDto canFitting(TraceId traceId,String userId,CanFittingRequestDto requestDto){
             String userImage = "";
             try {
@@ -142,7 +143,10 @@
                 }
                 user.addUserImage(userImage);
                 userPersistenceAdapter.save(user);
-                String cautionMessage = openaiAdapter.generateHaiku(userImage).orElse("");
+                String cautionMessage = imageValidateService.validateTest(userImage);
+                if(!cautionMessage.equals("")){
+                    isSuccess=false;
+                }
                 return new CanFittingResponseDto(userImage, isSuccess,cautionMessage);
             }catch (Exception e){
                 s3Client.deleteImageFromS3(userImage,userImgBucket);
@@ -151,8 +155,7 @@
         }
 
         public String  validateTest(String imageUrl){
-            System.out.println("call");
-            String response = openaiAdapter.generateHaiku(imageUrl).orElse(null);
+            String response = imageValidateService.validateTest(imageUrl);
             return response;
         }
 
@@ -198,7 +201,7 @@
             }
 
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName(),pickId);
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
@@ -247,7 +250,7 @@
 
             String itemImageUrlOnS3 = s3Client.upload(itemImage,clothesImgBucket);
             userImage = requestDto.getImageForUrl();
-            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName());
+            FittingResponseDto fittingResponse = scraperAdapter.fitting(traceId,userId,part,itemImageUrlOnS3,userImage,fcmToken,clothesPk,pick.getPlatform().getName(),pickId);
             pick.addFittingList(fittingResponse.getId());
             pickPersistenceAdapter.save(pick);
 
