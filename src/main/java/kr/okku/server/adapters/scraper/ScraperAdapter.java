@@ -43,9 +43,9 @@ public class ScraperAdapter {
         }
     }
 
-    public FittingResponseDto fitting(TraceId traceId,String userId, String clothesClass, String itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform) {
+    public FittingResponseDto fitting(TraceId traceId,String userId, String clothesClass, String itemImage, String userImage, String fcmToken, String clothesPk, String clohtesPlatform, String pickId) {
         try {
-            FittingRequestDto fittingRequestDto = new FittingRequestDto(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage);
+            FittingRequestDto fittingRequestDto = new FittingRequestDto(userId, clothesClass,fcmToken,clothesPk, clohtesPlatform,userImage, itemImage,pickId);
             log.info("{}",new FittingRequestLogEntity(traceId,"피팅 요청 시작").toJson());
             FittingResponseDto response = scraperClientAdapter.fitting(fittingRequestDto);
             log.info("{}",new FittingResponseLogEntity(traceId,response.getId(),"피팅 요청 종료").toJson());
