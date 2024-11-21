@@ -48,7 +48,7 @@ public class ImageValidateService {
 
             // 네 번 이상 등장한 값을 추출
             Set<Integer> duplicatedNumbers = frequencyMap.entrySet().stream()
-                    .filter(entry -> entry.getValue() > 3)
+                    .filter(entry -> entry.getValue() > 4)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toSet());
 
