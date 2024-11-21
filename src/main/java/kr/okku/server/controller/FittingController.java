@@ -53,7 +53,7 @@ public class FittingController {
             @AuthenticationPrincipal UserDetails userDetails) {
         String userId = userDetails.getUsername();
         TraceId traceId = new TraceId();
-        String result = fittingService.validateTest("https://image.fnnews.com/resource/media/image/2024/03/06/202403060820160082_l.jpg");
+        String result = fittingService.validateTest("https://user-images-caching.s3.ap-northeast-2.amazonaws.com/ff8febd8-2IMG_2651.jpg");
 
         return ResponseEntity.ok(result);
     }
